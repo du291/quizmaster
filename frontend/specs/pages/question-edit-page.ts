@@ -80,5 +80,4 @@ export class QuestionEditPage {
     errorMessageCount = () => this.page.locator('.errors > li').count()
 
     titleContent = () => this.page.locator('#question-page-title').textContent()
-
 }
