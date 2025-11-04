@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 export class QuizCreatePage {
-    constructor(private page: Page) { }
+    constructor(private page: Page) {}
     timeLimitInput = () => this.page.locator('#time-limit')
     passScoreInput = () => this.page.locator('#pass-score')
     questionsInList = () => this.page.locator('.create-quiz > .question-item')

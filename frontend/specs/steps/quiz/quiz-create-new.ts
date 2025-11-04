@@ -67,7 +67,7 @@ When('I enter time limit {string}', async function (limit: string) {
 })
 
 When('I filter questions by {string}', async function (s: string) {
-    await this.quizCreatePage.enterFilterString(s);
+    await this.quizCreatePage.enterFilterString(s)
 })
 
 Then('I display the quiz statistics', async function () {

@@ -42,7 +42,6 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
     const passScoreError = passScore > 100 ? 'scoreAboveMax' : undefined
     const atLeastOneQuestionError = isSubmitted && selectedIds.size === 0 ? 'atLeastOneQuestionRequired' : undefined
 
-
     return (
         <form
             className="create-quiz"
