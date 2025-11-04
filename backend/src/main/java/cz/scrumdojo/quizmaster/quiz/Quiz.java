@@ -36,5 +36,7 @@ public class Quiz {
     private double averageScore;
     private String workspaceGuid; // Workspace GUID
     private Integer size;
+    
+    @Column(nullable = true)
     private Integer finalCount;
 }
