@@ -31,6 +31,23 @@ Then('I see average score {float} %', async function (averageScore: number) {
     expect(await this.quizStatisticsPage.averageScore()).toBe(averageScore)
 })
 
+Then('I see average time {float} s', async function (averageTime: number) {
+    expect(await this.quizStatisticsPage.averageTime()).toBe(averageTime)
+})
+
+Then('I see success rate {float} %', async function (successRate: number) {
+    expect(await this.quizStatisticsPage.successRate()).toBe(successRate)
+})
+
+Then('I see failure rate {float} %', async function (failureRate: number) {
+    expect(await this.quizStatisticsPage.failureRate()).toBe(failureRate)
+})
+
+
+Then('I see timeout count {int}', async function (timeoutCount: number) {
+    expect(await this.quizStatisticsPage.timeoutCount()).toBe(timeoutCount)
+})
+
 When('I open quiz stats', async function () {
     await openStats(this, this.activeQuizBookmark)
 })

@@ -10,9 +10,13 @@ export interface Quiz {
     readonly mode: QuizMode
     readonly passScore: number
     readonly timeLimit: number
+    readonly size?: number
+}
 
+export interface QuizStats {
     readonly timesTaken: number
     readonly timesFinished: number
     readonly averageScore: number
-    readonly size?: number
 }
+
+
