@@ -113,15 +113,10 @@ Feature: Create Quiz from Workspace
   Scenario Outline: Filter questions in quiz creation form
     When I start creating a new quiz
     And I filter questions by "<filter>"
-    Then I see questions in quiz creation form
-      | question           |
-      | <visibleQuestion1> |
-      | <visibleQuestion2> |
-    And I don't see questions in quiz creation form
-      | question          |
-      | <hiddenQuestion1> |
-      | <hiddenQuestion2> |
-
+    Then I see quiz question "<visibleQuestion1>"
+    And I see quiz question "<visibleQuestion2>"
+    And I don't see quiz questions "<hiddenQuestion1>"
+    And I don't see quiz questions "<hiddenQuestion2>"
     Examples:
       | filter  | visibleQuestion1      | visibleQuestion2               | hiddenQuestion1 | hiddenQuestion2       |
       |       2 |             2 + 2 = ? |                      4 / 2 = ? |       3 * 3 = ? | Jaký nábytek má Ikea? |

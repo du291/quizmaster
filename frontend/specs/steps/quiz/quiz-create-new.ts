@@ -46,6 +46,14 @@ When('I see quiz question {string}', async function (title: string) {
         .then(visible => expect(visible).toEqual(true))
 })
 
+When("I don't see quiz questions {string}", async function (title: string) {
+    await this.quizCreatePage
+        .getQuestion(title)
+        .first()
+        .isVisible()
+        .then(visible => expect(visible).toEqual(false))
+})
+
 When('I enter quiz description {string}', async function (title: string) {
     await this.quizCreatePage.enterDescription(title)
 })
