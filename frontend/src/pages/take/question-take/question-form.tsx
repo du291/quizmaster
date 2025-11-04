@@ -9,6 +9,7 @@ import {
 } from 'pages/take/question-take'
 import { QuestionScore } from './components/question-score'
 import type { QuizMode } from 'model/quiz.ts'
+import { Form } from 'pages/components'
 
 export interface QuestionFormProps {
     readonly question: Question
@@ -23,8 +24,7 @@ export const QuestionForm = (props: QuestionFormProps) => {
     const state = useQuestionTakeState(props)
     const feedback = useQuestionFeedbackState(state, props.question)
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
+    const handleSubmit = () => {
         if (state.selectedAnswerIdxs.length > 0) {
             state.submit()
             props.onSubmitted?.(state.selectedAnswerIdxs)
@@ -36,7 +36,7 @@ export const QuestionForm = (props: QuestionFormProps) => {
     const correctAnswersCount = correctAnswers.length
 
     return (
-        <form onSubmit={handleSubmit} id="question-form">
+        <Form onSubmit={handleSubmit} id="question-form">
             <fieldset className="question-fieldset" name={`question-${props.question.id}`}>
                 <legend>
                     <h1 id="question">{props.question.question}</h1>
@@ -82,6 +82,6 @@ export const QuestionForm = (props: QuestionFormProps) => {
                     </>
                 )}
             </fieldset>
-        </form>
+        </Form>
     )
 }

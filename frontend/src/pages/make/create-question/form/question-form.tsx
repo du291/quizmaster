@@ -1,5 +1,4 @@
-import { Button, SubmitButton } from 'pages/components'
-import { preventDefault } from 'helpers.ts'
+import { Button, SubmitButton, Form } from 'pages/components'
 import {
     type AnswerData,
     AnswersEdit,
@@ -55,7 +54,7 @@ export const QuestionEditForm = ({
         setQuestionData({ ...questionData, questionExplanation })
 
     return (
-        <form id="question-create-form" onSubmit={preventDefault(onSubmit)}>
+        <Form id="question-create-form" onSubmit={onSubmit}>
             <QuestionEdit question={questionData.question} setQuestion={setQuestion} />
             <div className="questiion-options">
                 <MultipleChoiceEdit
@@ -92,6 +91,6 @@ export const QuestionEditForm = ({
                     </Button>
                 )}
             </div>
-        </form>
+        </Form>
     )
 }

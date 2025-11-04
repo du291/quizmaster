@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { preventDefault } from 'helpers.ts'
-import { Field, SubmitButton, TextInput } from 'pages/components'
+import { Field, SubmitButton, TextInput, Form } from 'pages/components'
 
 export interface WorkspaceFormData {
     readonly title: string
@@ -16,13 +15,13 @@ export const WorkspaceCreateForm = ({ onSubmit }: WorkspaceCreateProps) => {
     const toFormData = (title: string): WorkspaceFormData => ({ title })
 
     return (
-        <form onSubmit={preventDefault(() => onSubmit(toFormData(title)))}>
+        <Form onSubmit={() => onSubmit(toFormData(title))}>
             <Field label="Workspace Title">
                 <TextInput id="workspace-title" value={title} onChange={setTitle} />
             </Field>
             <div>
                 <SubmitButton />
             </div>
-        </form>
+        </Form>
     )
 }

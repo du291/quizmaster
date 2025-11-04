@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { preventDefault, useStateSet } from 'helpers'
+import { useStateSet } from 'helpers'
 import type { QuestionListItem } from 'model/question-list-item.ts'
 import type { QuizCreateRequest } from 'api/quiz.ts'
 
-import { Field, NumberInput, SubmitButton, TextInput } from 'pages/components'
+import { Field, Form, NumberInput, SubmitButton, TextInput } from 'pages/components'
 import { QuestionSelect } from './components/question-select.tsx'
 import { FormFieldError } from 'pages/components/forms/form-field-error.tsx'
 
@@ -46,12 +46,12 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
     const atLeastOneQuestionError = isSubmitted && selectedIds.size === 0 ? 'atLeastOneQuestionRequired' : undefined
 
     return (
-        <form
-            className="create-quiz"
-            onSubmit={preventDefault(() => {
+        <Form
+            id="create-quiz"
+            onSubmit={() => {
                 setIsSubmitted(true)
                 onSubmit(toFormData())
-            })}
+            }}
         >
             <Field label="Quiz title" isSubmitted={isSubmitted} errorCode={quizTitleError}>
                 <TextInput id="quiz-title" value={title} onChange={setTitle} />
@@ -78,6 +78,6 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
 
             {atLeastOneQuestionError && <FormFieldError errorCode="atLeastOneQuestionRequired" />}
             <SubmitButton />
-        </form>
+        </Form>
     )
 }
