@@ -8,7 +8,6 @@ Feature: Take a quiz with partial score
       | bookmark | title  | description   | questions | mode | pass score | time limit |
       |       -1 | Quiz A | Description A | Planets   | exam |         50 |        120 |
 
-@skip
   Scenario Outline: Multiple choice question with score
     Question is scored as follows:
     - all correct answers gives 1 point

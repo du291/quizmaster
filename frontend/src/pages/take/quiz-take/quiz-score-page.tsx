@@ -1,8 +1,8 @@
 import type { Quiz } from 'model/quiz.ts'
-import { evaluate } from './quiz-score.ts'
-import type { QuizAnswers } from './quiz-answers-state.ts'
-import { QuestionFeedback } from './components/question'
 import { useEffect } from 'react'
+import { QuestionFeedback } from './components/question'
+import type { QuizAnswers } from './quiz-answers-state.ts'
+import { evaluate } from './quiz-score.ts'
 
 interface QuizScorePageProps {
     readonly quiz: Quiz
@@ -10,10 +10,10 @@ interface QuizScorePageProps {
 }
 
 export const QuizScorePage = ({ quiz, quizAnswers }: QuizScorePageProps) => {
-    const score = evaluate(quiz, quizAnswers)
-    const { correct, firstCorrect, total } = score
+    const evaluation = evaluate(quiz, quizAnswers)
+    const { firstCorrect, total, score } = evaluation
 
-    const percentage = (correct / total) * 100
+    const percentage = (score / total) * 100
     const firstPercentage = (firstCorrect / total) * 100
     const result = percentage >= quiz.passScore ? 'passed' : 'failed'
     const firstResult = firstPercentage >= quiz.passScore ? 'passed' : 'failed'
@@ -35,14 +35,14 @@ export const QuizScorePage = ({ quiz, quizAnswers }: QuizScorePageProps) => {
 
             <div className="resultTable" id="results">
                 <div className="row header">
-                    <div>Correct Answers</div>
+                    <div>Points</div>
                     <div>Score</div>
                     <div>Min pass score</div>
                     <div>State</div>
                 </div>
                 <div className="row">
                     <div>
-                        <span id="correct-answers">{correct}</span> / <span id="total-questions">{total}</span>
+                        <span id="correct-answers">{score}</span> / <span id="total-questions">{total}</span>
                     </div>
                     <div>
                         <span id="percentage-result">{percentage.toFixed(0)}</span> %

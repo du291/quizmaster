@@ -28,7 +28,7 @@ export const useQuestionFeedbackState = (state: QuestionTakeState, answers: Answ
     return { isAnswerCorrect, showFeedback, isUserSelected, score }
 }
 
-const calculateScore = (
+export const calculateScore = (
     selectedAnswerIdxs: AnswerIdxs,
     correctAnswers: AnswerIdxs,
     isAnsweredCorrectly: boolean,
