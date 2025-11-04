@@ -80,7 +80,7 @@ export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
             <AnswersEdit
                 answers={questionData.answers}
                 setAnswers={setAnswers}
-                isMultichoiceQuestion={questionData.isMultipleChoice}
+                isMultipleChoice={questionData.isMultipleChoice}
             />
             <QuestionExplanationEdit
                 questionExplanation={questionData.questionExplanation}

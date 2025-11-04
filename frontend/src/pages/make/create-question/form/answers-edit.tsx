@@ -3,15 +3,15 @@ import { type AnswerData, emptyAnswerData } from './question-form-data.ts'
 interface AnswerRowProps {
     readonly answer: AnswerData
     readonly index: number
-    readonly isMultichoiceQuestion: boolean
+    readonly isMultipleChoice: boolean
     readonly updateAnswerData: (index: number, newValue: Partial<AnswerData>) => void
 }
 
-export const AnswerRow = ({ answer, index, isMultichoiceQuestion, updateAnswerData }: AnswerRowProps) => (
+export const AnswerRow = ({ answer, index, isMultipleChoice, updateAnswerData }: AnswerRowProps) => (
     <div key={`answer-${index}`} className="answer-row" id={`answer-${index}`}>
         <div className="answer-row-section">
             <input
-                className={!isMultichoiceQuestion ? 'answer-isCorrect-checkbox' : 'answer-isCorrect-checkbox-multi'}
+                className={!isMultipleChoice ? 'answer-isCorrect-checkbox' : 'answer-isCorrect-checkbox-multi'}
                 type="checkbox"
                 checked={answer.isCorrect}
                 onChange={e => updateAnswerData(index, { isCorrect: e.target.checked })}
@@ -54,18 +54,18 @@ export const AddAnswerButton = ({ addAnswer }: AddAnswerProps) => (
 
 interface AnswersProps {
     readonly answers: readonly AnswerData[]
-    readonly isMultichoiceQuestion: boolean
+    readonly isMultipleChoice: boolean
     readonly setAnswers: (answers: readonly AnswerData[]) => void
 }
 
 const updateIsCorrect = (
     answers: readonly AnswerData[],
     index: number,
-    isMultichoiceQuestion: boolean,
+    isMultipleChoice: boolean,
     isCorrect: boolean,
 ) => {
     const newAnswers = [...answers]
-    if (isMultichoiceQuestion) {
+    if (isMultipleChoice) {
         newAnswers[index] = { ...newAnswers[index], isCorrect: isCorrect }
     } else {
         newAnswers.forEach((answer, i) => {
@@ -75,12 +75,12 @@ const updateIsCorrect = (
     return newAnswers
 }
 
-export const AnswersEdit = ({ answers, isMultichoiceQuestion, setAnswers }: AnswersProps) => {
+export const AnswersEdit = ({ answers, isMultipleChoice, setAnswers }: AnswersProps) => {
     const updateAnswerData = (index: number, newValue: Partial<AnswerData>) => {
         let newAnswerData = [...answers]
         if ('isCorrect' in newValue) {
             const isCorrect = newValue.isCorrect || false
-            newAnswerData = updateIsCorrect(newAnswerData, index, isMultichoiceQuestion, isCorrect)
+            newAnswerData = updateIsCorrect(newAnswerData, index, isMultipleChoice, isCorrect)
         } else {
             newAnswerData[index] = { ...newAnswerData[index], ...newValue }
         }
@@ -97,7 +97,7 @@ export const AnswersEdit = ({ answers, isMultichoiceQuestion, setAnswers }: Answ
                     answer={answer}
                     // key={index}
                     index={index}
-                    isMultichoiceQuestion={isMultichoiceQuestion}
+                    isMultipleChoice={isMultipleChoice}
                     updateAnswerData={updateAnswerData}
                 />
             ))}
