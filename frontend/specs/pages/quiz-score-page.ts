@@ -7,7 +7,7 @@ export class QuizScorePage {
     resultTableExists = () => this.resultTableLocator().isVisible()
 
     private correctAnswerLocator = () => this.page.locator('#correct-answers')
-    correctAnswers = () => this.correctAnswerLocator().textContent().then(Number)
+    correctAnswers = () => this.correctAnswerLocator().textContent()
 
     private firstCorrectAnswerLocator = () => this.page.locator('#first-correct-answers')
     firstCorrectAnswers = () => this.firstCorrectAnswerLocator().textContent().then(Number)

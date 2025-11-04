@@ -6,9 +6,9 @@ Given('I finish the quiz', async function () {
 })
 
 Then(
-    /^I see the result (\d+) correct out of (\d+), (\d+)%, (passed|failed), required passScore (\d+)%/,
+    /^I see the result (\d+.?\d*) correct out of (\d+), (\d+)%, (passed|failed), required passScore (\d+)%/,
     async function (
-        expectedCorrectAnswers: number,
+        expectedCorrectAnswers: string,
         expectedTotalQuestions: number,
         expectedPercentage: number,
         expectedTextResult: string,
