@@ -8,11 +8,11 @@ import {
     EasyModeChoiceEdit,
     type QuestionFormData,
 } from 'pages/make/create-question/form'
+import { useState } from 'react'
 
 interface QuestionEditProps {
-    readonly questionData: QuestionFormData
-    readonly setQuestionData: (questionData: QuestionFormData) => void
-    readonly onSubmit: () => void
+    readonly initialQuestionData: QuestionFormData
+    readonly onSubmit: (questionData: QuestionFormData) => void
 }
 
 function setMultipleChoiceInQuestionData(isMultipleChoice: boolean, questionData: QuestionFormData): QuestionFormData {
@@ -35,7 +35,9 @@ function setEasyModeChoiceInQuestionData(isEasyModeChoice: boolean, questionData
     }
 }
 
-export const QuestionEditForm = ({ questionData, setQuestionData, onSubmit }: QuestionEditProps) => {
+export const QuestionEditForm = ({ initialQuestionData, onSubmit }: QuestionEditProps) => {
+    const [questionData, setQuestionData] = useState(initialQuestionData)
+
     const setQuestion = (question: string) => setQuestionData({ ...questionData, question })
     const setIsMultipleChoice = (isMultipleChoice: boolean) =>
         setQuestionData(setMultipleChoiceInQuestionData(isMultipleChoice, questionData))
@@ -45,8 +47,10 @@ export const QuestionEditForm = ({ questionData, setQuestionData, onSubmit }: Qu
     const setQuestionExplanation = (questionExplanation: string) =>
         setQuestionData({ ...questionData, questionExplanation })
 
+    const handleSubmit = () => onSubmit(questionData)
+
     return (
-        <Form id="question-create-form" onSubmit={onSubmit}>
+        <Form id="question-create-form" onSubmit={handleSubmit}>
             <QuestionEdit question={questionData.question} setQuestion={setQuestion} />
             <div className="questiion-options">
                 <MultipleChoiceEdit

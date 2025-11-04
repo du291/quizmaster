@@ -3,7 +3,13 @@ import { useParams } from 'react-router-dom'
 import { useApi } from 'api/hooks'
 import { type QuestionApiData, fetchQuestionByEditId, updateQuestion } from 'api/question.ts'
 
-import { emptyQuestionFormData, QuestionEditForm, toQuestionApiData, toQuestionFormData } from './form'
+import {
+    emptyQuestionFormData,
+    QuestionEditForm,
+    type QuestionFormData,
+    toQuestionApiData,
+    toQuestionFormData,
+} from './form'
 import { validateQuestionFormData } from './validators'
 import { ErrorMessages, type ErrorCodes } from './form/error-message'
 import { LoadedIndicator, QuestionEditLink, QuestionLink } from './components.tsx'
@@ -18,13 +24,11 @@ export function EditQuestionContainer() {
     const [linkToQuestion, setLinkToQuestion] = useState<string>('')
     const [linkToEditQuestion, setLinkToEditQuestion] = useState<string>('')
     const [errors, setErrors] = useState<ErrorCodes>(new Set())
-    const [, setQuestionId] = useState<number>(0)
 
     useApi(questionEditId, fetchQuestionByEditId, question => {
         setQuestionData(toQuestionFormData(question))
         setLinkToQuestion(`${location.origin}/question/${question.id}`)
         setLinkToEditQuestion(`${location.origin}/question/${questionEditId}/edit`)
-        setQuestionId(question.id)
         setIsLoaded(true)
     })
 
@@ -36,7 +40,7 @@ export function EditQuestionContainer() {
         updateQuestion(formData, questionEditId).catch(error => setLinkToQuestion(error.message))
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = (questionData: QuestionFormData) => {
         const errors = validateQuestionFormData(questionData)
 
         if (errors.size > 0) {
@@ -51,11 +55,7 @@ export function EditQuestionContainer() {
         <>
             <h1 data-testid="edit-question-title">Edit Question</h1>
             <div className="question-page">
-                <QuestionEditForm
-                    questionData={questionData}
-                    setQuestionData={setQuestionData}
-                    onSubmit={handleSubmit}
-                />
+                <QuestionEditForm key={questionData.question} initialQuestionData={questionData} onSubmit={handleSubmit} />
                 <ErrorMessages errorCodes={errors} />
                 <QuestionLink url={linkToQuestion} />
                 <QuestionEditLink editUrl={linkToEditQuestion} />
