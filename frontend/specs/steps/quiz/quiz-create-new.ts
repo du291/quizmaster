@@ -2,6 +2,7 @@ import { expect } from '@playwright/test'
 import { expectedNumberOfChildrenToBe } from '../common.ts'
 import { Then, When } from '../fixture.ts'
 import type { DataTable } from '@cucumber/cucumber'
+import { fail } from 'node:assert'
 
 When('I start creating a new quiz', async function () {
     await this.workspacePage.createNewQuiz()
@@ -91,4 +92,16 @@ Then('I see error messages in quiz form', async function (table: DataTable) {
 
 Then('I see no error messages in quiz form', async function () {
     await this.quizCreatePage.hasAnyError().then(result => expect(result).toBe(false))
+})
+
+When('I filter questions by {string}', (s: string) => {
+  fail('Not implemented yet')
+})
+
+Then("I don't see questions in quiz creation form", () => {
+  fail('Not implemented yet')
+})
+
+Then('I see questions in quiz creation form', () => {
+  fail('Not implemented yet')
 })

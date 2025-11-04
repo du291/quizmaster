@@ -57,6 +57,12 @@ It watches for changes in the `frontend` directory and reloads the browser autom
 
 You can run the end-to-end [Cucumber](https://cucumber.io/docs/guides/) + [Playwright](https://playwright.dev/) tests
 
+Do not forget to install latest browsers with command:
+
+```
+pnpm exec playwright install
+```
+
 - `pnpm run test:e2e` against the running app on `http://localhost:8080` (requires building the frontend first)
 - `pnpm run test:e2e:vite` against the running app on `http://localhost:5173`
 - `pnpm run test:e2e:ui` with Playwright UI (at `http://localhost:3333`) against the Vite development server on `http://localhost:5173`

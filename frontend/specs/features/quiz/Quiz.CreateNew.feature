@@ -2,10 +2,13 @@ Feature: Create Quiz from Workspace
 
   Background:
     Given a workspace with questions
-      | question  | answers  |
-      | 2 + 2 = ? | 4 (*), 5 |
-      | 3 * 3 = ? | 9 (*), 6 |
-      | 4 / 2 = ? | 2 (*), 3 |
+      | question                       | answers            |
+      |                      2 + 2 = ? |           4 (*), 5 |
+      |                      3 * 3 = ? |           9 (*), 6 |
+      |                      4 / 2 = ? |           2 (*), 3 |
+      | Jaký nábytek má Ikea?          | Stůl (*), Auto     |
+      | Jaké nádobí má Ikea?           | Talíř (*), Kolo    |
+      | Jaký venkovní Nábytek má Ikea? | Židle (*), Triangl |
 
   Scenario: Create quiz and display it in quiz list
     When I start creating a new quiz
@@ -45,8 +48,8 @@ Feature: Create Quiz from Workspace
     When I start creating a new quiz
     And I submit the quiz
     Then I see error messages in quiz form
-      | titleRequired |
-      | descriptionRequired |
+      | titleRequired              |
+      | descriptionRequired        |
       | atLeastOneQuestionRequired |
 
   @skip
@@ -67,7 +70,7 @@ Feature: Create Quiz from Workspace
     And I enter time limit "-10"
     And I submit the quiz
     Then I see error messages in quiz form
-      | negativeTimeLimit|
+      | negativeTimeLimit |
 
   @skip
   Scenario: Display error when limit is over 21600
@@ -100,3 +103,22 @@ Feature: Create Quiz from Workspace
     And I submit the quiz
     Then I see no error messages in quiz form
     And I see pass score "0"
+
+  @skip
+  Scenario Outline: Filter questions in quiz creation form
+    When I start creating a new quiz
+    And I filter questions by "<filter>"
+    Then I see questions in quiz creation form
+      | question           |
+      | <visibleQuestion1> |
+      | <visibleQuestion2> |
+    And I don't see questions in quiz creation form
+      | question          |
+      | <hiddenQuestion1> |
+      | <hiddenQuestion2> |
+
+    Examples:
+      | filter  | visibleQuestion1      | visibleQuestion2               | hiddenQuestion1 | hiddenQuestion2       |
+      |       2 |             2 + 2 = ? |                      4 / 2 = ? |       3 * 3 = ? | Jaký nábytek má Ikea? |
+      | Ikea    | Jaký nábytek má Ikea? | Jaké nádobí má Ikea?           |       2 + 2 = ? |             3 * 3 = ? |
+      | nábytek | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |       2 + 2 = ? |             4 / 2 = ? |
