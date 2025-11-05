@@ -8,6 +8,7 @@ const errorMessages = {
     negativeTimeLimit: 'Time limit cannot be negative.',
     timeLimitAboveMax: 'Time limit cannot be above 21600 seconds (6 hours).',
     atLeastOneQuestionRequired: 'At least one question must be selected.',
+    randErr: 'Number of random count must be smaller than selected questions.',
 }
 
 export type FormFieldErrorCode = keyof typeof errorMessages

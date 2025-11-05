@@ -26,6 +26,7 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [filter, setFilter] = useState<string>('')
     const [searchParams] = useSearchParams()
+    const [checkRandomize, setCheckRandomize] = useState(false)
     const [filteredQuestions, setFilteredQuestions] = useState<readonly QuestionListItem[]>(questions)
 
     const toFormData = (): QuizCreateFormData => ({
@@ -45,6 +46,7 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
     const timeLimitError = timeLimit < 0 ? 'negativeTimeLimit' : timeLimit > 21600 ? 'timeLimitAboveMax' : undefined
     const passScoreError = passScore > 100 ? 'scoreAboveMax' : undefined
     const atLeastOneQuestionError = isSubmitted && selectedIds.size === 0 ? 'atLeastOneQuestionRequired' : undefined
+    const randomizeError = checkRandomize && finalCount <= selectedIds.size ? undefined : 'randErr'
 
     useEffect(() => {
         if (filter === '') {
@@ -82,9 +84,15 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
             </Field>
             <QuestionSelect questions={filteredQuestions} onSelect={toggleSelectedId} />
 
-            <div className="label">Ramdomize questions</div>
-            <input type="checkbox" id="isRandomized" />
-            <NumberInput id="quiz-finalCount" value={finalCount} onChange={setFinalCount} />
+            <Field label="Randomize questions" errorCode={randomizeError}>
+                <input
+                    type="checkbox"
+                    id="isRandomized"
+                    onChange={e => setCheckRandomize(e.target.checked)}
+                    checked={checkRandomize}
+                />
+                {checkRandomize && <NumberInput id="quiz-finalCount" value={finalCount} onChange={setFinalCount} />}
+            </Field>
 
             {atLeastOneQuestionError && <FormFieldError errorCode="atLeastOneQuestionRequired" />}
             <SubmitButton />
