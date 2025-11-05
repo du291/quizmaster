@@ -47,7 +47,7 @@ Then(/I copy the (take|edit) question URL "(.+)" from the list/, async function 
 })
 
 Then('I see the quiz {string} in the workspace', async function (quizName: string) {
-    await expectTextToContain(this.page.getByText(quizName), quizName)
+    await this.workspacePage.hasQuiz(quizName)
 })
 
 Then('I take quiz {string}', async function (quiz: string) {

@@ -34,4 +34,6 @@ export class WorkspacePage {
     errorMessageLabel = () => this.page.locator('#error-message-label')
 
     createNewQuiz = () => this.page.locator('#create-quiz').click()
+
+    hasQuiz = (quiz: string) => this.quizLocator(quiz).isVisible()
 }
