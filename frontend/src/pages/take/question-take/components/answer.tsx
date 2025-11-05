@@ -25,8 +25,7 @@ export const Answer = (props: AnswerProps) => {
 
     const isChecked = props.isAnswerChecked(props.idx)
 
-    const className = props.isCorrect
-        ? 'correctly-selected' : isChecked ? 'incorrect': 'correctly-not-selected'
+    const className = props.isCorrect ? 'correctly-selected' : isChecked ? 'incorrect' : 'correctly-not-selected'
 
     return (
         <li key={props.idx} id={`answer-row-${props.idx}`}>
