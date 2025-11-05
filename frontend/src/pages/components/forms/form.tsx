@@ -1,30 +1,26 @@
 import './form.scss'
 import { useState } from 'react'
 import { preventDefault } from 'helpers.ts'
-import { type ErrorMessages, type Validate, ValidationsProvider } from './validations.tsx'
+import { type FormValidator, ValidationsProvider } from './validations.tsx'
 
-interface FormProps<T, K extends string> {
+interface FormProps<K extends string> {
     readonly id?: string
     readonly children: React.ReactNode
-    readonly data?: T
-    readonly validate?: Validate<T, K>
-    readonly errorMessages?: ErrorMessages<K>
+    readonly validator?: FormValidator<K>
     readonly onSubmit: () => void
 }
 
-export function Form<T, K extends string>({ id, children, data, errorMessages, validate, onSubmit }: FormProps<T, K>) {
+export function Form<K extends string>({ id, children, validator, onSubmit }: FormProps<K>) {
     const [errors, setErrors] = useState<Set<K>>(new Set())
 
     const submit = preventDefault(() => {
-        if (validate && data) {
-            const newErrors = validate(data)
-            setErrors(newErrors)
-        }
+        const errors = validator?.validate() ?? new Set()
+        setErrors(errors)
         if (errors.size === 0) onSubmit()
     })
 
     return (
-        <ValidationsProvider errors={errors} errorMessages={errorMessages}>
+        <ValidationsProvider errors={errors} errorMessages={validator?.errorMessages}>
             <form id={id} onSubmit={submit}>
                 {children}
             </form>

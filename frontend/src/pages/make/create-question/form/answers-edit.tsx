@@ -38,10 +38,10 @@ export const AnswersEdit = ({ answerStates, isMultipleChoice, addAnswer }: Answe
                     Add Answer
                 </Button>
             </Row>
-            <ErrorMessage error="no-correct-answer" />
-            <ErrorMessage error="empty-answer" />
-            <ErrorMessage error="empty-answer-explanation" />
-            <ErrorMessage error="multiple-choice-must-have-more-correct-answers" />
+            <ErrorMessage errorCode="no-correct-answer" />
+            <ErrorMessage errorCode="empty-answer" />
+            <ErrorMessage errorCode="empty-answer-explanation" />
+            <ErrorMessage errorCode="multiple-choice-must-have-more-correct-answers" />
         </Field>
     )
 }

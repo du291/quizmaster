@@ -4,7 +4,7 @@ import { useQuestionFormState } from './question-form-state'
 import { validateQuestionFormState, errorMessage } from './validators.ts'
 import type { QuestionApiData } from 'api/question.ts'
 import type { Question } from 'model/question.ts'
-import { ErrorMessage } from 'pages/components/forms/validations.tsx'
+import { ErrorMessage, createValidator } from 'pages/components/forms/validations.tsx'
 
 interface QuestionEditProps {
     readonly question?: Question
@@ -14,19 +14,15 @@ interface QuestionEditProps {
 export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
     const state = useQuestionFormState(question)
 
+    const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
+
     const handleSubmit = () => onSubmit(stateToQuestionApiData(state))
 
     return (
-        <Form
-            id="question-create-form"
-            data={state}
-            errorMessages={errorMessage}
-            validate={validateQuestionFormState}
-            onSubmit={handleSubmit}
-        >
+        <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
             <Field label="Question" required>
                 <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
-                <ErrorMessage error="empty-question" />
+                <ErrorMessage errorCode="empty-question" />
             </Field>
             <Row>
                 <CheckField
