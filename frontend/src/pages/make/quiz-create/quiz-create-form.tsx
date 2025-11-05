@@ -14,16 +14,17 @@ export type QuizCreateFormData = QuizCreateRequest
 interface QuizCreateProps {
     readonly questions: readonly QuestionListItem[]
     readonly onSubmit: (data: QuizCreateFormData) => void
+    readonly onFilterChange: (value: string) => void
+    readonly filter: string | null
 }
 
-export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
+export const QuizCreateForm = ({ questions, onSubmit, onFilterChange, filter }: QuizCreateProps) => {
     const [title, setTitle] = useState<string>('')
     const [description, setDescription] = useState<string>('')
     const [selectedIds, toggleSelectedId] = useStateSet<number>()
     const [timeLimit, setTimeLimit] = useState<number>(600)
     const [passScore, setPassScore] = useState<number>(80)
     const [isSubmitted, setIsSubmitted] = useState(false)
-    const [filter, setFilter] = useState<string>('')
     const [searchParams] = useSearchParams()
 
     const toFormData = (): QuizCreateFormData => ({
@@ -35,6 +36,10 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
         timeLimit,
         workspaceGuid: searchParams.get('workspaceguid') || '',
     })
+
+    const handleFilterChange = (value: string) => {
+        onFilterChange(value)
+    }
 
     const quizTitleError = !title ? 'titleRequired' : undefined
     const quizDescriptionError = !description ? 'descriptionRequired' : undefined
@@ -65,7 +70,7 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
 
             <div className="label">Select quiz questions</div>
             <Field label="Filter" isSubmitted={isSubmitted}>
-                <TextInput id="question-filter" value={filter} onChange={setFilter} />
+                <TextInput id="question-filter" value={filter || ''} onChange={handleFilterChange} />
             </Field>
             <QuestionSelect questions={questions} onSelect={toggleSelectedId} />
             {atLeastOneQuestionError && <FormFieldError errorCode="atLeastOneQuestionRequired" />}

@@ -16,12 +16,28 @@ export const QuizCreatePage = () => {
     const [searchParams] = useSearchParams()
     const workspaceGuid = searchParams.get('workspaceguid')
     const navigate = useNavigate()
+    const [filter, setFilter] = useState<string | null>(null)
 
     const [workspaceQuestions, setWorkspaceQuestions] = useState<readonly QuestionListItem[]>([])
     const [quizId, setQuizId] = useState<string | undefined>(undefined)
     const [errorMessage, setErrorMessage] = useState<string>('')
 
-    useApi(workspaceGuid || '', fetchWorkspaceQuestions, setWorkspaceQuestions)
+    useApi(
+        workspaceGuid || '',
+        fetchWorkspaceQuestions,
+        setWorkspaceQuestions,
+        filter ? { name: 'search', value: filter } : undefined,
+    )
+
+    const onFilterChange = (value: string) => {
+        const handler = setTimeout(() => {
+            setFilter(value)
+        }, 300)
+
+        return () => {
+            clearTimeout(handler)
+        }
+    }
 
     const onSubmit = (data: QuizCreateFormData) =>
         tryCatch(setErrorMessage, async () => {
@@ -34,7 +50,12 @@ export const QuizCreatePage = () => {
 
     return (
         <Page title="Create Quiz">
-            <QuizCreateForm questions={workspaceQuestions} onSubmit={onSubmit} />
+            <QuizCreateForm
+                questions={workspaceQuestions}
+                onSubmit={onSubmit}
+                onFilterChange={onFilterChange}
+                filter={filter}
+            />
 
             {errorMessage && <Alert type="error">{errorMessage}</Alert>}
             {quizId && (

@@ -16,8 +16,10 @@ export const postWorkspace = async (workspaceApiData: WorkspaceCreateRequest) =>
 
 export const fetchWorkspace = async (guid: string) => await fetchJson<Workspace>(`/api/workspaces/${guid}`)
 
-export const fetchWorkspaceQuestions = async (guid: string) =>
-    await fetchJson<readonly QuestionListItem[]>(`/api/workspaces/${guid}/questions`)
+export const fetchWorkspaceQuestions = async (guid: string, queryParam?: { name: string; value: string }) =>
+    await fetchJson<readonly QuestionListItem[]>(
+        `/api/workspaces/${guid}/questions${queryParam ? `?${queryParam.name}=${queryParam.value}` : ''}`,
+    )
 
 export const fetchWorkspaceQuizzes = async (guid: string) =>
     await fetchJson<readonly QuizListItem[]>(`/api/workspaces/${guid}/quizzes`)
