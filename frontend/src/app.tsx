@@ -7,22 +7,22 @@ import { QuizWelcomePage } from 'pages/take/quiz-take/quiz-welcome/quiz-welcome-
 import { QuizStatisticsPage } from 'pages/take/quiz-take/quiz-statistics-page.tsx'
 
 import { WorkspaceCreatePage } from 'pages/make/create-workspace/workspace-create-page'
-import { CreateQuestionContainer } from 'pages/make/create-question/create-question-container'
-import { EditQuestionContainer } from 'pages/make/create-question/edit-question-container'
+import { CreateQuestionPage } from 'pages/make/create-question/create-question-page'
+import { EditQuestionPage } from 'pages/make/create-question/edit-question-page'
 import { WorkspaceContainer } from 'pages/make/workspace/workspace-container'
 import { QuizCreatePage } from 'pages/make/quiz-create/quiz-create-page.tsx'
 
 export const App = () => (
     <BrowserRouter>
         <Routes>
-            <Route path="/question/new" element={<CreateQuestionContainer />} />
+            <Route path="/question/new" element={<CreateQuestionPage />} />
             <Route path="/workspace/new" element={<WorkspaceCreatePage />} />
             <Route path="/workspace/:id" element={<WorkspaceContainer />} />
             <Route path="/quiz/:id" element={<QuizWelcomePage />} />
             <Route path="/quiz/:id/stats" element={<QuizStatisticsPage />} />
             <Route path="/quiz/:id/questions" element={<QuizTakePage />} />
             <Route path="/quiz-create/new" element={<QuizCreatePage />} />
-            <Route path="/question/:id/edit" element={<EditQuestionContainer />} />
+            <Route path="/question/:id/edit" element={<EditQuestionPage />} />
             <Route path="/question/:id" element={<QuestionTakePage />} />
             <Route path="/" element={<HomePage />} />
         </Routes>

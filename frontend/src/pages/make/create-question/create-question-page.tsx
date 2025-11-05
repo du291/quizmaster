@@ -4,7 +4,7 @@ import { type QuestionApiData, saveQuestion } from 'api/question.ts'
 
 import { QuestionEditForm } from './form'
 
-export function CreateQuestionContainer() {
+export function CreateQuestionPage() {
     const [searchParams] = useSearchParams()
     const workspaceGuid = searchParams.get('workspaceguid') ? searchParams.get('workspaceguid') : ''
     const navigate = useNavigate()

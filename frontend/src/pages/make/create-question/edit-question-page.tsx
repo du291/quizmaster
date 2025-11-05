@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom'
 import { useApi } from 'api/hooks'
 import { fetchQuestionByEditId, type QuestionApiData, updateQuestion } from 'api/question.ts'
 
-import { QuestionEditForm } from './form'
+import { QuestionEditForm } from './form/index.ts'
 import { LoadedIndicator, QuestionEditLink, QuestionLink } from './components.tsx'
 import type { Question } from 'model/question.ts'
 
-export function EditQuestionContainer() {
+export function EditQuestionPage() {
     const params = useParams()
     const questionEditId = params.id || ''
 
