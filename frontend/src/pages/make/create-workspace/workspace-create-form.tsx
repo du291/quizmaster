@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Field, SubmitButton, TextInput, Form } from 'pages/components'
+import { Field, SubmitButton, TextInput, Form, Row } from 'pages/components'
 
 export interface WorkspaceFormData {
     readonly title: string
@@ -19,9 +19,9 @@ export const WorkspaceCreateForm = ({ onSubmit }: WorkspaceCreateProps) => {
             <Field label="Workspace Title">
                 <TextInput id="workspace-title" value={title} onChange={setTitle} />
             </Field>
-            <div>
+            <Row>
                 <SubmitButton />
-            </div>
+            </Row>
         </Form>
     )
 }

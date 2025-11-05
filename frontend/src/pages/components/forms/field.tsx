@@ -13,7 +13,9 @@ const Required = () => <span className="required">*</span>
 
 export const Field = ({ label, children, required = false, errorCode, isSubmitted = false }: FieldProps) => (
     <label className="field">
-        <div className="label">{label} {required && <Required/>}</div>
+        <div className="label">
+            {label} {required && <Required />}
+        </div>
         {children}
         {isSubmitted && errorCode && <FormFieldError errorCode={errorCode} />}
     </label>

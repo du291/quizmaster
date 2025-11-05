@@ -1,4 +1,4 @@
-import { Button, Field, TextInput } from 'pages/components'
+import { Button, Field, TextInput, Row } from 'pages/components'
 import type { AnswerState } from './question-form-state.ts'
 
 interface AnswerRowProps {
@@ -32,11 +32,11 @@ export const AnswersEdit = ({ answerStates, isMultipleChoice, addAnswer }: Answe
             {answerStates.map(state => (
                 <AnswerRow state={state} isMultipleChoice={isMultipleChoice} />
             ))}
-            <div>
+            <Row>
                 <Button onClick={addAnswer} className="secondary button" id="add-answer">
                     Add Answer
                 </Button>
-            </div>
+            </Row>
         </Field>
     )
 }

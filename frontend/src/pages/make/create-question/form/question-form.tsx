@@ -1,4 +1,4 @@
-import { SubmitButton, Form, Field, TextArea, CheckField } from 'pages/components'
+import { SubmitButton, Form, Field, TextArea, CheckField, Row } from 'pages/components'
 import { AnswersEdit, stateToQuestionApiData } from 'pages/make/create-question/form'
 import { useQuestionFormState } from './question-form-state'
 import { useState } from 'react'
@@ -28,7 +28,7 @@ export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
             <Field label="Question" required>
                 <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
             </Field>
-            <div className="questiion-options">
+            <Row>
                 <CheckField
                     id="is-multiple-choice"
                     label="Multiple choice"
@@ -43,7 +43,7 @@ export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
                         onToggle={state.setEasyMode}
                     />
                 )}
-            </div>
+            </Row>
             <AnswersEdit
                 answerStates={state.answerStates}
                 isMultipleChoice={state.isMultipleChoice}
@@ -56,9 +56,9 @@ export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
                     onChange={state.setQuestionExplanation}
                 />
             </Field>
-            <div className="flex-container">
+            <Row>
                 <SubmitButton />
-            </div>
+            </Row>
             <ErrorMessages errorCodes={errors} />
         </Form>
     )
