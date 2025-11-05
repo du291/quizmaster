@@ -9,8 +9,8 @@ Feature: Take a quiz with partial score
       | bookmark | title  | description   | questions    | mode | pass score | time limit |
       | -1       | Quiz A | Description A | Planets, Sky | exam | 75         | 120        |
 
-  Scenario Outline: Multiple choice question with score
-    Question is scored as follows:
+  Scenario Outline: Quiz with multiple choice question with partial score
+    Quiz is scored as follows:
     - all correct answers gives 1 point
     - one incorrect answer selected gives 0.5 point
     - more than one incorrect answer selected gives 0 point
