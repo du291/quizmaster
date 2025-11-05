@@ -1,4 +1,4 @@
-import { Button, TextInput } from 'pages/components'
+import { Button, Field, TextInput } from 'pages/components'
 import type { AnswerState } from './question-form-state.ts'
 
 interface AnswerRowProps {
@@ -28,8 +28,7 @@ interface AnswersProps {
 
 export const AnswersEdit = ({ answerStates, isMultipleChoice, addAnswer }: AnswersProps) => {
     return (
-        <>
-            <h3 className="answers-header">Enter your answers</h3>
+        <Field label="Enter your answers">
             {answerStates.map(state => (
                 <AnswerRow state={state} isMultipleChoice={isMultipleChoice} />
             ))}
@@ -38,6 +37,6 @@ export const AnswersEdit = ({ answerStates, isMultipleChoice, addAnswer }: Answe
                     Add Answer
                 </Button>
             </div>
-        </>
+        </Field>
     )
 }

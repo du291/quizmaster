@@ -2,7 +2,8 @@ import './create-question.scss'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { type QuestionApiData, saveQuestion } from 'api/question.ts'
 
-import { QuestionEditForm } from './form'
+import { Page } from 'pages/components/page.tsx'
+import { QuestionEditForm } from './form/question-form.tsx'
 
 export function CreateQuestionPage() {
     const [searchParams] = useSearchParams()
@@ -18,11 +19,8 @@ export function CreateQuestionPage() {
     }
 
     return (
-        <>
-            <h1>Create Question</h1>
-            <div className="question-page">
-                <QuestionEditForm onSubmit={handleSubmit} />
-            </div>
-        </>
+        <Page title="Create Question">
+            <QuestionEditForm onSubmit={handleSubmit} />
+        </Page>
     )
 }
