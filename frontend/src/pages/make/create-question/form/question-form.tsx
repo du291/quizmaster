@@ -30,7 +30,7 @@ export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
             // Clear all and set only the first one
             for (const idx of state.correctAnswers) {
                 if (idx !== firstCorrectAnswer) {
-                    state.toggleCorrectAnswer(idx)
+                    state.answerStates[idx].toggleCorrect()
                 }
             }
         }
@@ -58,13 +58,8 @@ export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
                 )}
             </div>
             <AnswersEdit
-                answers={state.answers}
-                explanations={state.explanations}
-                correctAnswers={state.correctAnswers}
+                answerStates={state.answerStates}
                 isMultipleChoice={state.isMultipleChoice}
-                setAnswer={state.setAnswer}
-                setExplanation={state.setExplanation}
-                toggleCorrectAnswer={state.toggleCorrectAnswer}
                 addAnswer={state.addAnswer}
             />
             <Field label="Question explanation">

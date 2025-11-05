@@ -3,6 +3,16 @@ import { updated } from 'helpers.ts'
 import type { Question } from 'model/question.ts'
 import type { QuestionApiData } from 'api/question.ts'
 
+export interface AnswerState {
+    readonly index: number
+    readonly answer: string
+    readonly explanation: string
+    readonly isCorrect: boolean
+    readonly setAnswer: (value: string) => void
+    readonly setExplanation: (value: string) => void
+    readonly toggleCorrect: () => void
+}
+
 export interface QuestionFormState {
     readonly questionText: string
     readonly answers: readonly string[]
@@ -29,7 +39,7 @@ export const useQuestionFormState = (question?: Question) => {
     const setExplanation = (index: number, explanation: string) =>
         setExplanations(updated(explanations, index, explanation))
 
-    const toggleCorrectAnswer = (index: number) => {
+    const toggleCorrect = (index: number) => {
         if (isMultipleChoice) {
             // Multiple choice: toggle the index in/out of the array
             setCorrectAnswers(
@@ -46,8 +56,19 @@ export const useQuestionFormState = (question?: Question) => {
         setExplanations([...explanations, ''])
     }
 
+    const answerStates: readonly AnswerState[] = answers.map((answer, index) => ({
+        index,
+        answer,
+        explanation: explanations[index] || '',
+        isCorrect: correctAnswers.includes(index),
+        setAnswer: (value: string) => setAnswer(index, value),
+        setExplanation: (value: string) => setExplanation(index, value),
+        toggleCorrect: () => toggleCorrect(index),
+    }))
+
     return {
         questionText,
+        answerStates,
         answers,
         explanations,
         correctAnswers,
@@ -56,9 +77,6 @@ export const useQuestionFormState = (question?: Question) => {
         easyMode,
 
         setQuestionText,
-        setAnswer,
-        setExplanation,
-        toggleCorrectAnswer,
         addAnswer,
         setQuestionExplanation,
         setIsMultipleChoice,

@@ -1,42 +1,29 @@
+import type { AnswerState } from './question-form-state.ts'
+
 interface AnswerRowProps {
-    readonly answer: string
-    readonly explanation: string
-    readonly isCorrect: boolean
-    readonly index: number
+    readonly state: AnswerState
     readonly isMultipleChoice: boolean
-    readonly setAnswer: (index: number, answer: string) => void
-    readonly setExplanation: (index: number, explanation: string) => void
-    readonly toggleCorrectAnswer: (index: number) => void
 }
 
-export const AnswerRow = ({
-    answer,
-    explanation,
-    isCorrect,
-    index,
-    isMultipleChoice,
-    setAnswer,
-    setExplanation,
-    toggleCorrectAnswer,
-}: AnswerRowProps) => (
-    <div key={`answer-${index}`} className="answer-row" id={`answer-${index}`}>
+export const AnswerRow = ({ state, isMultipleChoice }: AnswerRowProps) => (
+    <div key={`answer-${state.index}`} className="answer-row" id={`answer-${state.index}`}>
         <div className="answer-row-section">
             <input
                 className={!isMultipleChoice ? 'answer-isCorrect-checkbox' : 'answer-isCorrect-checkbox-multi'}
                 type="checkbox"
-                checked={isCorrect}
-                onChange={() => toggleCorrectAnswer(index)}
+                checked={state.isCorrect}
+                onChange={() => state.toggleCorrect()}
             />
-            <span className="answer-row-correct-icon">{isCorrect ? '✅' : '❌'}</span>
-            <span className="answer-row-correct-text">{isCorrect ? 'Correct answer' : 'Incorrect answer'}</span>
+            <span className="answer-row-correct-icon">{state.isCorrect ? '✅' : '❌'}</span>
+            <span className="answer-row-correct-text">{state.isCorrect ? 'Correct answer' : 'Incorrect answer'}</span>
         </div>
         <div className="answer-row-section">
             <input
                 className="text"
                 type="text"
-                placeholder={`Input answer ${index + 1} here...`}
-                value={answer}
-                onChange={e => setAnswer(index, e.target.value)}
+                placeholder={`Input answer ${state.index + 1} here...`}
+                value={state.answer}
+                onChange={e => state.setAnswer(e.target.value)}
             />
         </div>
         <div className="answer-row-section">
@@ -44,8 +31,8 @@ export const AnswerRow = ({
                 className="explanation"
                 type="text"
                 placeholder="You can add explanation of the anwser here..."
-                value={explanation}
-                onChange={e => setExplanation(index, e.target.value)}
+                value={state.explanation}
+                onChange={e => state.setExplanation(e.target.value)}
             />
         </div>
     </div>
@@ -64,40 +51,17 @@ export const AddAnswerButton = ({ addAnswer }: AddAnswerProps) => (
 )
 
 interface AnswersProps {
-    readonly answers: readonly string[]
-    readonly explanations: readonly string[]
-    readonly correctAnswers: readonly number[]
+    readonly answerStates: readonly AnswerState[]
     readonly isMultipleChoice: boolean
-    readonly setAnswer: (index: number, answer: string) => void
-    readonly setExplanation: (index: number, explanation: string) => void
-    readonly toggleCorrectAnswer: (index: number) => void
     readonly addAnswer: () => void
 }
 
-export const AnswersEdit = ({
-    answers,
-    explanations,
-    correctAnswers,
-    isMultipleChoice,
-    setAnswer,
-    setExplanation,
-    toggleCorrectAnswer,
-    addAnswer,
-}: AnswersProps) => {
+export const AnswersEdit = ({ answerStates, isMultipleChoice, addAnswer }: AnswersProps) => {
     return (
         <>
             <h3 className="answers-header">Enter your answers</h3>
-            {answers.map((answer, index) => (
-                <AnswerRow
-                    answer={answer}
-                    explanation={explanations[index] || ''}
-                    isCorrect={correctAnswers.includes(index)}
-                    index={index}
-                    isMultipleChoice={isMultipleChoice}
-                    setAnswer={setAnswer}
-                    setExplanation={setExplanation}
-                    toggleCorrectAnswer={toggleCorrectAnswer}
-                />
+            {answerStates.map(state => (
+                <AnswerRow state={state} isMultipleChoice={isMultipleChoice} />
             ))}
             <AddAnswerButton addAnswer={addAnswer} />
         </>
