@@ -7,7 +7,8 @@ import type { QuizCreateRequest } from 'api/quiz.ts'
 
 import { Field, Form, NumberInput, SubmitButton, TextArea, TextInput } from 'pages/components'
 import { QuestionSelect } from './components/question-select.tsx'
-import { FormFieldError } from 'pages/components/forms/form-field-error.tsx'
+import { ErrorMessage, createValidator } from 'pages/components/forms/validations.tsx'
+import { validateQuizForm, errorMessage } from './validations.ts'
 
 export type QuizCreateFormData = QuizCreateRequest
 
@@ -23,11 +24,15 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
     const [timeLimit, setTimeLimit] = useState<number>(600)
     const [finalCount, setFinalCount] = useState<number>(0)
     const [passScore, setPassScore] = useState<number>(80)
-    const [isSubmitted, setIsSubmitted] = useState(false)
     const [filter, setFilter] = useState<string>('')
     const [searchParams] = useSearchParams()
     const [checkRandomize, setCheckRandomize] = useState(false)
     const [filteredQuestions, setFilteredQuestions] = useState<readonly QuestionListItem[]>(questions)
+
+    const validator = createValidator(
+        () => validateQuizForm({ title, description, timeLimit, passScore, selectedIds }),
+        errorMessage,
+    )
 
     const toFormData = (): QuizCreateFormData => ({
         title,
@@ -41,13 +46,6 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
         questionList: searchParams.get('listguid') || '',
     })
 
-    const quizTitleError = !title ? 'titleRequired' : undefined
-    const quizDescriptionError = !description ? 'descriptionRequired' : undefined
-    const timeLimitError = timeLimit < 0 ? 'negativeTimeLimit' : timeLimit > 21600 ? 'timeLimitAboveMax' : undefined
-    const passScoreError = passScore > 100 ? 'scoreAboveMax' : undefined
-    const atLeastOneQuestionError = isSubmitted && selectedIds.size === 0 ? 'atLeastOneQuestionRequired' : undefined
-    const randomizeError = checkRandomize && finalCount <= selectedIds.size ? undefined : 'randErr'
-
     useEffect(() => {
         if (filter === '') {
             setFilteredQuestions(questions)
@@ -58,33 +56,29 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
     }, [filter, questions])
 
     return (
-        <Form
-            id="create-quiz"
-            onSubmit={() => {
-                setIsSubmitted(true)
-                onSubmit(toFormData())
-            }}
-        >
-            <Field label="Quiz title" isSubmitted={isSubmitted} errorCode={quizTitleError}>
+        <Form id="create-quiz" validator={validator} onSubmit={() => onSubmit(toFormData())}>
+            <Field label="Quiz title" required>
                 <TextInput id="quiz-title" value={title} onChange={setTitle} />
+                <ErrorMessage errorCode="empty-title" />
             </Field>
-            <Field label="Quiz description" isSubmitted={isSubmitted} errorCode={quizDescriptionError}>
+            <Field label="Quiz description">
                 <TextArea id="quiz-description" value={description} onChange={setDescription} />
             </Field>
-            <Field label="Time limit (in seconds)" isSubmitted={isSubmitted} errorCode={timeLimitError}>
+            <Field label="Time limit (in seconds)">
                 <NumberInput id="time-limit" value={timeLimit} onChange={setTimeLimit} />
             </Field>
-            <Field label="Required score to pass the quiz (in %)" isSubmitted={isSubmitted} errorCode={passScoreError}>
+            <Field label="Required score to pass the quiz (in %)">
                 <NumberInput id="pass-score" value={passScore} onChange={setPassScore} />
             </Field>
 
             <div className="label">Select quiz questions</div>
-            <Field label="Filter" isSubmitted={isSubmitted}>
+            <Field label="Filter">
                 <TextInput id="question-filter" value={filter} onChange={setFilter} />
             </Field>
             <QuestionSelect questions={filteredQuestions} onSelect={toggleSelectedId} />
+            <ErrorMessage errorCode="few-questions" />
 
-            <Field label="Randomize questions" errorCode={randomizeError}>
+            <Field label="Randomize questions">
                 <input
                     type="checkbox"
                     id="isRandomized"
@@ -94,7 +88,6 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
                 {checkRandomize && <NumberInput id="quiz-finalCount" value={finalCount} onChange={setFinalCount} />}
             </Field>
 
-            {atLeastOneQuestionError && <FormFieldError errorCode="atLeastOneQuestionRequired" />}
             <SubmitButton />
         </Form>
     )

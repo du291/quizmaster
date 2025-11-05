@@ -47,14 +47,12 @@ Feature: Create Quiz from Workspace
     * I see quiz description "Very hard math quiz"
     * I see question count 3
 
-  @skip
   Scenario: Quiz form with only default values
     When I start creating a new quiz
     And I submit the quiz
     Then I see error messages in quiz form
-      | titleRequired              |
-      | descriptionRequired        |
-      | atLeastOneQuestionRequired |
+      | empty-title   |
+      | few-questions |
 
   @skip
   Scenario: Display error when score is above 100
@@ -108,7 +106,7 @@ Feature: Create Quiz from Workspace
     Then I see no error messages in quiz form
     And I see pass score "0"
 
-  
+
   Scenario Outline: Filter questions in quiz creation form
     When I start creating a new quiz
     And I filter questions by "<filter>"
@@ -116,6 +114,7 @@ Feature: Create Quiz from Workspace
     And I see quiz question "<visibleQuestion2>"
     And I don't see quiz questions "<hiddenQuestion1>"
     And I don't see quiz questions "<hiddenQuestion2>"
+
     Examples:
       | filter  | visibleQuestion1      | visibleQuestion2               | hiddenQuestion1 | hiddenQuestion2       |
       |       2 |             2 + 2 = ? |                      4 / 2 = ? |       3 * 3 = ? | Jaký nábytek má Ikea? |
