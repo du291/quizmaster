@@ -55,6 +55,11 @@ export const QuestionForm = (props: QuestionProps) => {
         <div>
             <TimeLimit timeLimit={props.quiz.timeLimit} onConfirm={evaluate} />
             <h2>Quiz</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div id="feedback-mode">Feedback mode:</div>
+                <label style={{ fontWeight: 800 }}>{props.quiz.mode}</label>
+            </div>
+
             <ProgressBar current={nav.currentQuestionIdx + 1} total={props.quiz.questions.length} />
 
             <StandaloneQuestionForm

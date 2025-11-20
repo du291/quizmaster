@@ -9,6 +9,7 @@ import { Field, Form, NumberInput, SubmitButton, TextArea, TextInput } from 'pag
 import { QuestionSelect } from './components/question-select.tsx'
 import { ErrorMessage, createValidator } from 'pages/components/forms/validations.tsx'
 import { validateQuizForm, errorMessage } from './validations.ts'
+import { QuizMode } from 'model/quiz.ts'
 
 export type QuizCreateFormData = QuizCreateRequest
 
@@ -28,6 +29,7 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
     const [searchParams] = useSearchParams()
     const [checkRandomize, setCheckRandomize] = useState(false)
     const [filteredQuestions, setFilteredQuestions] = useState<readonly QuestionListItem[]>(questions)
+    const [feedbackMode, setFeedbackMode] = useState<QuizMode>('EXAM')
 
     const validator = createValidator(
         () => validateQuizForm({ title, description, timeLimit, passScore, selectedIds }),
@@ -38,7 +40,7 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
         title,
         description,
         questionIds: Array.from(selectedIds),
-        mode: 'EXAM' as const,
+        mode: feedbackMode,
         passScore,
         timeLimit,
         workspaceGuid: searchParams.get('workspaceguid') || '',
@@ -70,7 +72,32 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
             <Field label="Required score to pass the quiz (in %)">
                 <NumberInput id="pass-score" value={passScore} onChange={setPassScore} />
             </Field>
-
+            <Field label="Feedback mode">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                        type="radio"
+                        name="feedbackMode"
+                        id="exam-mode"
+                        value="EXAM"
+                        checked={feedbackMode === 'EXAM'}
+                        onChange={e => setFeedbackMode(e.target.value as QuizMode)}
+                    />
+                    <label htmlFor="exam-mode" style={{ marginTop: '5px' }}>
+                        EXAM
+                    </label>
+                    <input
+                        type="radio"
+                        name="feedbackMode"
+                        id="learn-mode"
+                        value="LEARN"
+                        checked={feedbackMode === 'LEARN'}
+                        onChange={e => setFeedbackMode(e.target.value as QuizMode)}
+                    />
+                    <label htmlFor="learn-mode" style={{ marginTop: '5px' }}>
+                        LEARN
+                    </label>
+                </span>
+            </Field>
             <div className="label">Select quiz questions</div>
             <Field label="Filter">
                 <TextInput id="question-filter" value={filter} onChange={setFilter} />
