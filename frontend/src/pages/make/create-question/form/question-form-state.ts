@@ -85,7 +85,7 @@ export const useQuestionFormState = (question?: Question) => {
         setQuestionExplanation,
         toggleMultipleChoice,
         setEasyMode,
-        setWorkspaceGuid
+        setWorkspaceGuid,
     }
 }
 
