@@ -3,7 +3,7 @@ import { expectedNumberOfChildrenToBe } from '../common.ts'
 import { Then, When } from '../fixture.ts'
 import type { DataTable } from '@cucumber/cucumber'
 import { fail } from 'node:assert'
-import { QuizMode } from '../world/quiz.ts'
+import type { QuizMode } from '../world/quiz.ts'
 
 When('I start creating a new quiz', async function () {
     await this.workspacePage.createNewQuiz()
