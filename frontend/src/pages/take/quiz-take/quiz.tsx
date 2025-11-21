@@ -51,6 +51,20 @@ export const QuestionForm = (props: QuestionProps) => {
     const currentAnswers = quizAnswers.finalAnswers[nav.currentQuestionIdx]
     const isAnswered = currentAnswers !== undefined
 
+    // Funkce pro Next/Skip tlačítko
+    const handleNextOrSkip = () => {
+        if (!isAnswered) {
+            // Pokud není zodpovězeno, skipni a bookmarkuj
+            if (!bookmarks.has(nav.currentQuestionIdx)) {
+                bookmarks.toggle(nav.currentQuestionIdx)
+            }
+            nav.skip()
+        } else {
+            // Pokud je zodpovězeno, pouze next
+            nav.next()
+        }
+    }
+
     return (
         <div>
             <TimeLimit timeLimit={props.quiz.timeLimit} onConfirm={evaluate} />
@@ -73,9 +87,8 @@ export const QuestionForm = (props: QuestionProps) => {
                 style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '10px', marginBottom: '20px' }}
             >
                 {nav.canBack && <BackButton onClick={nav.back} />}
-                {isAnswered && nav.canNext && <NextButton onClick={nav.next} />}
+                {nav.canNext && <NextButton onClick={handleNextOrSkip} />}
                 {isAnswered && !nav.canNext && <EvaluateButton onClick={evaluate} />}
-                {!isAnswered && nav.canNext && <SkipButton onClick={nav.skip} />}
                 <BookmarkButton isBookmarked={bookmarks.has(nav.currentQuestionIdx)} onClick={bookmark} />
             </div>
 

@@ -13,21 +13,17 @@ Feature: Take a quiz
       | -3       | Quiz B | Description B | Nose,France   | exam  | 40         | 120        |
 
     # Given a quiz containing questions "Sky" and "France"
-
-  Scenario: Quiz question Sky is skipable
+  Scenario: Quiz question is not answered and the next button is clicked
     Given I start quiz "-1"
-    Then I should see the skip button
-
-  Scenario: Quiz question is not answered and the skip button is clicked
-    Given I start quiz "-1"
-    When I click the skip button
+    When I click the next button
     Then I see question "France"
+    And I see bookmark to previous question "Sky"
+    And I see bookmark link "Sky"
 
   Scenario: User proceed to last question
     Given I start quiz "-1"
     When I answer "Green"
     Then I see question "France"
-    Then I should not see the skip button
     Then I should not see the evaluate button
     When I answer "Lyon"
     Then I should see the evaluate button
@@ -37,7 +33,6 @@ Feature: Take a quiz
     Given I start quiz "-1"
     When I answer "Green"
     Then I see question "France"
-    Then I should not see the skip button
     Then I should not see the evaluate button
     When I answer "Lyon"
     Then I click the evaluate button
@@ -68,14 +63,14 @@ Feature: Take a quiz
 
   Scenario: Last question is not answered and there are any skipped questions
     Given I start quiz "-1"
-    When I click the skip button
+    When I click the next button
     Then I see question "France"
     Then I should not see the evaluate button
-    Then I should see the skip button
+    Then I should see the next button
 
   Scenario: Last question is answered and there are any skipped questions
     Given I start quiz "-1"
-    When I click the skip button
+    When I click the next button
     Then I see question "France"
     When I answer "Paris"
     Then I should not see the evaluate button
@@ -83,7 +78,7 @@ Feature: Take a quiz
 
   Scenario: Last question is answered and show skipped question
     Given I start quiz "-1"
-    When I click the skip button
+    When I click the next button
     Then I see question "France"
     When I answer "Paris"
     Then I should not see the evaluate button
@@ -93,15 +88,15 @@ Feature: Take a quiz
 
   Scenario: Last question is skipped and there are any skipped questions
     Given I start quiz "-1"
-    When I click the skip button
+    When I click the next button
     Then I see question "France"
-    Then I should see the skip button
-    When I click the skip button
+    Then I should see the next button
+    When I click the next button
     Then I see question "Sky"
 
   Scenario: Do not show skipped question which was submited
     Given I start quiz "-1"
-    When I click the skip button
+    When I click the next button
     Then I see question "France"
     When I answer "Paris"
     Then I should not see the evaluate button

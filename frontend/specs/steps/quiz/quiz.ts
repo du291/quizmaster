@@ -35,10 +35,6 @@ Then('I should see the next button', async function () {
     await expect(this.questionPage.nextButtonLocator()).toBeVisible()
 })
 
-Then('I should see the skip button', async function () {
-    await expect(this.questionPage.skipButtonLocator()).toBeVisible()
-})
-
 Then('I should not see the skip button', async function () {
     await expect(this.questionPage.skipButtonLocator()).not.toBeVisible()
 })
@@ -53,10 +49,6 @@ When('I proceed to the next question', async function () {
 
 When('I click the next button', async function () {
     await this.questionPage.next()
-})
-
-When('I click the skip button', async function () {
-    await this.questionPage.skip()
 })
 
 When('I click the start button', async function () {
