@@ -66,6 +66,7 @@ public class QuizController {
                 .description(quiz.getDescription())
                 .questions(questions)
                 .mode(quiz.getMode())
+                .easyMode(EasyMode.PERQUESTION)
                 .passScore(quiz.getPassScore())
                 .timeLimit(quiz.getTimeLimit())
                 .timesTaken(stats.getTimesTaken())
@@ -110,42 +111,42 @@ public class QuizController {
     public ResponseEntity<Void> updateQuizFinishedCounts(
             @PathVariable Integer id,
             @RequestBody ScoreRequest payload) {
-    
+
         double scorePct = payload.getScore();
         boolean passed = payload.isPassed();
-    
+
         Quiz quiz = quizRepository.findById(id).orElse(null);
         if (quiz == null) {
             return ResponseEntity.notFound().build();
         }
-    
+
         QuizStats stats = quizStatsRepository.findByQuizId(id);
         if (stats == null) {
             return ResponseEntity.notFound().build();
         }
-    
+
         if (!passed) {
             passed = scorePct >= quiz.getPassScore();
         }
-    
+
         if (passed) {
             stats.setTimesFinished(stats.getTimesFinished() + 1);
         }
-    
+
         int totalAttempts = stats.getTimesTaken();
         if (totalAttempts > 0) {
             double newAvgScore = stats.getAverageScore() +
                     (scorePct - stats.getAverageScore()) / totalAttempts;
             stats.setAverageScore(newAvgScore);
         }
-    
+
         double successRate = (stats.getTimesTaken() > 0)
                 ? (stats.getTimesFinished() * 100.0) / stats.getTimesTaken()
                 : 0.0;
-    
+
         stats.setSuccessRate(successRate);
         stats.setFailureRate(100.0 - successRate);
-    
+
         quizStatsRepository.save(stats);
         return ResponseEntity.ok().build();
     }

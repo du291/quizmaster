@@ -8,7 +8,7 @@ import {
     QuestionExplanation,
 } from 'pages/take/question-take'
 import { QuestionScore } from './components/question-score'
-import type { QuizMode } from 'model/quiz.ts'
+import type { QuizMode, EasyMode } from 'model/quiz.ts'
 import { Form } from 'pages/components'
 
 export interface QuestionFormProps {
@@ -16,6 +16,7 @@ export interface QuestionFormProps {
     readonly selectedAnswerIdxs?: AnswerIdxs
     readonly onSubmitted?: (selectedAnswerIdxs: AnswerIdxs) => void
     readonly mode: QuizMode
+    readonly quizEasyMode?: EasyMode
 }
 
 export const QuestionForm = (props: QuestionFormProps) => {
@@ -35,6 +36,15 @@ export const QuestionForm = (props: QuestionFormProps) => {
 
     const correctAnswersCount = correctAnswers.length
 
+    // Determine if easy mode should be displayed based on quiz easy mode setting
+    const shouldShowEasyMode = props.quizEasyMode
+        ? props.quizEasyMode === 'ALWAYS'
+            ? true
+            : props.quizEasyMode === 'NEVER'
+              ? false
+              : easyMode // PERQUESTION - use question's easy mode
+        : easyMode // No quiz context - use question's easy mode (standalone question)
+
     return (
         <Form onSubmit={handleSubmit} id="question-form">
             <fieldset className="question-fieldset" name={`question-${props.question.id}`}>
@@ -42,7 +52,7 @@ export const QuestionForm = (props: QuestionFormProps) => {
                     <h1 id="question">{props.question.question}</h1>
                 </legend>
 
-                {easyMode && (
+                {shouldShowEasyMode && (
                     <div>
                         Correct answers count is{' '}
                         <strong className="correct-answers-count">{correctAnswersCount}</strong>

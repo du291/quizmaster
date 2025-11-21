@@ -28,6 +28,11 @@ public class Quiz {
 
     @Enumerated(EnumType.STRING)
     private QuizMode mode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EasyMode easyMode = EasyMode.PERQUESTION;
+
     private int passScore;
     private Integer timeLimit; // time limit in seconds, null means no limit
     private String workspaceGuid; // Workspace GUID
