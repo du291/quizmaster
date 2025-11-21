@@ -53,11 +53,11 @@ When('I wait for {int} ms', async (milliseconds: number) => {
     await new Promise(resolve => setTimeout(resolve, milliseconds))
 })
 
-When('I check "Add explanation to your answer" checkbox', async function() {
+When('I check "Add explanation to your answer" checkbox', async function () {
     await this.questionEditPage.checkShowExplanationFields()
 })
 
-Then('I see explanation fields are visible for answers', async function(){
-    const countExplanationFields= await this.questionEditPage.countExplanationFields()
+Then('I see explanation fields are visible for answers', async function () {
+    const countExplanationFields = await this.questionEditPage.countExplanationFields()
     expect(countExplanationFields).toBe(2)
 })
