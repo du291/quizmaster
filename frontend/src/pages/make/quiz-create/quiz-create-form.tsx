@@ -131,7 +131,7 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
                 />
                 {checkRandomize && <NumberInput id="quiz-finalCount" value={finalCount} onChange={setFinalCount} />}
             </Field>
-            <ErrorMessage errorCode="too-many-randomized-questions"/>
+            <ErrorMessage errorCode="too-many-randomized-questions" />
             <SubmitButton />
         </Form>
     )
