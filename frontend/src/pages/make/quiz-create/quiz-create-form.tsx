@@ -122,15 +122,26 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
                 </span>
             </div>
 
-            <Field label="Randomize questions">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                 <input
                     type="checkbox"
                     id="isRandomized"
                     onChange={e => setCheckRandomize(e.target.checked)}
                     checked={checkRandomize}
                 />
-                {checkRandomize && <NumberInput id="quiz-finalCount" value={finalCount} onChange={setFinalCount} />}
-            </Field>
+                <label htmlFor="isRandomized" style={{ marginTop: '5px', fontWeight: 'bold' }}>
+                    {' '}
+                    Randomize questions in the quiz{' '}
+                </label>
+            </span>
+            {checkRandomize && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ width: '150px', paddingLeft: '25px' }}>
+                        <NumberInput id="quiz-finalCount" value={finalCount} onChange={setFinalCount} />
+                    </div>
+                    random questions
+                </span>
+            )}
             <ErrorMessage errorCode="too-many-randomized-questions" />
             <SubmitButton />
         </Form>
