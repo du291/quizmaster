@@ -33,10 +33,6 @@ export class QuizCreatePage {
     enterDescription = (description: string) => this.page.locator('#quiz-description').fill(description)
     private quizUrlLocator = () => this.page.locator('.alert.success a')
     takeQuiz = () => this.quizUrlLocator().click()
-
-    private quizStatisticsUrlLocator = () => this.page.locator('.alert.info a')
-
-    showQuizStatistics = () => this.quizStatisticsUrlLocator().click()
     errorMessageLocator = () => this.page.locator('.alert.error')
     getFieldByInputId = (inputId: string) => this.page.locator(`label[for="${inputId}"]`)
     hasError = (errorTestId: string) => {

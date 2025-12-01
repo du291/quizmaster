@@ -17,15 +17,12 @@ public class QuizController {
 
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
-    private final QuizStatsRepository quizStatsRepository;
 
     @Autowired
     public QuizController(QuestionRepository questionRepository,
-                          QuizRepository quizRepository,
-                          QuizStatsRepository quizStatsRepository) {
+                          QuizRepository quizRepository) {
         this.questionRepository = questionRepository;
         this.quizRepository = quizRepository;
-        this.quizStatsRepository = quizStatsRepository;
     }
 
     @Transactional
@@ -72,69 +69,7 @@ public class QuizController {
     @PostMapping("/quiz")
     public ResponseEntity<Integer> createQuiz(@RequestBody Quiz quizInput) {
         Quiz output = quizRepository.save(quizInput);
-        QuizStats stats = new QuizStats();
-        stats.setQuiz(output);
-        quizStatsRepository.save(stats);
         return ResponseEntity.ok(output.getId());
-    }
-
-    @Transactional
-    @PutMapping("/quiz/{id}/start")
-    public ResponseEntity<Void> updateQuizCounts(@PathVariable Integer id) {
-        QuizStats stats = quizStatsRepository.findByQuizId(id);
-        if (stats == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        stats.setTimesTaken(stats.getTimesTaken() + 1);
-        quizStatsRepository.save(stats);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @Transactional
-    @PutMapping("/quiz/{id}/evaluate")
-    public ResponseEntity<Void> updateQuizFinishedCounts(
-            @PathVariable Integer id,
-            @RequestBody ScoreRequest payload) {
-
-        double scorePct = payload.getScore();
-        boolean passed = payload.isPassed();
-
-        Quiz quiz = quizRepository.findById(id).orElse(null);
-        if (quiz == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        QuizStats stats = quizStatsRepository.findByQuizId(id);
-        if (stats == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (!passed) {
-            passed = scorePct >= quiz.getPassScore();
-        }
-
-        if (passed) {
-            stats.setTimesFinished(stats.getTimesFinished() + 1);
-        }
-
-        int totalAttempts = stats.getTimesTaken();
-        if (totalAttempts > 0) {
-            double newAvgScore = stats.getAverageScore() +
-                    (scorePct - stats.getAverageScore()) / totalAttempts;
-            stats.setAverageScore(newAvgScore);
-        }
-
-        double successRate = (stats.getTimesTaken() > 0)
-                ? (stats.getTimesFinished() * 100.0) / stats.getTimesTaken()
-                : 0.0;
-
-        stats.setSuccessRate(successRate);
-        stats.setFailureRate(100.0 - successRate);
-
-        quizStatsRepository.save(stats);
-        return ResponseEntity.ok().build();
     }
 
 }

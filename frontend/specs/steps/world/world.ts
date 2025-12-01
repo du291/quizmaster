@@ -10,7 +10,6 @@ import {
     QuizScorePage,
     QuizWelcomePage,
     TakeQuestionPage,
-    QuizStatisticsPage,
 } from '../../pages'
 import { emptyQuestion, type Question } from './question.ts'
 import { emptyQuiz, type Quiz, type QuizBookmark } from './quiz.ts'
@@ -25,7 +24,6 @@ export class QuizmasterWorld {
         this.takeQuestionPage = new TakeQuestionPage(this.page)
         this.questionPage = new QuestionPage(this.page)
         this.quizWelcomePage = new QuizWelcomePage(this.page)
-        this.quizStatisticsPage = new QuizStatisticsPage(this.page)
         this.quizScorePage = new QuizScorePage(this.page)
         this.workspacePage = new WorkspacePage(this.page)
         this.quizCreatePage = new QuizCreatePage(this.page)
@@ -37,7 +35,6 @@ export class QuizmasterWorld {
     readonly takeQuestionPage: TakeQuestionPage
     readonly questionPage: QuestionPage
     readonly quizWelcomePage: QuizWelcomePage
-    readonly quizStatisticsPage: QuizStatisticsPage
     readonly quizScorePage: QuizScorePage
     readonly workspacePage: WorkspacePage
     readonly quizCreatePage: QuizCreatePage

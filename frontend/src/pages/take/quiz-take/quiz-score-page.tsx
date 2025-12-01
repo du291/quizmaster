@@ -1,5 +1,4 @@
 import type { Quiz } from 'model/quiz.ts'
-import { useEffect } from 'react'
 import { QuestionFeedback } from './components/question'
 import type { QuizAnswers } from './quiz-answers-state.ts'
 import { evaluate } from './quiz-score.ts'
@@ -11,22 +10,6 @@ export const QuizScorePage = ({ quiz, quizAnswers }: { quiz: Quiz; quizAnswers: 
     const percentage = (score / total) * 100
     const passed = percentage >= quiz.passScore
     const result = passed ? 'passed' : 'failed'
-
-    useEffect(() => {
-        const quizId = quiz.id
-        const passed = percentage >= quiz.passScore
-
-        fetch(`/api/quiz/${quizId}/evaluate`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                score: percentage,
-                passed: passed,
-                timeout: false,
-                timeTaken: 0,
-            }),
-        })
-    }, [quiz.id, quiz.passScore, percentage])
 
     return (
         <>

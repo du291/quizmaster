@@ -100,10 +100,6 @@ When('I filter questions by {string}', async function (s: string) {
     await this.quizCreatePage.enterFilterString(s)
 })
 
-Then('I display the quiz statistics', async function () {
-    await this.quizCreatePage.showQuizStatistics()
-})
-
 Then('I see workspace with {int} available questions', async function (count: number) {
     await expectedNumberOfChildrenToBe(this.quizCreatePage.questionsInList(), count)
 })

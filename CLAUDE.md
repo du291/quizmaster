@@ -7,7 +7,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Quizmaster is a training application for Scrum workshops at ScrumDojo.cz. Core features:
 - Create and manage questions, workspaces, and quizzes
 - Take standalone questions or complete quizzes
-- Track quiz performance (times taken/finished, average scores)
 
 Built incrementally using thin slices of functionality—a key learning objective of the Scrum training.
 
@@ -56,21 +55,18 @@ pnpm test:e2e:ui       # Playwright UI at :3333
 
 ## Domain Model
 
-**Four entities:**
+**Three entities:**
 1. **Question** - Question text, multiple answers, correct answer indices, explanations
    - Fields: `id`, `question`, `answers[]`, `correctAnswers[]`, `answerExplanations[]`, `questionExplanation`, `isEasyMode`, `editId` (UUID), `workspaceGuid`
 2. **Workspace** - Collection of questions and quizzes (identified by GUID/UUID)
    - Fields: `guid`, `name`
 3. **Quiz** - Assessment configuration
    - Fields: `id`, `title`, `description`, `questionIds[]`, `passScore`, `timeLimit`, `mode` (EXAM/LEARN), `finalCount`, `workspaceGuid`
-4. **QuizStats** - Quiz performance statistics (one-to-one with Quiz)
-   - Fields: `timesTaken`, `timesFinished`, `averageScore`, `timeoutCount`, `failureRate`, `successRate`, `averageTime`
 
 **Key concepts:**
 - **`mode` field**: `EXAM` = exam mode (feedback at end), `LEARN` = learning mode (feedback after each question)
 - **`finalCount` field**: Limits quiz to N random questions from the question pool
 - **`editId` field**: UUID used for editing questions without authentication (NOT encryption/hashing)
-- **QuizStats separation**: Statistics were refactored into a separate entity for better data modeling
 - **Standalone questions**: Original feature; users can take individual questions outside quizzes
 
 ## API Endpoints
@@ -78,8 +74,6 @@ pnpm test:e2e:ui       # Playwright UI at :3333
 **Quiz Management:**
 - `GET /api/quiz/{id}` - Get quiz with all questions (returns `QuizResponse` DTO)
 - `POST /api/quiz` - Create quiz with question IDs array
-- `PUT /api/quiz/{id}/start` - Increment `timesTaken` counter in QuizStats
-- `PUT /api/quiz/{id}/evaluate` - Submit score (via `ScoreRequest` DTO), update QuizStats
 - `GET /api/workspaces/{guid}/quizzes` - Find quizzes in a workspace (returns array of `QuizListItem` DTOs)
 
 **Question Management:**
@@ -96,12 +90,6 @@ pnpm test:e2e:ui       # Playwright UI at :3333
 **Feature Flags:**
 - `GET /api/feature-flag` - Returns whether feature flag is enabled
 
-**Quiz-Taking Workflow:**
-1. Frontend loads quiz via `GET /api/quiz/{id}` (shows welcome page)
-2. User starts → `PUT /api/quiz/{id}/start` (increments counter)
-3. User answers questions
-4. User finishes → `PUT /api/quiz/{id}/evaluate` (updates statistics)
-
 ## API DTOs (Data Transfer Objects)
 
 The API uses type-safe DTOs for cleaner responses:
@@ -109,8 +97,7 @@ The API uses type-safe DTOs for cleaner responses:
 **Backend DTOs:**
 - `QuestionCreateResponse` - `{id: number, editId: string}` - Returned when creating questions
 - `WorkspaceCreateResponse` - `{guid: string}` - Returned when creating workspaces
-- `QuizResponse` - Complete quiz data including all Quiz and QuizStats fields
-- `ScoreRequest` - `{score: number}` - Request body for evaluate endpoint
+- `QuizResponse` - Complete quiz data including all Quiz fields
 - `QuestionListItem` - `{id: number, question: string, editId: string}` - Lightweight question in workspace list
 - `QuizListItem` - `{id: number, title: string}` - Lightweight quiz in workspace list
 
@@ -131,7 +118,6 @@ These DTOs are part of an ongoing API refactoring (see `API_REFACTORING_PLAN.md`
 - `/quiz-create/new` - Create quiz
 - `/quiz/:id` - Quiz welcome/info page
 - `/quiz/:id/questions` - Take quiz
-- `/quiz/:id/stats` - Quiz statistics
 
 ## Feature Flags
 

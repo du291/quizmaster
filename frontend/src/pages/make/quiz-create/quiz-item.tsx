@@ -15,8 +15,6 @@ export const QuizItem: React.FC<Props> = ({ quiz }) => {
 
     const copyQuizLink = () => navigator.clipboard.writeText(`${window.location.origin}/quiz/${quiz.id}`)
 
-    const onStatsQuiz = () => navigate(`/quiz/${quiz.id}/stats`)
-
     return (
         <div className="quiz-item question-item">
             <span id="quiz-text">
@@ -38,11 +36,6 @@ export const QuizItem: React.FC<Props> = ({ quiz }) => {
                                 e.currentTarget.style.display = 'none'
                             }}
                         />
-                    </Button>
-                </span>
-                <span className="stats-quiz-button take-button">
-                    <Button className="stats-quiz" onClick={onStatsQuiz}>
-                        Stats
                     </Button>
                 </span>
             </span>

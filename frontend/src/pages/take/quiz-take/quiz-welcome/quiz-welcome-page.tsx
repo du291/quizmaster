@@ -13,11 +13,8 @@ export const QuizWelcomePage = () => {
 
     useApi(params.id, fetchQuiz, setQuiz)
 
-    const onStart = async () => {
+    const onStart = () => {
         const quizId = params.id
-        await fetch(`/api/quiz/${quizId}/start`, {
-            method: 'PUT',
-        })
         navigate(`/quiz/${quizId}/questions`)
         sessionStorage.removeItem('quizAnswers')
     }

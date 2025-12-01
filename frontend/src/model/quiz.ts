@@ -14,13 +14,3 @@ export interface Quiz {
     readonly timeLimit: number
     readonly size?: number
 }
-
-export interface QuizStats {
-    readonly timesTaken: number
-    readonly timesFinished: number
-    readonly averageScore: number
-    readonly timeoutCount: number
-    readonly failureRate: number
-    readonly successRate: number
-    readonly averageTime: number
-}
