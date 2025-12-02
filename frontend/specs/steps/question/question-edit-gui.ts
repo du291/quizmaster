@@ -218,15 +218,19 @@ Then('I see no error messages', async function () {
     await expectErrorCount(this, 0)
 })
 
-const expectAnswerDeleteBtnsToBeVisibleAndDisabled = async (world: QuizmasterWorld, expectedBtnCount: number = 2, expectDisabled: boolean = true) => {
+const expectAnswerDeleteBtnsToBeVisibleAndDisabled = async (
+    world: QuizmasterWorld,
+    expectedBtnCount = 2,
+    expectDisabled = true,
+) => {
     const trashIconButtons = world.questionEditPage.answerDeleteButtonsLocator()
-    const btnCount = await trashIconButtons.count();
+    const btnCount = await trashIconButtons.count()
 
     expect(btnCount).toBe(expectedBtnCount)
-    for(let i = 0; i < btnCount; i++) {
-        let trashIconBtn = trashIconButtons.nth(i);
+    for (let i = 0; i < btnCount; i++) {
+        const trashIconBtn = trashIconButtons.nth(i)
         expect(trashIconBtn).toBeVisible()
-        if(expectDisabled) {
+        if (expectDisabled) {
             expect(trashIconBtn).toBeDisabled()
         } else {
             expect(trashIconBtn).toBeEnabled()
@@ -235,16 +239,16 @@ const expectAnswerDeleteBtnsToBeVisibleAndDisabled = async (world: QuizmasterWor
 }
 
 Then('I delete answer {int}', async function (answerNumber: number) {
-    let answerDeleteButtonLocator = this.questionEditPage.answerDeleteButtonLocator(answerNumber -1);
+    const answerDeleteButtonLocator = this.questionEditPage.answerDeleteButtonLocator(answerNumber - 1)
 
     answerDeleteButtonLocator.click()
 })
 
 Then('I do not see answer {string}', async function (answer: string) {
-    const answerRowsLocator = this.questionEditPage.answerRowsLocator();
+    const answerRowsLocator = this.questionEditPage.answerRowsLocator()
 
     const answerCount = await answerRowsLocator.count()
-    for(let i = 0; i < answerCount; i++) {
+    for (let i = 0; i < answerCount; i++) {
         expect(await this.questionEditPage.answerText(i)).not.toBe(answer)
     }
 })
