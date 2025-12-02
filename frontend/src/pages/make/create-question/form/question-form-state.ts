@@ -28,7 +28,7 @@ export const useQuestionFormState = (question?: Question) => {
     const [questionText, setQuestionText] = useState<string>(question?.question || '')
     const [isMultipleChoice, setIsMultipleChoice] = useState((question?.correctAnswers?.length || 0) > 1 || false)
     const [easyMode, setEasyMode] = useState(question?.easyMode || false)
-    const [showExplanations, setShowExplanations] = useState(false)
+    const [showExplanations, setShowExplanations] = useState(question?.explanations?.some(explanation => !!explanation))
     const [answers, setAnswers] = useState<readonly string[]>(question?.answers || ['', ''])
     const [explanations, setExplanations] = useState<readonly string[]>(question?.explanations || ['', ''])
     const [correctAnswers, setCorrectAnswers] = useState<readonly number[]>(question?.correctAnswers || [])
