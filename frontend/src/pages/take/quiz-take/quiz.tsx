@@ -87,6 +87,15 @@ export const QuestionForm = (props: QuestionProps) => {
         }
     }
 
+    const handleAnswerSubmitted = (answers: AnswerIdxs) => {
+        setSelectedAnswers(answers)
+        if (props.quiz.mode === 'LEARN') {
+            answer(answers)
+        } else {
+            answerAndNext(answers)
+        }
+    }
+
     return (
         <div>
             <TimeLimit timeLimit={props.quiz.timeLimit} onConfirm={evaluate} />
@@ -102,13 +111,10 @@ export const QuestionForm = (props: QuestionProps) => {
                 key={currentQuestion.id}
                 question={currentQuestion}
                 selectedAnswerIdxs={quizAnswers.finalAnswers[nav.currentQuestionIdx]}
-                onAnswerSelected={(answers) => {
+                onAnswerSelected={answers => {
                     setSelectedAnswers(answers)
                 }}
-                onSubmitted={(answers) => {
-                    setSelectedAnswers(answers)
-                    props.quiz.mode === 'LEARN' ? answer(answers) : answerAndNext(answers)
-                }}
+                onSubmitted={handleAnswerSubmitted}
                 mode={props.quiz.mode}
                 quizEasyMode={props.quiz.easyMode}
             />
