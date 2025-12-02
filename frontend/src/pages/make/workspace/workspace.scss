@@ -40,7 +40,7 @@ h1 {
 
 .add-existing-section {
     margin-bottom: 1rem;
-    
+
     #question-input-field {
         width: 300px;
         padding: 0.5rem;
@@ -49,17 +49,17 @@ h1 {
         border-radius: 0.375rem;
         margin-bottom: 0.5rem; // Small spacing between input and button
         display: block;
-        
+
         &:focus {
             outline: none;
             border-color: rgb(51, 139, 147);
             box-shadow: 0 0 0 2px rgba(51, 139, 147, 0.2);
         }
     }
-    
+
     .add-button-container {
         margin-bottom: 0.5rem;
-        
+
         button {
             background-color: rgb(51, 139, 147);
             color: #ffffff;
@@ -86,7 +86,7 @@ h1 {
             }
         }
     }
-    
+
     .error-message {
         color: #dc2626;
         font-size: 0.875rem;
@@ -124,7 +124,7 @@ h1 {
     }
 }
 
-.take-button {
+.take-button, .stats-button {
     margin-left: 1rem;
 
     button {

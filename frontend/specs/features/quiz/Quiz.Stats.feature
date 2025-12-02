@@ -6,7 +6,6 @@ Background:
       | Jaký nábytek má Ikea?          | Stůl (*), Auto     |
       | Jaké nádobí má Ikea?           | Talíř (*), Kolo    |
 
-  @skip
   Scenario: Show empty stats page for quiz
     - Shows empty stats page for brand new created quiz.
 
