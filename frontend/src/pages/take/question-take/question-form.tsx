@@ -1,6 +1,5 @@
 import './question-form.scss'
 import type { AnswerIdxs, Question } from 'model/question.ts'
-import React from 'react'
 import {
     Answer,
     useQuestionFeedbackState,
@@ -16,7 +15,6 @@ export interface QuestionFormProps {
     readonly question: Question
     readonly selectedAnswerIdxs?: AnswerIdxs
     readonly onSubmitted?: (selectedAnswerIdxs: AnswerIdxs) => void
-    readonly onAnswerSelected?: (selectedAnswerIdxs: AnswerIdxs) => void
     readonly mode: QuizMode
     readonly quizEasyMode?: EasyMode
 }
@@ -26,11 +24,6 @@ export const QuestionForm = (props: QuestionFormProps) => {
 
     const state = useQuestionTakeState(props)
     const feedback = useQuestionFeedbackState(state, props.question)
-
-    // Notify parent when answers change
-    React.useEffect(() => {
-        props.onAnswerSelected?.(state.selectedAnswerIdxs)
-    }, [state.selectedAnswerIdxs, props])
 
     const handleSubmit = () => {
         if (state.selectedAnswerIdxs.length > 0) {
