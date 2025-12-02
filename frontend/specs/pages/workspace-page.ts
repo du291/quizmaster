@@ -25,6 +25,7 @@ export class WorkspacePage {
     copyTakeQuestion = this.clickQuestionButtonLocator('.copy-take-button button')
     copyEditQuestion = this.clickQuestionButtonLocator('.copy-edit-button button')
     takeQuiz = this.clickQuizButtonLocator('.take-quiz-button button')
+    statsQuiz = this.clickQuizButtonLocator('.stats-quiz-button button')
 
     private createQuestionButtonLocator = () => this.page.locator('#create-question')
     createNewQuestion = async () => this.createQuestionButtonLocator().click()
