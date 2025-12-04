@@ -1,3 +1,4 @@
+import './quiz-create-form.scss'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
@@ -5,7 +6,7 @@ import { useStateSet } from 'helpers'
 import type { QuestionListItem } from 'model/question-list-item.ts'
 import type { QuizCreateRequest } from 'api/quiz.ts'
 
-import { Field, Form, NumberInput, SubmitButton, TextArea, TextInput } from 'pages/components'
+import { Field, Form, NumberInput, Row, SubmitButton, TextArea, TextInput } from 'pages/components'
 import { QuestionSelect } from './components/question-select.tsx'
 import { ErrorMessage, createValidator } from 'pages/components/forms/validations.tsx'
 import { validateQuizForm, errorMessage } from './validations.ts'
@@ -68,12 +69,14 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
             <Field label="Quiz description">
                 <TextArea id="quiz-description" value={description} onChange={setDescription} />
             </Field>
-            <Field label="Time limit (in seconds)">
-                <NumberInput id="time-limit" value={timeLimit} onChange={setTimeLimit} />
-            </Field>
-            <Field label="Required score to pass the quiz (in %)">
-                <NumberInput id="pass-score" value={passScore} onChange={setPassScore} />
-            </Field>
+            <Row>
+                <Field label="Pass score (in %)">
+                    <NumberInput id="pass-score" value={passScore} onChange={setPassScore} />
+                </Field>
+                <Field label="Time limit (in sec)">
+                    <NumberInput id="time-limit" value={timeLimit} onChange={setTimeLimit} />
+                </Field>
+            </Row>
             <Field label="Feedback mode">
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                     <input
