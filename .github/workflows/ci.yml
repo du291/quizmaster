@@ -25,15 +25,15 @@ jobs:
         run: chmod +x backend/gradlew
 
       - name: Install frontend dependencies and Playwright
-        working-directory: frontend
+        working-directory: specs
         run: pnpm ci:install
 
       - name: Type check & lint & format frontend
-        working-directory: frontend
+        working-directory: specs
         run: pnpm ci:code
 
       - name: Build frontend
-        working-directory: frontend
+        working-directory: specs
         run: pnpm ci:build
 
       - name: Run backend tests
@@ -41,5 +41,5 @@ jobs:
         run: ./gradlew test
 
       - name: Run end-to-end tests
-        working-directory: frontend
+        working-directory: specs
         run: pnpm ci:test:e2e
