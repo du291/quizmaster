@@ -23,7 +23,8 @@ Built incrementally using thin slices of functionality—a key learning objectiv
 ## Tech Stack
 
 - **Backend:** Java 21, Spring Boot 3.3.3, Gradle (Kotlin DSL), Lombok
-- **Frontend:** TypeScript 5.7, React 19, Vite 6, Biome (linting), Cucumber + Playwright (E2E)
+- **Frontend:** TypeScript 5.7, React 19, Vite 6, Biome (linting)
+- **E2E Testing:** Cucumber + Playwright (separate `specs/` package)
 - **Database:** PostgreSQL
 - **Swagger UI:** http://localhost:8080/swagger-ui/index.html
 
@@ -31,7 +32,8 @@ Built incrementally using thin slices of functionality—a key learning objectiv
 
 **Setup:**
 ```bash
-cd frontend && pnpm ci:install
+cd frontend && pnpm install        # Frontend dependencies
+cd specs && pnpm ci:install        # E2E test dependencies + Playwright browsers
 ```
 
 **Running (choose one):**
@@ -44,10 +46,15 @@ cd backend && ./gradlew bootRun     # :8080 backend
 cd frontend && pnpm dev             # :5173 dev server (proxies API to :8080)
 ```
 
-**Testing:**
+**Code Quality:**
 ```bash
-cd frontend
-pnpm code              # TypeScript + Biome lint/format
+cd frontend && pnpm code           # TypeScript + Biome lint/format (frontend)
+cd specs && pnpm code              # TypeScript + Biome lint/format (specs)
+```
+
+**E2E Testing:**
+```bash
+cd specs
 pnpm test:e2e          # E2E against :8080
 pnpm test:e2e:vite     # E2E against :5173
 pnpm test:e2e:ui       # Playwright UI at :3333

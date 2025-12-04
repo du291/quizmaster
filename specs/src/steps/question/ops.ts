@@ -1,5 +1,5 @@
 import type { TableOf } from '../common.ts'
-import { type Answer, emptyAnswer, emptyQuestion, type QuizmasterWorld } from '../world'
+import { type Answer, emptyAnswer, emptyQuestion, type QuizmasterWorld } from '../world/index.ts'
 
 export type AnswerRaw = [string, '*' | '', string]
 

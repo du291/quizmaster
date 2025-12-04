@@ -1,6 +1,6 @@
 {
-    "cucumber.features": ["frontend/specs/features/**/*.feature"],
-    "cucumber.glue": ["frontend/specs/steps/**/*.ts"],
+    "cucumber.features": ["specs/features/**/*.feature"],
+    "cucumber.glue": ["specs/src/steps/**/*.ts"],
     "editor.codeActionsOnSave": {
         "source.fixAll": "explicit"
     },

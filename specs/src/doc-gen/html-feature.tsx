@@ -21,9 +21,11 @@ export const FeatureDoc = ({ feature }: FeatureProps) => (
     <>
         <h1>{feature.name}</h1>
         <Description description={feature.description} />
-        {feature.children.map(child => <>
-            {child.background && <BackgroundDoc background={child.background} />}
-            {child.scenario && <ScenarioDoc scenario={child.scenario} />}
-        </>)}
+        {feature.children.map(child => (
+            <>
+                {child.background && <BackgroundDoc background={child.background} />}
+                {child.scenario && <ScenarioDoc scenario={child.scenario} />}
+            </>
+        ))}
     </>
 )

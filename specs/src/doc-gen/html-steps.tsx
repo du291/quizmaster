@@ -1,8 +1,7 @@
 // @ts-ignore
-import React from 'react'
+import type React from 'react'
 import type { Step } from '@cucumber/messages'
 import { DataTableDoc } from './html-table'
-
 
 let lastKeyword = ''
 
@@ -20,16 +19,17 @@ const transformQuotedText = (text: string): React.ReactNode => {
     const regex = /"([^"]+)"/g
     const parts = []
     let lastIndex = 0
-    let match
+    let match = regex.exec(text)
 
-    while ((match = regex.exec(text)) !== null) {
+    while (match !== null) {
         if (match.index > lastIndex) {
             parts.push(text.slice(lastIndex, match.index))
         }
 
-        parts.push(<span className="param" >{match[1]}</span>)
+        parts.push(<span className="param">{match[1]}</span>)
 
         lastIndex = match.index + match[0].length
+        match = regex.exec(text)
     }
 
     if (lastIndex < text.length) {
@@ -55,6 +55,8 @@ type StepsDocProps = { readonly steps: readonly Step[] }
 
 export const StepsDoc = ({ steps }: StepsDocProps) => (
     <ul className="steps">
-        {steps.map(step => <StepDoc step={step} />)}
+        {steps.map(step => (
+            <StepDoc step={step} />
+        ))}
     </ul>
 )

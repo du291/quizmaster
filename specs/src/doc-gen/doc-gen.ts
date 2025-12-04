@@ -18,11 +18,11 @@ const parseFeature = (featurePath: string): GherkinDocument => {
     return parser.parse(gherkinContent)
 }
 
-const featureFiles = fs.readdirSync('specs').filter(file => file.endsWith('.feature'))
+const featureFiles = fs.readdirSync('features').filter(file => file.endsWith('.feature'))
 
 const htmlFiles: HtmlFile[] = featureFiles.map(featureFile => ({
     name: featureFile.replace('.feature', '.html'),
-    html: toHtml(parseFeature(`specs/${featureFile}`)),
+    html: toHtml(parseFeature(`features/${featureFile}`)),
 }))
 
 for (const htmlFile of htmlFiles) {

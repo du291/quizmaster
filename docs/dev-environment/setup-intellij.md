@@ -26,4 +26,4 @@ Setup Node.js and pnpm in **Settings > Languages & Frameworks > Node.js**:
 ## Running Cucumber tests from IDE
 
 When creating a Run configuration for running Cucumber tests directly in your IDE,
-make sure you set the working directory to `frontend`.
+make sure you set the working directory to `specs`.

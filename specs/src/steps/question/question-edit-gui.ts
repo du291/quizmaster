@@ -2,7 +2,7 @@ import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
 import { Given, Then, When } from '../fixture.ts'
-import type { QuizmasterWorld } from '../world'
+import type { QuizmasterWorld } from '../world/index.ts'
 import {
     addAnswers,
     type AnswerRaw,

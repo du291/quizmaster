@@ -1,6 +1,6 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { Given, Then } from '../fixture.ts'
-import { type QuizmasterWorld, type Quiz, type QuizMode, type Question, parseKey } from '../world'
+import { type QuizmasterWorld, type Quiz, type QuizMode, type Question, parseKey } from '../world/index.ts'
 import { createQuestion } from '../question/ops.ts'
 import { expect } from '@playwright/test'
 

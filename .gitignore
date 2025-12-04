@@ -6,14 +6,17 @@ backend/.gradle/
 backend/build/
 backend/src/main/resources/static/
 
-frontend/.features-gen
-frontend/coverage/
 frontend/node/
 frontend/node_modules/
-frontend/test-results
 frontend/tsconfig.app.tsbuildinfo
 frontend/tsconfig.node.tsbuildinfo
 frontend/.vite
+
+specs/.features-gen
+specs/coverage/
+specs/node_modules/
+specs/test-results
+specs/tsconfig.tsbuildinfo
 
 site/coverage/
 site/docs/screenshots/

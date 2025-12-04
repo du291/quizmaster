@@ -9,7 +9,13 @@
 
 ## First-time setup
 
-To install frontend dependencies and Playwright, run the following command in the `frontend` directory:
+To install frontend dependencies, run in the `frontend` directory:
+
+```sh
+pnpm install
+```
+
+To install E2E test dependencies and Playwright browsers, run in the `specs` directory:
 
 ```sh
 pnpm ci:install
@@ -55,13 +61,16 @@ It watches for changes in the `frontend` directory and reloads the browser autom
 
 ## 🧪 Running end-to-end tests
 
-You can run the end-to-end [Cucumber](https://cucumber.io/docs/guides/) + [Playwright](https://playwright.dev/) tests
+You can run the end-to-end [Cucumber](https://cucumber.io/docs/guides/) + [Playwright](https://playwright.dev/) tests from the `specs` directory.
 
 Do not forget to install latest browsers with command:
 
+```sh
+cd specs
+pnpm playwright install --with-deps
 ```
-pnpm exec playwright install
-```
+
+Run one of the following commands from the `specs` directory:
 
 - `pnpm run test:e2e` against the running app on `http://localhost:8080` (requires building the frontend first)
 - `pnpm run test:e2e:vite` against the running app on `http://localhost:5173`
@@ -132,7 +141,7 @@ To enable the feature flag, set the `FEATURE_FLAG` environment variable to `true
 - Run end-to-end tests with feature flag enabled
 
     ```bash
-    cd frontend
+    cd specs
     export FEATURE_FLAG=true
     pnpm test:e2e:vite
     ```

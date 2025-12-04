@@ -11,7 +11,7 @@ const coverageReport = new CoverageReport({
         '**/node_modules/**': false,
     },
     sourcePath: {
-        'frontend/': ''
+        'frontend/': '',
     },
 })
 

@@ -21,7 +21,7 @@ export default defineConfig({
         },
     ],
     testDir: defineBddConfig({
-        features: 'specs/features',
-        steps: ['specs/steps/fixture.ts', 'specs/steps/index.ts'],
+        features: 'features',
+        steps: ['src/steps/fixture.ts', 'src/steps/index.ts'],
     })
 })
