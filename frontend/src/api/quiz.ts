@@ -11,7 +11,6 @@ export interface QuizCreateRequest {
     readonly timeLimit: number
     readonly size?: number
     readonly workspaceGuid: string | null
-    readonly questionList: string | null
     readonly finalCount?: number
 }
 

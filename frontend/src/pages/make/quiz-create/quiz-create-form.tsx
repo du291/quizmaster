@@ -48,7 +48,6 @@ export const QuizCreateForm = ({ questions, onSubmit }: QuizCreateProps) => {
         timeLimit,
         workspaceGuid: searchParams.get('workspaceguid') || null,
         finalCount,
-        questionList: searchParams.get('listguid') || null,
     })
 
     useEffect(() => {
