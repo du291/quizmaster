@@ -1,3 +1,4 @@
+import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 import { When, Then } from '../fixture.ts'
 import type { QuizmasterWorld } from '../world/world.ts'
@@ -40,4 +41,45 @@ Then('I see feedback mode {string}', async function (modeLabel: string) {
     const feedbackModeElementLabel = feedbackModeElement.locator('xpath=..').locator('label')
     await expect(feedbackModeElement).toBeVisible()
     await expectTextToBe(feedbackModeElementLabel, modeLabel)
+})
+
+When('I progress through the questions', async function () {
+    const quiz = this.quizBookmarks[this.activeQuizBookmark]
+    const questionIds = quiz.questionIds
+
+    // Build reverse lookup: question ID -> bookmark
+    const idToBookmark: Record<number, string> = {}
+    for (const [bookmark, question] of Object.entries(this.questionBookmarks)) {
+        const id = Number.parseInt(question.url.split('/').pop() || '0')
+        idToBookmark[id] = bookmark
+    }
+
+    // Progress through each question
+    for (const questionId of questionIds) {
+        const bookmark = idToBookmark[questionId]
+        await this.takeQuestionPage.waitForLoaded()
+
+        // Check if correct answers count is visible and record it
+        const countLocator = this.takeQuestionPage.correctAnswersCountLocator()
+        const isVisible = await countLocator.isVisible()
+
+        if (isVisible) {
+            const count = await countLocator.textContent()
+            this.correctAnswersCounts[bookmark] = count || '-'
+        } else {
+            this.correctAnswersCounts[bookmark] = '-'
+        }
+
+        // Answer and submit to progress
+        await this.takeQuestionPage.selectAnswerNth(0)
+        await this.takeQuestionPage.submit()
+    }
+})
+
+Then('I see the correct answers count', async function (dataTable: DataTable) {
+    const rows = dataTable.raw()
+    for (const [bookmark, expected] of rows) {
+        const actual = this.correctAnswersCounts[bookmark]
+        expect(actual).toBe(expected)
+    }
 })

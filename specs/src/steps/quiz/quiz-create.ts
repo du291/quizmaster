@@ -1,6 +1,13 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { Given, Then } from '../fixture.ts'
-import { type QuizmasterWorld, type Quiz, type QuizMode, type Question, parseKey } from '../world/index.ts'
+import {
+    type QuizmasterWorld,
+    type Quiz,
+    type QuizMode,
+    type EasyMode,
+    type Question,
+    parseKey,
+} from '../world/index.ts'
 import { createQuestion } from '../question/ops.ts'
 import { expect } from '@playwright/test'
 
@@ -15,6 +22,7 @@ const postQuiz = async (world: QuizmasterWorld, bookmark: string, quiz: Quiz) =>
         passScore: quiz.passScore,
         timeLimit: quiz.timeLimit,
         size: quiz.size,
+        easyMode: quiz.easyMode,
     }
 
     const response = await world.page.request.post('/api/quiz', { data: quizPayload })
@@ -44,6 +52,15 @@ const createDummyQuestion = async (world: QuizmasterWorld, bookmark: string) => 
             ['3', '', ''],
         ],
     })
+}
+
+const difficultyToEasyMode = (difficulty: string): EasyMode | undefined => {
+    const mapping: Record<string, EasyMode> = {
+        'Keep Question': 'PERQUESTION',
+        Easy: 'ALWAYS',
+        Hard: 'NEVER',
+    }
+    return mapping[difficulty]
 }
 
 const createDummyQuestions = async (world: QuizmasterWorld, quizBookmark: string, count: number) => {
@@ -76,6 +93,7 @@ const toQuiz = async (world: QuizmasterWorld, row: Record<string, string>): Prom
         passScore: Number.parseInt(row['pass score']),
         timeLimit: Number.parseInt(row['time limit']),
         size: Number.parseInt(row.size) || undefined,
+        easyMode: difficultyToEasyMode(row.difficulty),
     }
 }
 

@@ -43,14 +43,15 @@ export const QuestionForm = (props: QuestionFormProps) => {
 
     const correctAnswersCount = correctAnswers.length
 
-    // Determine if easy mode should be displayed based on quiz easy mode setting
-    const shouldShowEasyMode = props.quizEasyMode
-        ? props.quizEasyMode === 'ALWAYS'
-            ? true
-            : props.quizEasyMode === 'NEVER'
-              ? false
-              : easyMode // PERQUESTION - use question's easy mode
-        : easyMode // No quiz context - use question's easy mode (standalone question)
+    const shouldShowEasyMode =
+        state.isMultipleChoice &&
+        (props.quizEasyMode
+            ? props.quizEasyMode === 'ALWAYS'
+                ? true
+                : props.quizEasyMode === 'NEVER'
+                  ? false
+                  : easyMode
+            : easyMode)
 
     return (
         <Form onSubmit={handleSubmit} id="question-form">
