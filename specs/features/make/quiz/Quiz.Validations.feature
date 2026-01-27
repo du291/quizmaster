@@ -52,7 +52,6 @@ Feature: Create Quiz from Workspace
     Then I see error messages in quiz form
       | negativeTimeLimit |
 
-  @skip
   Scenario: Display error when limit is over 21600
     When I start creating a new quiz
     * I enter quiz name "Math Quiz"
