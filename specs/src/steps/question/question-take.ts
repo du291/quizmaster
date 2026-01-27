@@ -115,3 +115,13 @@ Then('I do not see correct answers count', async function () {
     await expect(this.takeQuestionPage.submitButtonLocator()).toBeVisible()
     await expect(correctAnswersNumberElement).not.toBeAttached()
 })
+
+Then('I see the image {string}', async function (filename: string) {
+    const questionImageLocator = this.takeQuestionPage.questionImageLocator(filename)
+    await expect(questionImageLocator).toBeVisible()
+})
+
+Then('I do not see the image {string}', async function (filename: string) {
+    const questionImageLocator = this.takeQuestionPage.questionImageLocator(filename)
+    await expect(questionImageLocator).not.toBeVisible()
+})

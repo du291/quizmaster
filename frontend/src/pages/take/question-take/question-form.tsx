@@ -22,6 +22,7 @@ export interface QuestionFormProps {
 }
 
 export const QuestionForm = (props: QuestionFormProps) => {
+        const showCatImage = props.question.question.includes('😺');
     const { correctAnswers, easyMode, answers, questionExplanation } = props.question
 
     const state = useQuestionTakeState(props)
@@ -65,6 +66,15 @@ export const QuestionForm = (props: QuestionFormProps) => {
                         Correct answers count is{' '}
                         <strong className="correct-answers-count">{correctAnswersCount}</strong>
                     </div>
+                )}
+
+                {showCatImage && (
+                    <img
+                        src="https://images.unsplash.com/photo-1529778873920-4da4926a72c2?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        alt="question"
+                        className="question-image"
+                        style={{ maxWidth: '300px', display: 'block', marginBottom: '1rem' }}
+                    />
                 )}
 
                 <ul className="answers">

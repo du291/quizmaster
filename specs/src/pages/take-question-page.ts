@@ -5,6 +5,7 @@ export class TakeQuestionPage {
 
     private questionLocator = () => this.page.locator('h1')
     questionText = () => this.questionLocator().textContent()
+    questionImageLocator = (filename: string) => this.page.locator(`img[src*="${filename}"]`)
 
     waitForLoaded = () => this.page.waitForSelector('h1')
 
