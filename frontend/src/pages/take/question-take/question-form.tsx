@@ -22,7 +22,7 @@ export interface QuestionFormProps {
 }
 
 export const QuestionForm = (props: QuestionFormProps) => {
-    const showCatImage = props.question.question.includes('😺');
+    const showCatImage = props.question.question.includes('😺')
     const { correctAnswers, easyMode, answers, questionExplanation } = props.question
 
     const state = useQuestionTakeState(props)
