@@ -40,6 +40,10 @@ When('I delete question {string} from the list', async function (question: strin
     await this.workspacePage.deleteQuestion(question)
 })
 
+Then('I cannot see delete button for question {string}', async function (question: string) {
+    expect(await this.workspacePage.hasDeleteButton(question)).toBe(false)
+})
+
 When('I edit question {string} from the list', async function (question: string) {
     this.activeQuestionBookmark = question
     await this.workspacePage.editQuestion(question)

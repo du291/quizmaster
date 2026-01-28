@@ -15,6 +15,21 @@ Feature: Workspace - where workspace and quiz list are displayed
     When I delete question "2 + 2 = ?" from the list
     Then I see an empty workspace
 
+  @skip
+  Scenario: Do not show delete button for question used in a quiz
+    Given a workspace with questions
+      | question                       | answers            |
+      | Jaký nábytek má Ikea?          | Stůl (*), Auto     |
+      | Jaké nádobí má Ikea?           | Talíř (*), Kolo    |
+    When I start creating a new quiz
+    And I enter quiz name "Math Quiz"
+    And I select exam mode
+    And I select question "Jaký nábytek má Ikea?"
+    And I select question "Jaké nádobí má Ikea?"
+    And I submit the quiz
+    Then I see the quiz "Math Quiz" in the workspace
+    Then I cannot see delete button for question "Jaký nábytek má Ikea?"
+
   Scenario: Copy a take question URL
     Given a workspace with question
       | question  | answers  |

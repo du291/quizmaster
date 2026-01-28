@@ -25,6 +25,10 @@ export class WorkspacePage {
         await this.questionLocator(question).locator('.delete-button button').click()
         await this.questionLocator(question).waitFor({ state: 'hidden' })
     }
+    hasDeleteButton = async (question: string) => {
+        const btn = this.questionLocator(question).locator('.delete-button button')
+        return await btn.isVisible()
+    }
     editQuestion = this.clickQuestionButtonLocator('.edit-button button')
     copyTakeQuestion = this.clickQuestionButtonLocator('.copy-take-button button')
     copyEditQuestion = this.clickQuestionButtonLocator('.copy-edit-button button')
