@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+ORIGINAL_DIR="$(pwd)"
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+check_dirty() {
+    if ! git diff --quiet; then
+        echo "pre-commit: pnpm code changed files. Please stage the changes and re-run commit." >&2
+        git status --short
+        exit 1
+    fi
+}
+
+cd "$ROOT_DIR/frontend"
+pnpm code
+
+cd "$ROOT_DIR/specs"
+pnpm code
+check_dirty
+
+cd "$ORIGINAL_DIR"
