@@ -33,19 +33,19 @@ export const QuestionForm = (props: QuestionFormProps) => {
     }, [state.selectedAnswerIdxs, props])
 
     React.useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-        if (!e.code.startsWith('Numpad')) return
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (!e.code.startsWith('Numpad')) return
 
-        const idx = Number(e.code.slice(-1)) - 1
+            const idx = Number(e.code.slice(-1)) - 1
 
-        state.onSelectedAnswerChange(idx,true)
-        state.submit()
-        props.onSubmitted?.([idx])
-    }
+            state.onSelectedAnswerChange(idx, true)
+            state.submit()
+            props.onSubmitted?.([idx])
+        }
 
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-}, [state, props])
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+    }, [state, props])
 
     const handleSubmit = () => {
         if (state.selectedAnswerIdxs.length > 0) {
