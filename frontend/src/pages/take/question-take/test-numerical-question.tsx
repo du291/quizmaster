@@ -4,7 +4,7 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-const DEFAULT_QUESTION = 'Regions'
+const DEFAULT_QUESTION = 'How many regions does Czechia have?'
 const DEFAULT_CORRECT_ANSWER = '14'
 
 export const TestNumericalQuestionPage = () => {

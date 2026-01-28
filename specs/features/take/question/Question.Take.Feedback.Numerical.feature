@@ -1,13 +1,13 @@
 Feature: Take a numerical question
 
   Background:
-    Given numerical question "Regions" with correct answer "14"
+    Given numerical question "How many regions does Czechia have?" with correct answer "14"
 
   Scenario Outline: Numerical question feedback
-    When I take question "Regions"
+    When I take question "How many regions does Czechia have?"
     Then I see a number input
     When I enter "<answer>"
-    # Then I see feedback "<feedback>"
+    Then I see feedback "<feedback>"
 
     Examples:
       | answer | feedback   |
