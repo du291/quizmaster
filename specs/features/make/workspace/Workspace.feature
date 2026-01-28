@@ -15,7 +15,6 @@ Feature: Workspace - where workspace and quiz list are displayed
     When I delete question "2 + 2 = ?" from the list
     Then I see an empty workspace
 
-  @skip
   Scenario: Do not show delete button for question used in a quiz
     Given a workspace with questions
       | question                       | answers            |
