@@ -1,10 +1,9 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+
 import { HomePage } from 'pages/make/home'
 import { QuestionTakePage } from 'pages/take/question-take'
+import { TestNumericalQuestionPage } from 'pages/take/question-take/test-numerical-question.tsx'
 import { QuizTakePage } from 'pages/take/quiz-take/quiz-take-page.tsx'
-
-// Jednoduchá testovací komponenta pro numerickou otázku
-const TestNumericalQuestionPage = () => <div data-testid="test-numerical-question"><input type="number" /><button id="submit-answer">Odeslat</button></div>
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { QuizWelcomePage } from 'pages/take/quiz-take/quiz-welcome/quiz-welcome-page'
 
@@ -28,7 +27,7 @@ export const App = () => (
             <Route path="/question/:id/edit" element={<EditQuestionPage />} />
             <Route path="/question/:id" element={<QuestionTakePage />} />
             <Route path="/" element={<HomePage />} />
-            <Route path="/quiz/:id/stats" element={<QuizStatsPage />} />'
+            <Route path="/quiz/:id/stats" element={<QuizStatsPage />} />
         </Routes>
     </BrowserRouter>
 )
