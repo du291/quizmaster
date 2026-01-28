@@ -10,7 +10,7 @@ import { useWorkspaceGuid } from 'urls.ts'
 
 import type { QuestionListItem } from 'model/question-list-item.ts'
 import { QuizEditForm } from './quiz-edit-form'
-import { fetchQuiz, putQuiz, QuizCreateRequest } from 'api/quiz'
+import { fetchQuiz, putQuiz, type QuizCreateRequest } from 'api/quiz'
 import { Alert, Page } from 'pages/components'
 
 export const QuizEditPage = () => {
@@ -37,7 +37,6 @@ export const QuizEditPage = () => {
             .catch(() => setErrorMessage('Failed to load quiz.'))
             .finally(() => setLoading(false))
     }, [quizId])
-
 
     const handleSubmit = (quizData: QuizCreateRequest) => {
         if (!quizId) {

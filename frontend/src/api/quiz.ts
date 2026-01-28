@@ -16,7 +16,7 @@ export interface QuizCreateRequest {
 
 export const fetchQuiz = async (quizId: string) => await fetchJson<Quiz>(`/api/quiz/${quizId}`)
 
-export const putQuiz = async (quiz: QuizCreateRequest, id: string) => await putJson<QuizCreateRequest, string>(`/api/quiz/${id}`, quiz)
+export const putQuiz = async (quiz: QuizCreateRequest, id: string) =>
+    await putJson<QuizCreateRequest, string>(`/api/quiz/${id}`, quiz)
 
 export const postQuiz = async (quiz: QuizCreateRequest) => await postJson<QuizCreateRequest, string>('/api/quiz', quiz)
-
