@@ -18,3 +18,7 @@ specs/test-results
 site/coverage/
 site/docs/screenshots/
 site/docs/*.html
+
+node_modules/
+pnpm-lock.yaml
+package.json
