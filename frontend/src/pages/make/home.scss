@@ -1,0 +1,89 @@
+.home-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.home-cube-scene {
+    width: 220px;
+    height: 220px;
+    display: grid;
+    place-items: center;
+    perspective: 700px;
+    margin-bottom: 1rem;
+}
+
+.home-cube {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: home-cube-rotate 12s linear infinite;
+}
+
+.home-cube-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.3rem;
+    padding: 0.45rem;
+    border: 0.13rem solid #1f2937;
+    border-radius: 0.55rem;
+    background: #ffffff;
+    backface-visibility: hidden;
+    box-shadow: 0 0.2rem 0.5rem rgb(0 0 0 / 0.15);
+}
+
+.home-cube-tile {
+    border-radius: 0.25rem;
+    border: 0.06rem solid rgb(255 255 255 / 0.5);
+    background: linear-gradient(145deg, #ff7f50, #ffab70);
+}
+
+.home-cube-face-front {
+    transform: translateZ(75px);
+}
+
+.home-cube-face-back {
+    transform: rotateY(180deg) translateZ(75px);
+}
+
+.home-cube-face-right {
+    transform: rotateY(90deg) translateZ(75px);
+}
+
+.home-cube-face-left {
+    transform: rotateY(-90deg) translateZ(75px);
+}
+
+.home-cube-face-top {
+    transform: rotateX(90deg) translateZ(75px);
+}
+
+.home-cube-face-bottom {
+    transform: rotateX(-90deg) translateZ(75px);
+}
+
+@keyframes home-cube-rotate {
+    from {
+        transform: rotateX(-20deg) rotateY(0deg);
+    }
+
+    to {
+        transform: rotateX(-20deg) rotateY(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-cube {
+        animation: none;
+        transform: rotateX(-20deg) rotateY(35deg);
+    }
+}
