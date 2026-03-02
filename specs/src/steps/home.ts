@@ -16,3 +16,26 @@ Then('I should see a link to create a new workspace', async function (this: Quiz
     const hasLink = await this.homePage.hasCreateWorkspaceLink()
     expect(hasLink).toBeTruthy()
 })
+
+Then('the home cube should change rotation on {int} clicks', async function (this: QuizmasterWorld, clickCount: number) {
+    expect(clickCount).toBeGreaterThan(0)
+
+    const transforms = new Set<string>()
+    let previousTransform = await this.homePage.getCubeTransform()
+    transforms.add(previousTransform)
+
+    for (let clickIndex = 0; clickIndex < clickCount; clickIndex += 1) {
+        await this.homePage.clickCube()
+
+        await expect
+            .poll(() => this.homePage.getCubeTransform(), {
+                message: `Expected cube transform to change after click ${clickIndex + 1}`,
+            })
+            .not.toBe(previousTransform)
+
+        previousTransform = await this.homePage.getCubeTransform()
+        transforms.add(previousTransform)
+    }
+
+    expect(transforms.size).toBe(clickCount + 1)
+})
