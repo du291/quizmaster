@@ -100,13 +100,12 @@ Then('I clear score', async function () {
 Then('I see error messages in quiz form', async function (table: DataTable) {
     const expectedErrors = table.raw().map(row => row[0])
     for (const error of expectedErrors) {
-        const hasError = await this.quizCreatePage.hasError(error)
-        expect(hasError).toBe(true)
+        await expect(this.page.getByTestId(error)).toBeVisible()
     }
 })
 
 Then('I see no error messages in quiz form', async function () {
-    await this.quizCreatePage.hasAnyError().then(result => expect(result).toBe(false))
+    await expect(this.page.locator('.alert.error')).toHaveCount(0)
 })
 
 Then("I don't see questions in quiz creation form", () => {
