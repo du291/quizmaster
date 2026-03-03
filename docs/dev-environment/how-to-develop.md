@@ -86,8 +86,16 @@ bash ./scripts/test-migration.sh
 ```
 
 This command runs:
-- Web Test Runner in `frontend` on headless Chromium + Firefox
-- Legacy Playwright-BDD suite in `specs` against backend + Vite
+- Web Test Runner mocked lane (`pnpm --dir frontend test:wtr:mocked`) on headless Chromium + Firefox
+- Legacy Playwright-BDD suite (`specs`) against backend + Vite
+- Web Test Runner backend lane (`pnpm --dir frontend test:wtr:backend`) against real backend via WTR `/api` proxy
+
+It also prints per-lane duration/status lines so migration speed can be tracked over time.
+
+For running lanes individually:
+
+- `pnpm --dir frontend test:wtr:mocked` for API-boundary mocked WTR tests
+- `pnpm --dir frontend test:wtr:backend` for real-backend WTR smoke tests (requires backend on `http://localhost:8080`)
 
 ## Swagger UI ###
 For easier testing, Swagger UI is available at http://localhost:8080/swagger-ui/index.html

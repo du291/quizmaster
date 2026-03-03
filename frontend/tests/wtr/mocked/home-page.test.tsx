@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai'
 import { createRoot, type Root } from 'react-dom/client'
 import { MemoryRouter } from 'react-router-dom'
 
-import { HomePage } from '../../src/pages/make/home.tsx'
+import { HomePage } from '../../../src/pages/make/home.tsx'
 
 const nextFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 

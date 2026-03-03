@@ -7,8 +7,11 @@
     scripts: {
         dev: 'vite --host',
         build: 'vite build',
-        'test:wtr': 'web-test-runner --config web-test-runner.config.mjs',
-        'test:wtr:watch': 'web-test-runner --watch --config web-test-runner.config.mjs',
+        'test:wtr': 'pnpm test:wtr:mocked',
+        'test:wtr:mocked': 'web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/**/*.test.tsx"',
+        'test:wtr:backend':
+            'WTR_API_PROXY_TARGET=http://localhost:8080 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/backend/**/*.test.tsx"',
+        'test:wtr:watch': 'web-test-runner --watch --config web-test-runner.config.mjs --files "tests/wtr/mocked/**/*.test.tsx"',
         'code:tsc': 'tsc -b && rm -f *.tsbuildinfo',
         'code:lint': 'biome lint --fix',
         'code:format': 'biome format --write',
