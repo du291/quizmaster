@@ -1,6 +1,15 @@
 import { expect } from '@esm-bundle/chai'
+import { createSimulatedClock } from '../../../src/infrastructure/clock.tsx'
 import { createQuestionInBackend, createWorkspaceInBackend } from '../support/backend-api.ts'
-import { clickElement, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
+import {
+    advanceClockBy,
+    clickElement,
+    flushFrames,
+    renderAppAt,
+    textContent,
+    waitFor,
+    waitForElement,
+} from '../support/test-harness.tsx'
 
 type QuizMode = 'exam' | 'learn'
 
@@ -68,14 +77,18 @@ describe('Quiz.Timer feature (WTR real backend)', () => {
         const question2 = await createQuestionInBackend(workspaceGuid, `Timer Q2 ${suffix}`, ['B1', 'B2'])
 
         const quizId = await createQuizInBackend(workspaceGuid, 'exam', 85, 1, [question1.id, question2.id])
-        ;({ cleanup } = await renderAppAt(`/quiz/${quizId}`))
+        const clock = createSimulatedClock(1_700_000_000_000)
+        ;({ cleanup } = await renderAppAt(`/quiz/${quizId}`, { clock }))
 
         await clickElement('#start')
         await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
+        await waitForElement<HTMLElement>('[data-testid="timerID"]')
+        await flushFrames()
 
-        await waitFor(() => document.querySelector('dialog p')?.textContent?.includes('Game over time') ?? false, 6000)
+        await advanceClockBy(clock, 1000)
+        await waitFor(() => document.querySelector('dialog p')?.textContent?.includes('Game over time') ?? false, 500)
         await clickElement('dialog #evaluate')
-        await waitFor(() => document.querySelector('#results') !== null, 5000)
+        await waitFor(() => document.querySelector('#results') !== null, 500)
 
         expect(textContent('#correct-answers')).to.equal('0')
         expect(textContent('#total-questions')).to.equal('2')

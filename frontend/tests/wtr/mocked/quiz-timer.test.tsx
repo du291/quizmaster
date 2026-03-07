@@ -1,8 +1,17 @@
 import { expect } from '@esm-bundle/chai'
 import type { Question } from '../../../src/model/question.ts'
 import type { Quiz } from '../../../src/model/quiz.ts'
+import { createSimulatedClock, type SimulatedClock } from '../../../src/infrastructure/clock.tsx'
 import { installApiMock, type Route } from '../support/mock-api.ts'
-import { clickElement, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
+import {
+    advanceClockBy,
+    clickElement,
+    flushFrames,
+    renderAppAt,
+    textContent,
+    waitFor,
+    waitForElement,
+} from '../support/test-harness.tsx'
 
 const question = (
     id: number,
@@ -73,8 +82,13 @@ const installTimerMockApi = () => {
 
 const timerText = () => document.querySelector<HTMLElement>('[data-testid="timerID"]')?.textContent?.trim() ?? ''
 
-const waitForTimeoutDialog = async () => {
-    await waitFor(() => document.querySelector('dialog p')?.textContent?.includes('Game over time') ?? false, 6000)
+const waitForTimer = async () => {
+    await waitForElement<HTMLElement>('[data-testid="timerID"]')
+    await flushFrames()
+}
+
+const waitForTimeoutDialog = async (timeoutMs = 500) => {
+    await waitFor(() => document.querySelector('dialog p')?.textContent?.includes('Game over time') ?? false, timeoutMs)
 }
 
 const answerCurrentQuestion = async (answer: string) => {
@@ -101,6 +115,7 @@ const startQuiz = async (quizId: number) => {
 describe('Quiz.Timer feature (WTR mocked API)', () => {
     let cleanup = async () => {}
     let restoreFetch = () => {}
+    let clock: SimulatedClock
 
     afterEach(async () => {
         restoreFetch()
@@ -110,25 +125,34 @@ describe('Quiz.Timer feature (WTR mocked API)', () => {
 
     it('displays countdown timer for configured short limits', async () => {
         restoreFetch = installTimerMockApi()
-        ;({ cleanup } = await renderAppAt(`/quiz/${quizA.id}`))
+        clock = createSimulatedClock(1_700_000_000_000)
+        ;({ cleanup } = await renderAppAt(`/quiz/${quizA.id}`, { clock }))
 
         await startQuiz(quizA.id)
-        await waitFor(() => timerText() === '00:02')
+        await waitForTimer()
+        await waitFor(() => timerText() === '00:02', 500)
+        await advanceClockBy(clock, 1000)
+        await waitFor(() => timerText() === '00:01', 500)
 
         await cleanup()
-        ;({ cleanup } = await renderAppAt(`/quiz/${quizB.id}`))
+        clock = createSimulatedClock(1_700_000_010_000)
+        ;({ cleanup } = await renderAppAt(`/quiz/${quizB.id}`, { clock }))
         await startQuiz(quizB.id)
-        await waitFor(() => timerText() === '00:01')
+        await waitForTimer()
+        await waitFor(() => timerText() === '00:01', 500)
     })
 
     it('shows result table with 0 score when timeout happens before any answer', async () => {
         restoreFetch = installTimerMockApi()
-        ;({ cleanup } = await renderAppAt(`/quiz/${quizA.id}`))
+        clock = createSimulatedClock(1_700_000_000_000)
+        ;({ cleanup } = await renderAppAt(`/quiz/${quizA.id}`, { clock }))
 
         await startQuiz(quizA.id)
+        await waitForTimer()
+        await advanceClockBy(clock, 2000)
         await waitForTimeoutDialog()
         await clickElement('dialog #evaluate')
-        await waitFor(() => document.querySelector('#results') !== null, 5000)
+        await waitFor(() => document.querySelector('#results') !== null, 500)
 
         expect(textContent('#correct-answers')).to.equal('0')
         expect(textContent('#total-questions')).to.equal('2')
@@ -138,15 +162,18 @@ describe('Quiz.Timer feature (WTR mocked API)', () => {
 
     it('shows score 1/2 when one correct answer was submitted before timeout', async () => {
         restoreFetch = installTimerMockApi()
-        ;({ cleanup } = await renderAppAt(`/quiz/${quizA.id}`))
+        clock = createSimulatedClock(1_700_000_000_000)
+        ;({ cleanup } = await renderAppAt(`/quiz/${quizA.id}`, { clock }))
 
         await startQuiz(quizA.id)
+        await waitForTimer()
         await answerCurrentQuestion('Mars')
 
         await waitFor(() => textContent('#question').includes("capital city of Australia"))
+        await advanceClockBy(clock, 2000)
         await waitForTimeoutDialog()
         await clickElement('dialog #evaluate')
-        await waitFor(() => document.querySelector('#results') !== null, 5000)
+        await waitFor(() => document.querySelector('#results') !== null, 500)
 
         expect(textContent('#correct-answers')).to.equal('1')
         expect(textContent('#total-questions')).to.equal('2')

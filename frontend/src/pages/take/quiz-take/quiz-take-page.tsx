@@ -9,9 +9,11 @@ import { useNavigate } from 'react-router-dom'
 import { putStats } from 'api/stats.ts'
 import { getQuizRunId } from 'helpers.ts'
 import { evaluate } from './quiz-score.ts'
+import { useClock } from 'infrastructure/clock.tsx'
 
 export const QuizTakePage = () => {
     const quiz = useQuizApi()
+    const clock = useClock()
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswers | null>(null)
     const navigate = useNavigate()
 
@@ -37,7 +39,7 @@ export const QuizTakePage = () => {
         const score =
             quiz && answers ? Math.round((evaluate(quiz, answers).score / evaluate(quiz, answers).total) * 100) : 0
         putStats(String(quiz?.id), getQuizRunId(), {
-            finished: new Date().toISOString(),
+            finished: new Date(clock.now()).toISOString(),
             score,
         })
     }

@@ -7,8 +7,10 @@ import { fetchQuiz } from 'api/quiz.ts'
 import { QuizDetails } from './quiz-details.tsx'
 import { putStats } from 'api/stats.ts'
 import { getRandomRunId, setQuizRunId } from 'helpers.ts'
+import { useClock } from 'infrastructure/clock.tsx'
 
 export const QuizWelcomePage = () => {
+    const clock = useClock()
     const navigate = useNavigate()
     const params = useParams()
     const [quiz, setQuiz] = useState<Quiz>()
@@ -21,7 +23,7 @@ export const QuizWelcomePage = () => {
         sessionStorage.removeItem('quizAnswers')
         const quizRunId = getRandomRunId()
         putStats(String(quiz?.id), quizRunId, {
-            started: new Date().toISOString(),
+            started: new Date(clock.now()).toISOString(),
         })
         setQuizRunId(quizRunId)
     }

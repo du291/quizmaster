@@ -1,7 +1,14 @@
 import { createRoot, type Root } from 'react-dom/client'
 import { App } from '../../../src/app.tsx'
+import type { Clock, SimulatedClock } from '../../../src/infrastructure/clock.tsx'
 
 export const nextFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+
+export const flushFrames = async (frames = 2) => {
+    for (let frame = 0; frame < frames; frame += 1) {
+        await nextFrame()
+    }
+}
 
 export const waitFor = async (check: () => boolean, timeoutMs = 2500): Promise<void> => {
     const start = performance.now()
@@ -48,18 +55,27 @@ export const clickElement = async (selector: string) => {
     await nextFrame()
 }
 
+export const advanceClockBy = async (clock: SimulatedClock, milliseconds: number) => {
+    clock.advanceBy(milliseconds)
+    await flushFrames()
+}
+
 export const textContent = (selector: string): string => {
     const element = document.querySelector(selector)
     return element?.textContent?.trim() ?? ''
 }
 
-export const renderAppAt = async (path: string) => {
+interface RenderAppOptions {
+    readonly clock?: Clock
+}
+
+export const renderAppAt = async (path: string, options: RenderAppOptions = {}) => {
     window.history.replaceState({}, '', path)
     const host = document.createElement('div')
     document.body.append(host)
 
     const root: Root = createRoot(host)
-    root.render(<App />)
+    root.render(<App clock={options.clock} />)
     await nextFrame()
 
     const cleanup = async () => {

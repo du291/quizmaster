@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useClock } from 'infrastructure/clock.tsx'
 
 interface CountdownProps {
     readonly timeLimit: number
@@ -6,23 +7,24 @@ interface CountdownProps {
 }
 
 export const Countdown = ({ onTimeLimit, timeLimit }: CountdownProps) => {
+    const clock = useClock()
     const durationMs = (timeLimit || 120) * 1000
 
     const [timeLeft, setTimeLeft] = useState(durationMs)
 
     useEffect(() => {
-        const endTime = Date.now() + durationMs
-        const interval = setInterval(() => {
-            const newTimeLeft = endTime - Date.now()
+        const endTime = clock.now() + durationMs
+        const interval = clock.setInterval(() => {
+            const newTimeLeft = endTime - clock.now()
             if (newTimeLeft <= 0) {
-                clearInterval(interval)
+                clock.clearInterval(interval)
                 setTimeLeft(0)
             } else {
                 setTimeLeft(newTimeLeft)
             }
         }, 1000)
-        return () => clearInterval(interval)
-    }, [durationMs])
+        return () => clock.clearInterval(interval)
+    }, [clock, durationMs])
 
     useEffect(() => {
         if (timeLeft <= 0) {
