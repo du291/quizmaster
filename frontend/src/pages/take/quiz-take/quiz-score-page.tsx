@@ -39,7 +39,11 @@ export const QuizScorePage = ({ quiz, quizAnswers }: { quiz: Quiz; quizAnswers: 
 
             <h2>Answer overview</h2>
             {quiz.questions.map((question, idx) => (
-                <QuestionFeedback question={question} selectedAnswerIdxs={quizAnswers.finalAnswers[idx]} />
+                <QuestionFeedback
+                    key={question.id}
+                    question={question}
+                    selectedAnswerIdxs={quizAnswers.finalAnswers[idx]}
+                />
             ))}
         </>
     )

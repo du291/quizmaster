@@ -105,11 +105,23 @@ Last updated: 2026-03-08
   - `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/clock.test.tsx"` completed with exit code `0`.
   - Targeted timer baseline before clock wrapper: mocked `real 28.73s`; backend `real 55.65s` including backend startup.
   - Targeted timer verification after clock wrapper: mocked `real 7.02s`; backend `real 27.90s` including backend startup.
-  - `pnpm --dir frontend test:wtr:mocked` completed with exit code `0`.
-  - `pnpm --dir specs exec start-server-and-test "cd /workspaces/quizmaster/backend && ./gradlew bootRun" 8080 "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/**/*.test.tsx\""` completed with exit code `0`.
-  - WTR mocked: `30 passed`, `0 failed` (Chromium + Firefox).
-  - WTR backend: `10 passed`, `0 failed` (Chromium + Firefox).
-  - `bash ./scripts/test-migration.sh` completed with exit code `0`, `wtr_mocked_seconds=23`, `playwright_seconds=289`, `wtr_backend_seconds=22`, `migration_total_seconds=361`.
+- `pnpm --dir frontend test:wtr:mocked` completed with exit code `0`.
+- `pnpm --dir specs exec start-server-and-test "cd /workspaces/quizmaster/backend && ./gradlew bootRun" 8080 "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/**/*.test.tsx\""` completed with exit code `0`.
+- WTR mocked: `30 passed`, `0 failed` (Chromium + Firefox).
+- WTR backend: `10 passed`, `0 failed` (Chromium + Firefox).
+- `bash ./scripts/test-migration.sh` completed with exit code `0`, `wtr_mocked_seconds=23`, `playwright_seconds=289`, `wtr_backend_seconds=22`, `migration_total_seconds=361`.
+- `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/quiz-score-page-warning.test.tsx"` completed with exit code `0` (2026-03-08).
+- `bash ./scripts/test-migration.sh` later failed with exit code `1` because the mocked WTR lane hit `frontend/tests/wtr/mocked/quiz-score.test.tsx` flake(s) on Chromium (2026-03-08).
+- `pnpm --dir frontend test:wtr:mocked` rerun later also failed with exit code `1` in `frontend/tests/wtr/mocked/quiz-score.test.tsx` on Chromium, while short isolated reruns of that file stayed green (2026-03-08).
+
+## Intermittent flake follow-up (if it reappears)
+- Context: an earlier 2026-03-08 full-gate attempt hit an intermittent mocked-lane failure in `frontend/tests/wtr/mocked/quiz-score.test.tsx`, but the rerun passed and the final migration gate was green.
+- Follow-up evidence collected on 2026-03-08:
+  - A 10-run serial loop of `frontend/tests/wtr/mocked/quiz-score.test.tsx` stayed green in Chromium + Firefox.
+  - An opt-in 100-run repro first failed only in Firefox with `SecurityError: The operation is insecure.` after repeated `BrowserRouter` history churn; it did not isolate the original score-page transition.
+  - The same 100-run repro passed in Chromium + Firefox after switching the repro harness to `MemoryRouter`, so the browser-history failure was a harness artifact rather than proof of the original flake.
+- Current conclusion: the original score-page flake remains **UNPROVEN**, but the full mocked suite is still intermittently failing in `frontend/tests/wtr/mocked/quiz-score.test.tsx` under suite pressure. The earlier `goToScorePage()` / React-state / timeout hypotheses are not supported by current evidence and should not drive future work unless a fresh failure appears.
+- Keep as future learning: long repeated WTR navigations through `BrowserRouter` can trigger Firefox history-related `SecurityError` failures in test harnesses before the application path under investigation fails.
 
 ## Scenario migration inventory
 | Playwright feature | WTR status | Notes |
