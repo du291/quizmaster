@@ -1,6 +1,6 @@
 import type { Question } from '../../../src/model/question.ts'
 import type { QuestionListItem } from '../../../src/model/question-list-item.ts'
-import type { Quiz } from '../../../src/model/quiz.ts'
+import type { Difficulty, Quiz, QuizMode } from '../../../src/model/quiz.ts'
 import type { QuizListItem } from '../../../src/model/quiz-list-item.ts'
 import type { Workspace } from '../../../src/model/workspace.ts'
 
@@ -107,27 +107,98 @@ const questionBank = new Map<number, Question>([
     ],
 ])
 
+interface QuestionFixtureOptions {
+    readonly id: number
+    readonly question: string
+    readonly answers: readonly string[]
+    readonly correctAnswers?: readonly number[]
+    readonly explanations?: readonly string[]
+    readonly questionExplanation?: string
+    readonly editId?: string
+    readonly workspaceGuid?: string | null
+    readonly easyMode?: boolean
+    readonly imageUrl?: string
+}
+
+export const buildQuestion = ({
+    id,
+    question,
+    answers,
+    correctAnswers = [0],
+    explanations = answers.map(() => ''),
+    questionExplanation = '',
+    editId = `edit-${id}`,
+    workspaceGuid = null,
+    easyMode = false,
+    imageUrl,
+}: QuestionFixtureOptions): Question => ({
+    id,
+    editId,
+    question,
+    imageUrl,
+    answers: [...answers],
+    explanations: [...explanations],
+    correctAnswers: [...correctAnswers],
+    questionExplanation,
+    workspaceGuid,
+    easyMode,
+})
+
+interface QuizFixtureOptions {
+    readonly id: number
+    readonly title: string
+    readonly description: string
+    readonly questions?: readonly Question[]
+    readonly questionIds?: readonly number[]
+    readonly mode?: QuizMode
+    readonly difficulty?: Difficulty
+    readonly passScore?: number
+    readonly timeLimit?: number
+    readonly size?: number
+}
+
+export const buildQuizFixture = ({
+    id,
+    title,
+    description,
+    questions,
+    questionIds,
+    mode = 'exam',
+    difficulty = 'keep-question',
+    passScore = 80,
+    timeLimit = 600,
+    size,
+}: QuizFixtureOptions): Quiz => {
+    const resolvedQuestions =
+        questions ??
+        questionIds?.map(questionId => {
+            const question = questionBank.get(questionId)
+            if (!question) throw new Error(`Unknown question ${questionId}`)
+            return question
+        })
+
+    if (!resolvedQuestions) throw new Error('buildQuizFixture requires either questions or questionIds')
+
+    return {
+        id,
+        title,
+        description,
+        mode,
+        difficulty,
+        passScore,
+        timeLimit,
+        size,
+        questions: [...resolvedQuestions],
+    }
+}
+
 export const buildQuiz = (
     id: number,
     title: string,
     description: string,
     questionIds: readonly number[],
     size?: number,
-): Quiz => ({
-    id,
-    title,
-    description,
-    mode: 'exam',
-    difficulty: 'keep-question',
-    passScore: 80,
-    timeLimit: 600,
-    size,
-    questions: questionIds.map(questionId => {
-        const question = questionBank.get(questionId)
-        if (!question) throw new Error(`Unknown question ${questionId}`)
-        return question
-    }),
-})
+): Quiz => buildQuizFixture({ id, title, description, questionIds, size })
 
 export const toQuizListItems = (quizzes: readonly Quiz[]): readonly QuizListItem[] =>
     quizzes.map(quiz => ({ id: quiz.id, title: quiz.title }))

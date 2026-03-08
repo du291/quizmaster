@@ -7,6 +7,22 @@ type QuestionCreateResponse = {
     readonly editId: string
 }
 
+type QuizMode = 'exam' | 'learn'
+type Difficulty = 'easy' | 'hard' | 'keep-question'
+
+interface CreateQuizInBackendOptions {
+    readonly workspaceGuid: string
+    readonly questionIds: readonly number[]
+    readonly title?: string
+    readonly description?: string
+    readonly mode?: QuizMode
+    readonly difficulty?: Difficulty
+    readonly passScore?: number
+    readonly timeLimit?: number
+    readonly size?: number
+    readonly finalCount?: number
+}
+
 const postJson = async <T, U>(url: string, body: T): Promise<U> => {
     const response = await fetch(url, {
         method: 'POST',
@@ -53,4 +69,46 @@ export const createQuestionInBackend = async (workspaceGuid: string, question: s
     })
 
     return response
+}
+
+export const createQuizInBackend = async ({
+    workspaceGuid,
+    questionIds,
+    title = `WTR Quiz ${Date.now()}`,
+    description = 'WTR backend quiz',
+    mode = 'exam',
+    difficulty = 'keep-question',
+    passScore = 85,
+    timeLimit = 120,
+    size,
+    finalCount,
+}: CreateQuizInBackendOptions): Promise<number> => {
+    const response = await postJson<
+        {
+            title: string
+            description: string
+            questionIds: readonly number[]
+            mode: QuizMode
+            difficulty: Difficulty
+            passScore: number
+            timeLimit: number
+            workspaceGuid: string
+            size?: number
+            finalCount?: number
+        },
+        number | string
+    >('/api/quiz', {
+        title,
+        description,
+        questionIds,
+        mode,
+        difficulty,
+        passScore,
+        timeLimit,
+        workspaceGuid,
+        size,
+        finalCount,
+    })
+
+    return Number(response)
 }
