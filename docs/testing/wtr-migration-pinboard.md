@@ -1,6 +1,6 @@
 # WTR Migration Pinboard
 
-Last updated: 2026-03-08
+Last updated: 2026-03-09
 
 ## Accepted decisions (current truth)
 - Migration strategy: **Option 2 (incremental)**.
@@ -52,13 +52,18 @@ Last updated: 2026-03-08
   - full mocked WTR lane exit code `0` with `30 passed`, `0 failed` (2026-03-08)
   - full backend WTR lane exit code `0` with `10 passed`, `0 failed` (2026-03-08)
   - `bash ./scripts/test-migration.sh` exit code `0` (2026-03-08)
+  - targeted `quiz-score.test.tsx` exit code `0` after the chosen helper fix (2026-03-09, Chromium + Firefox)
+  - full mocked WTR lane exit code `0` with `31 passed`, `0 failed` (2026-03-09)
+  - full backend WTR lane exit code `0` with `10 passed`, `0 failed` (2026-03-09)
+  - legacy Playwright `Quiz.Score.feature` loop `3/3` green (`9 passed`, `1 skipped` each run) (2026-03-09)
+  - `bash ./scripts/test-migration.sh` exit code `0` (2026-03-09)
   - `wtr_mocked_exit_code=0`
   - `playwright_exit_code=0`
   - `wtr_backend_exit_code=0`
-  - `wtr_mocked_seconds=23`
-  - `playwright_seconds=289`
-  - `wtr_backend_seconds=22`
-  - `migration_total_seconds=361`
+  - `wtr_mocked_seconds=27`
+  - `playwright_seconds=302`
+  - `wtr_backend_seconds=25`
+  - `migration_total_seconds=387`
 - Legacy Playwright suite remains unchanged and still required during migration.
 
 ## Required evidence before marking migration complete
@@ -114,13 +119,52 @@ Last updated: 2026-03-08
 - `bash ./scripts/test-migration.sh` later failed with exit code `1` because the mocked WTR lane hit `frontend/tests/wtr/mocked/quiz-score.test.tsx` flake(s) on Chromium (2026-03-08).
 - `pnpm --dir frontend test:wtr:mocked` rerun later also failed with exit code `1` in `frontend/tests/wtr/mocked/quiz-score.test.tsx` on Chromium, while short isolated reruns of that file stayed green (2026-03-08).
 
-## Intermittent flake follow-up (if it reappears)
+## Resolved flake investigation
 - Context: an earlier 2026-03-08 full-gate attempt hit an intermittent mocked-lane failure in `frontend/tests/wtr/mocked/quiz-score.test.tsx`, but the rerun passed and the final migration gate was green.
 - Follow-up evidence collected on 2026-03-08:
   - A 10-run serial loop of `frontend/tests/wtr/mocked/quiz-score.test.tsx` stayed green in Chromium + Firefox.
   - An opt-in 100-run repro first failed only in Firefox with `SecurityError: The operation is insecure.` after repeated `BrowserRouter` history churn; it did not isolate the original score-page transition.
   - The same 100-run repro passed in Chromium + Firefox after switching the repro harness to `MemoryRouter`, so the browser-history failure was a harness artifact rather than proof of the original flake.
-- Current conclusion: the original score-page flake remains **UNPROVEN**, but the full mocked suite is still intermittently failing in `frontend/tests/wtr/mocked/quiz-score.test.tsx` under suite pressure. The earlier `goToScorePage()` / React-state / timeout hypotheses are not supported by current evidence and should not drive future work unless a fresh failure appears.
+- Additional follow-up evidence collected on 2026-03-08 with local-only instrumentation in `frontend/tests/wtr/mocked/quiz-score.test.tsx`:
+  - A 10-run loop of `pnpm --dir frontend test:wtr:mocked` failed `7/10` times and passed `3/10` times.
+  - The instrumented isolated file still passed when run alone, so the stronger repro is at suite level, not single-file level.
+  - For `evaluates score for 3 correct and 1 incorrect`, some failing runs had `sessionStorage.quizAnswers.finalAnswers=[[0],[0],[0],[0]]` and the score page already showed `4/4`, `100%` at elapsed `0ms`.
+  - For `evaluates score for 0 correct and 4 incorrect`, some failing runs had `sessionStorage.quizAnswers.finalAnswers=[[1],[1],[1],[0]]` and the score page already showed `1/4`, `25%` at elapsed `0ms`.
+  - For the score-details scenario, the test selected `Blue` for the sky question, but the failing score page immediately showed `Red`; extra frame sampling did not converge to `Blue`, and the stored state was already wrong (`firstAnswers=[[1],[0]]`, `finalAnswers=[[0],[0]]`).
+- Additional follow-up evidence collected on 2026-03-09 after removing the `goToScorePage()` fallback that clicked the first answer:
+  - An isolated rerun of `frontend/tests/wtr/mocked/quiz-score.test.tsx` failed on Firefox with `Score page transition never exposed #evaluate or #results`.
+  - A fresh 10-run `pnpm --dir frontend test:wtr:mocked` loop failed on run `1/10` with the same transition error in `frontend/tests/wtr/mocked/quiz-score.test.tsx`.
+  - In the new failure snapshot, the test was still on pathname `/quiz/3101/questions/3`, `#question` was `Question 4`, `hasEvaluateButton=false`, `hasResults=false`, `hasSubmitButton=true`, `submitButtonDisabled=true`, and `sessionStorage.quizAnswers` was still `null`.
+  - Interpretation: with the unsafe answer-click fallback removed, the remaining repro is no longer a wrong-score-page mutation at the first observed sample. The app is instead getting stuck before evaluation, with the last question still live and no persisted quiz answers.
+- Additional follow-up evidence collected on 2026-03-09 after instrumenting the last-question answer/submit path:
+  - A 10-run isolated loop of `frontend/tests/wtr/mocked/quiz-score.test.tsx` failed within the first 3 runs on Firefox.
+  - In the failing trace for `evaluates score for 4 correct and 0 incorrect`, the helper label `sequence-last-question-3` started on pathname `/quiz/3101/questions/2` with `#question="Question 3"`, not Question 4.
+  - The recorded click correctly checked `Correct 3` and enabled submit for Question 3.
+  - After submit returned, the route advanced to `/quiz/3101/questions/3`; one extra frame later the UI rendered `Question 4` with `submitButtonDisabled=true`, no checked answers, no `#evaluate`, no `#results`, and `sessionStorage.quizAnswers` still `null`.
+  - `goToScorePage()` then started from that unanswered Question 4 state and timed out waiting for evaluation UI.
+- Comparison experiments completed on 2026-03-09 from the same pre-experiment baseline in `frontend/tests/wtr/mocked/quiz-score.test.tsx`:
+  - Tighten variant: keep position-based answering, but wait for the expected question route/prompt/input ownership before each answer step. Results: isolated loop `10/10` green, mocked-suite loop `5/5` green.
+  - Redesign variant: wait for the expected question, scope to `#question-form`, and select by answer label text instead of global position. Results: isolated loop `10/10` green, mocked-suite loop `5/5` green.
+  - Churn comparison against the pre-experiment investigation baseline:
+    - Tighten variant diff: `38 insertions`, `9 deletions`
+    - Redesign variant diff: `57 insertions`, `22 deletions`
+  - Decision: keep the tighten variant because it matched the redesign on observed stability while changing less code.
+- Resolved cause:
+  - The mocked score flake was primarily a WTR helper sequencing problem, not a proven production scoring bug.
+  - Under Firefox pressure, `answerQuizSequence()` could begin its nominal final answer step while the app was still on the previous question.
+  - That left the real last question unanswered, so `goToScorePage()` started waiting for `#evaluate` / `#results` one question too early.
+  - An earlier fallback in `goToScorePage()` that clicked the first answer was also unsafe and was removed during the investigation.
+- Chosen fix:
+  - Keep the lower-churn tighten variant in `frontend/tests/wtr/mocked/quiz-score.test.tsx`.
+  - The helper now waits for the expected question route, prompt, and input ownership before each answer step.
+  - In the comparison run on 2026-03-09, both tighten and redesign variants were stable in sampled loops, and tighten won on smaller diff size.
+- Post-fix status:
+  - `frontend/tests/wtr/mocked/quiz-score.test.tsx` passed isolated Chromium + Firefox reruns.
+  - The mocked WTR suite passed `5/5` sampled reruns after the chosen fix.
+  - `bash ./scripts/test-migration.sh` passed on 2026-03-09 with mocked WTR, backend WTR, and legacy Playwright lanes green.
+- Follow-up options:
+  1. decide later whether the tighter expected-question wait should remain local to score tests or be extracted into a shared WTR helper
+  2. optionally harden the backend score helper, which still has a mutation-prone fallback path but did not reproduce this mocked-only flake
 - Keep as future learning: long repeated WTR navigations through `BrowserRouter` can trigger Firefox history-related `SecurityError` failures in test harnesses before the application path under investigation fails.
 
 ## Scenario migration inventory
