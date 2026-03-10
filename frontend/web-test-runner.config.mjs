@@ -1,3 +1,5 @@
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { removeViteLogging, vitePlugin } from '@remcovaes/web-test-runner-vite-plugin'
 import { playwrightLauncher } from '@web/test-runner-playwright'
 
@@ -5,6 +7,8 @@ const apiProxyTarget = process.env.WTR_API_PROXY_TARGET
 const concurrentBrowsers = Number(process.env.WTR_CONCURRENT_BROWSERS || 2)
 const concurrency = Number(process.env.WTR_CONCURRENCY || 2)
 const testTimeout = Number(process.env.WTR_TEST_TIMEOUT || 10000)
+const frontendRoot = dirname(fileURLToPath(import.meta.url))
+const wtrCacheDir = join(frontendRoot, 'node_modules/.vite-wtr')
 
 const copyHeaders = headers => {
     const forwarded = {}
@@ -57,7 +61,10 @@ export default {
     concurrentBrowsers,
     concurrency,
     plugins: [
-        vitePlugin(),
+        vitePlugin({
+            root: frontendRoot,
+            cacheDir: wtrCacheDir,
+        }),
     ],
     middleware: apiProxyMiddleware ? [apiProxyMiddleware] : [],
     browsers: [

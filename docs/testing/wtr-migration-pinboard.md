@@ -1,6 +1,6 @@
 # WTR Migration Pinboard
 
-Last updated: 2026-03-09
+Last updated: 2026-03-10
 
 ## Accepted decisions (current truth)
 - Migration strategy: **Option 2 (incremental)**.
@@ -22,11 +22,32 @@ Last updated: 2026-03-09
 - Avoid sudden coverage drops while scenarios are moved from Playwright to WTR.
 - Do not modify legacy Playwright tests during migration.
 
+## Lessons Learned / Quality Control
+- Principle:
+  - Scenario parity belongs in scenario descriptions.
+  - Scenario robustness belongs in helper contracts.
+  - When a WTR helper crosses question, navigation, timeout, storage, or evaluation boundaries, it must prove the active identity/state before acting instead of inferring progress from loose timing or generic DOM change.
+- Risk this addresses:
+  - Prevent helper-level race conditions that can produce false failures, false passes, or mutation-prone recovery paths under suite pressure or browser differences.
+  - Reduce helper diversity without rationale, which increases future churn and makes migration mistakes more likely.
+- Current QC direction:
+  - Re-align the remaining outlier helpers to this pattern before more migration batches add further helper diversity.
+  - The ranked set below is the current risk order for review; the exact implementation priority can be decided next session.
+  - Treat persistent backend test-state accumulation as an environment-risk check during RCA: if full-suite backend or legacy-browser flakes appear after many runs, reset the local Postgres DB before concluding the failure is code-level or tool-interference.
+- Current ranked outlier helper set:
+  1. `frontend/tests/wtr/backend/quiz-score.backend.test.tsx`: still uses position-based answering, loose question-change waits, and a mutation-prone recovery answer before evaluate.
+  2. `frontend/tests/wtr/mocked/quiz-score-partial.test.tsx` and `frontend/tests/wtr/backend/quiz-score-partial.backend.test.tsx`: safer text-based selection, but the submit/evaluate transition still relies on generic progression rather than explicit final-question identity proof.
+  3. `frontend/tests/wtr/mocked/quiz-timer.test.tsx`: crosses question progression plus timeout/evaluate boundaries, but still infers readiness from generic text/timing checks.
+  4. `frontend/tests/wtr/mocked/quiz-take.test.tsx` and `frontend/tests/wtr/backend/quiz-take.backend.test.tsx`: answer helpers are thin and mostly rely on downstream assertions rather than proving active-question identity before acting.
+  5. `frontend/tests/wtr/mocked/quiz-progress.test.tsx` and `frontend/tests/wtr/backend/quiz-progress.backend.test.tsx`: scenario assertions currently carry most of the robustness burden; helper contracts remain thinner than the new pattern.
+
 ## Open decisions / questions
 - Which feature groups are next after the current take-flow batch.
 - Final CI policy: dual-suite on every PR vs staged/nightly legacy run.
 - Final runtime budget checkpoints on the path to sub-5s feedback loops.
 - Whether repeated WTR quiz/question fixture duplication should eventually trigger a clean pure-domain extraction beyond shared test-support builders.
+- Whether timer-related WTR helpers need stronger proof obligations than the current score-family contract; save this for a later, separate investigation.
+- Whether WTR backend tests or legacy Playwright need explicit database cleanup / fresh-db discipline so persistent local Postgres state does not reintroduce suite-pressure flakes.
 
 ## Handover snapshot (for next session)
 - Latest migration commit: `bedf33a8` (`test: add shared clock for timer coverage`).
@@ -118,6 +139,7 @@ Last updated: 2026-03-09
 - `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/quiz-score-page-warning.test.tsx"` completed with exit code `0` (2026-03-08).
 - `bash ./scripts/test-migration.sh` later failed with exit code `1` because the mocked WTR lane hit `frontend/tests/wtr/mocked/quiz-score.test.tsx` flake(s) on Chromium (2026-03-08).
 - `pnpm --dir frontend test:wtr:mocked` rerun later also failed with exit code `1` in `frontend/tests/wtr/mocked/quiz-score.test.tsx` on Chromium, while short isolated reruns of that file stayed green (2026-03-08).
+- `bash ./scripts/test-migration.sh` later failed with exit code `1` in `specs/features/make/workspace/Workspace.feature.spec.js` after prolonged local test use, while isolated reruns of the same scenario/spec stayed green; after resetting the local `quizmaster` Postgres DB and rebuilding schema, the same full migration command completed with exit code `0` (`wtr_mocked_seconds=32`, `playwright_seconds=325`, `wtr_backend_seconds=27`, `migration_total_seconds=417`) on 2026-03-10.
 
 ## Resolved flake investigation
 - Context: an earlier 2026-03-08 full-gate attempt hit an intermittent mocked-lane failure in `frontend/tests/wtr/mocked/quiz-score.test.tsx`, but the rerun passed and the final migration gate was green.
@@ -162,9 +184,7 @@ Last updated: 2026-03-09
   - `frontend/tests/wtr/mocked/quiz-score.test.tsx` passed isolated Chromium + Firefox reruns.
   - The mocked WTR suite passed `5/5` sampled reruns after the chosen fix.
   - `bash ./scripts/test-migration.sh` passed on 2026-03-09 with mocked WTR, backend WTR, and legacy Playwright lanes green.
-- Follow-up options:
-  1. decide later whether the tighter expected-question wait should remain local to score tests or be extracted into a shared WTR helper
-  2. optionally harden the backend score helper, which still has a mutation-prone fallback path but did not reproduce this mocked-only flake
+- Remaining helper harmonization work is tracked in `Lessons Learned / Quality Control`.
 - Keep as future learning: long repeated WTR navigations through `BrowserRouter` can trigger Firefox history-related `SecurityError` failures in test harnesses before the application path under investigation fails.
 
 ## Scenario migration inventory
