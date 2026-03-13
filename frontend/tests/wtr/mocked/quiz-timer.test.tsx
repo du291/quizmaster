@@ -3,6 +3,7 @@ import type { Question } from '../../../src/model/question.ts'
 import type { Quiz } from '../../../src/model/quiz.ts'
 import { createSimulatedClock, type SimulatedClock } from '../../../src/infrastructure/clock.tsx'
 import { installApiMock, type Route } from '../support/mock-api.ts'
+import { answerQuestion, waitForQuestionReady } from '../support/quiz-flow.ts'
 import {
     advanceClockBy,
     clickElement,
@@ -91,22 +92,6 @@ const waitForTimeoutDialog = async (timeoutMs = 500) => {
     await waitFor(() => document.querySelector('dialog p')?.textContent?.includes('Game over time') ?? false, timeoutMs)
 }
 
-const answerCurrentQuestion = async (answer: string) => {
-    await waitFor(() =>
-        Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).some(
-            label => label.textContent?.trim() === answer,
-        ),
-    )
-    const label = Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).find(
-        item => item.textContent?.trim() === answer,
-    )
-    if (!label) throw new Error(`Answer label not found: ${answer}`)
-    const answerId = label.htmlFor
-    if (!answerId) throw new Error(`Missing answer input id for ${answer}`)
-    await clickElement(`input#${answerId}`)
-    await clickElement('input.submit-btn')
-}
-
 const startQuiz = async (quizId: number) => {
     await clickElement('#start')
     await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
@@ -148,6 +133,7 @@ describe('Quiz.Timer feature (WTR mocked API)', () => {
         ;({ cleanup } = await renderAppAt(`/quiz/${quizA.id}`, { clock }))
 
         await startQuiz(quizA.id)
+        await waitForQuestionReady({ quizId: quizA.id, questionIndex: 0, question: quizA.questions[0] })
         await waitForTimer()
         await advanceClockBy(clock, 2000)
         await waitForTimeoutDialog()
@@ -167,9 +153,14 @@ describe('Quiz.Timer feature (WTR mocked API)', () => {
 
         await startQuiz(quizA.id)
         await waitForTimer()
-        await answerCurrentQuestion('Mars')
+        await answerQuestion({
+            quizId: quizA.id,
+            questionIndex: 0,
+            question: quizA.questions[0],
+            answers: ['Mars'],
+        })
 
-        await waitFor(() => textContent('#question').includes("capital city of Australia"))
+        await waitForQuestionReady({ quizId: quizA.id, questionIndex: 1, question: quizA.questions[1] })
         await advanceClockBy(clock, 2000)
         await waitForTimeoutDialog()
         await clickElement('dialog #evaluate')

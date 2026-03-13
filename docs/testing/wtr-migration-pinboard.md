@@ -1,6 +1,6 @@
 # WTR Migration Pinboard
 
-Last updated: 2026-03-10
+Last updated: 2026-03-13
 
 ## Accepted decisions (current truth)
 - Migration strategy: **Option 2 (incremental)**.
@@ -15,6 +15,7 @@ Last updated: 2026-03-10
 - Runtime tracking of WTR vs Playwright is mandatory during migration.
 - The next migration batch should include at least one feature that exercises an infrastructure/external-world seam so the seam pattern is used early.
 - When a migration step would otherwise hand-craft quiz/question shapes repeatedly, prefer low-churn shared WTR test helpers scoped to that feature step.
+- Helper harmonization may proceed in ranked slices; the highest-risk score/partial/timer tranche has now been realigned before choosing the next slice.
 
 ## Constraints
 - Keep CI and local developer flow usable during migration.
@@ -31,18 +32,17 @@ Last updated: 2026-03-10
   - Prevent helper-level race conditions that can produce false failures, false passes, or mutation-prone recovery paths under suite pressure or browser differences.
   - Reduce helper diversity without rationale, which increases future churn and makes migration mistakes more likely.
 - Current QC direction:
-  - Re-align the remaining outlier helpers to this pattern before more migration batches add further helper diversity.
-  - The ranked set below is the current risk order for review; the exact implementation priority can be decided next session.
+  - Keep re-aligning the remaining outlier helpers to this pattern before more migration batches add further helper diversity.
+  - The highest-risk score/partial/timer tranche now shares explicit question-identity and score-transition proof through `frontend/tests/wtr/support/quiz-flow.ts`.
+  - The ranked set below is the current remaining risk order for review.
   - Treat persistent backend test-state accumulation as an environment-risk check during RCA: if full-suite backend or legacy-browser flakes appear after many runs, reset the local Postgres DB before concluding the failure is code-level or tool-interference.
 - Current ranked outlier helper set:
-  1. `frontend/tests/wtr/backend/quiz-score.backend.test.tsx`: still uses position-based answering, loose question-change waits, and a mutation-prone recovery answer before evaluate.
-  2. `frontend/tests/wtr/mocked/quiz-score-partial.test.tsx` and `frontend/tests/wtr/backend/quiz-score-partial.backend.test.tsx`: safer text-based selection, but the submit/evaluate transition still relies on generic progression rather than explicit final-question identity proof.
-  3. `frontend/tests/wtr/mocked/quiz-timer.test.tsx`: crosses question progression plus timeout/evaluate boundaries, but still infers readiness from generic text/timing checks.
-  4. `frontend/tests/wtr/mocked/quiz-take.test.tsx` and `frontend/tests/wtr/backend/quiz-take.backend.test.tsx`: answer helpers are thin and mostly rely on downstream assertions rather than proving active-question identity before acting.
-  5. `frontend/tests/wtr/mocked/quiz-progress.test.tsx` and `frontend/tests/wtr/backend/quiz-progress.backend.test.tsx`: scenario assertions currently carry most of the robustness burden; helper contracts remain thinner than the new pattern.
+  1. `frontend/tests/wtr/mocked/quiz-take.test.tsx` and `frontend/tests/wtr/backend/quiz-take.backend.test.tsx`: answer helpers are still thin and mostly rely on downstream assertions rather than proving active-question identity before acting.
+  2. `frontend/tests/wtr/mocked/quiz-progress.test.tsx` and `frontend/tests/wtr/backend/quiz-progress.backend.test.tsx`: scenario assertions still carry most of the robustness burden; helper contracts remain thinner than the newer shared pattern.
+  3. `frontend/tests/wtr/mocked/quiz-timer.test.tsx` and `frontend/tests/wtr/backend/quiz-timer.backend.test.tsx`: now use explicit question identity before answer/timeout steps, but stronger timer-specific proof obligations remain a separate later investigation.
 
 ## Open decisions / questions
-- Which feature groups are next after the current take-flow batch.
+- Whether to finish take/progress helper harmonization before starting `Quiz.Welcome`, or carry the remaining helper residuals forward explicitly.
 - Final CI policy: dual-suite on every PR vs staged/nightly legacy run.
 - Final runtime budget checkpoints on the path to sub-5s feedback loops.
 - Whether repeated WTR quiz/question fixture duplication should eventually trigger a clean pure-domain extraction beyond shared test-support builders.
@@ -62,7 +62,8 @@ Last updated: 2026-03-10
 - Current command of record: `bash ./scripts/test-migration.sh`.
 - Current migration priority after `Quiz.Take`: `Quiz.Welcome` -> `Quiz.Take.Length` -> `Quiz.Bookmarks`.
 - Shared fixture note: current low-churn migrations may extend WTR test-support builders/helpers, but production/domain extraction is deferred unless duplication keeps repeating.
-- Current handover note: low-churn WTR helper updates in `frontend/tests/wtr/support/fixtures.ts` and `frontend/tests/wtr/support/backend-api.ts` now support the `Quiz.Take` migration without introducing production-domain extraction.
+- Current handover note: low-churn WTR helper updates in `frontend/tests/wtr/support/fixtures.ts`, `frontend/tests/wtr/support/backend-api.ts`, and `frontend/tests/wtr/support/quiz-flow.ts` now support the `Quiz.Take`, score-backend, partial-score, and timer helper contracts without introducing production-domain extraction.
+- Current local working tree note: the 2026-03-13 helper-harmonization tranche is not yet committed.
 - Fake timer status: quiz-taking flow now uses a production clock wrapper with a simulated clock path for WTR timer tests.
 - Last validated run status:
   - `clock.test.tsx` exit code `0` (2026-03-07)
@@ -85,6 +86,16 @@ Last updated: 2026-03-10
   - `playwright_seconds=302`
   - `wtr_backend_seconds=25`
   - `migration_total_seconds=387`
+  - targeted `quiz-score-partial.test.tsx` exit code `0` with `6 passed`, `0 failed` (2026-03-13, Chromium + Firefox)
+  - targeted `quiz-timer.test.tsx` exit code `0` with `3 passed`, `0 failed` (2026-03-13, Chromium + Firefox)
+  - targeted `quiz-score.backend.test.tsx` exit code `0` with `1 passed`, `0 failed` (2026-03-13, Chromium + Firefox)
+  - targeted `quiz-score-partial.backend.test.tsx` exit code `0` with `1 passed`, `0 failed` (2026-03-13, Chromium + Firefox)
+  - targeted `quiz-timer.backend.test.tsx` exit code `0` with `1 passed`, `0 failed` (2026-03-13, Chromium + Firefox)
+  - mocked `quiz-score-partial.test.tsx` loop `5/5` green (2026-03-13)
+  - legacy Playwright lane exit code `0` with `153 passed`, `2 skipped` (2026-03-13)
+  - full mocked WTR lane exit code `0` with `31 passed`, `0 failed` (2026-03-13)
+  - full backend WTR lane exit code `0` with `10 passed`, `0 failed` (2026-03-13)
+  - `bash ./scripts/test-migration.sh` exit code `0` with `wtr_mocked_seconds=28`, `playwright_seconds=298`, `wtr_backend_seconds=23`, `migration_total_seconds=378` (2026-03-13)
 - Legacy Playwright suite remains unchanged and still required during migration.
 
 ## Required evidence before marking migration complete
@@ -100,6 +111,7 @@ Last updated: 2026-03-10
 ## Current migration scope and progress
 - `frontend/tests/wtr/support/fixtures.ts`: low-churn question/quiz builders for WTR to reduce ad hoc object-shape drift.
 - `frontend/tests/wtr/support/backend-api.ts`: shared backend quiz creator for WTR backend tests.
+- `frontend/tests/wtr/support/quiz-flow.ts`: shared explicit question-identity, submit-readiness, and score-transition helper for the hardened score-backend, partial-score, and timer WTR lanes.
 - `frontend/src/infrastructure/clock.tsx`: production clock wrapper plus simulated clock implementation for WTR timer control.
 - `frontend/tests/wtr/mocked/home-page.test.tsx`: migrated from `specs/features/make/Home.feature`.
 - `frontend/tests/wtr/mocked/workspace-create.test.tsx`: migrated from `specs/features/make/workspace/Workspace.Create.feature`.
@@ -140,6 +152,10 @@ Last updated: 2026-03-10
 - `bash ./scripts/test-migration.sh` later failed with exit code `1` because the mocked WTR lane hit `frontend/tests/wtr/mocked/quiz-score.test.tsx` flake(s) on Chromium (2026-03-08).
 - `pnpm --dir frontend test:wtr:mocked` rerun later also failed with exit code `1` in `frontend/tests/wtr/mocked/quiz-score.test.tsx` on Chromium, while short isolated reruns of that file stayed green (2026-03-08).
 - `bash ./scripts/test-migration.sh` later failed with exit code `1` in `specs/features/make/workspace/Workspace.feature.spec.js` after prolonged local test use, while isolated reruns of the same scenario/spec stayed green; after resetting the local `quizmaster` Postgres DB and rebuilding schema, the same full migration command completed with exit code `0` (`wtr_mocked_seconds=32`, `playwright_seconds=325`, `wtr_backend_seconds=27`, `migration_total_seconds=417`) on 2026-03-10.
+- 2026-03-13 helper-harmonization tranche:
+  - `frontend/tests/wtr/backend/quiz-score.backend.test.tsx` now uses explicit question identity and score-transition proof instead of position-change inference plus a recovery answer click.
+  - `frontend/tests/wtr/mocked/quiz-score-partial.test.tsx` and `frontend/tests/wtr/backend/quiz-score-partial.backend.test.tsx` now use the shared helper to prove final-question identity before answering and before opening results.
+  - `frontend/tests/wtr/mocked/quiz-timer.test.tsx` and `frontend/tests/wtr/backend/quiz-timer.backend.test.tsx` now prove question identity before answer/timeout actions; deeper timer-proof obligations remain open separately.
 
 ## Resolved flake investigation
 - Context: an earlier 2026-03-08 full-gate attempt hit an intermittent mocked-lane failure in `frontend/tests/wtr/mocked/quiz-score.test.tsx`, but the rerun passed and the final migration gate was green.

@@ -1,6 +1,7 @@
 import { expect } from '@esm-bundle/chai'
 import { createWorkspaceInBackend } from '../support/backend-api.ts'
-import { clickElement, nextFrame, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
+import { answerQuestion, goToResultsPage } from '../support/quiz-flow.ts'
+import { clickElement, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
 
 type QuizMode = 'exam' | 'learn'
 
@@ -86,49 +87,6 @@ const createQuizInBackend = async (
     return Number(response)
 }
 
-const selectAnswer = async (answer: string) => {
-    await waitFor(() =>
-        Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).some(
-            label => label.textContent?.trim() === answer,
-        ),
-    )
-    const label = Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).find(
-        item => item.textContent?.trim() === answer,
-    )
-    if (!label) throw new Error(`Answer label not found: ${answer}`)
-    const answerId = label.htmlFor
-    if (!answerId) throw new Error(`Missing answer input id for ${answer}`)
-    await clickElement(`input#${answerId}`)
-}
-
-const answerCurrentQuestion = async (answers: readonly string[]) => {
-    for (const answer of answers) {
-        await selectAnswer(answer)
-    }
-    await clickElement('input.submit-btn')
-}
-
-const goToScorePage = async () => {
-    for (let attempt = 0; attempt < 4; attempt++) {
-        if (document.querySelector('#results')) return
-
-        const evaluateButton = document.querySelector<HTMLButtonElement>('#evaluate')
-        if (evaluateButton) {
-            evaluateButton.click()
-            await nextFrame()
-            if (document.querySelector('#results')) return
-        }
-
-        const submitButton = document.querySelector<HTMLInputElement>('input.submit-btn')
-        if (submitButton && !submitButton.disabled) {
-            submitButton.click()
-            await nextFrame()
-        }
-    }
-
-    await waitFor(() => document.querySelector('#results') !== null, 5000)
-}
-
 describe('Quiz.Score.Partial feature (WTR real backend)', () => {
     let cleanup = async () => {}
 
@@ -157,16 +115,37 @@ describe('Quiz.Score.Partial feature (WTR real backend)', () => {
         )
 
         const quizId = await createQuizInBackend(workspaceGuid, 'exam', 75, 120, [planetsQuestion.id, skyQuestion.id])
+        const quizQuestions = [
+            {
+                id: planetsQuestion.id,
+                question: `Which of the following are planets? (Partial Score) ${suffix}`,
+                answers: ['Mars', 'Pluto', 'Titan', 'Venus', 'Earth'],
+            },
+            {
+                id: skyQuestion.id,
+                question: `What is the standard colour of sky? ${suffix}`,
+                answers: ['Red', 'Blue', 'Green', 'Black'],
+            },
+        ] as const
         ;({ cleanup } = await renderAppAt(`/quiz/${quizId}`))
 
         await clickElement('#start')
         await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
 
-        await answerCurrentQuestion(['Mars', 'Venus'])
-        await waitFor(() => textContent('#question').includes('standard colour of sky'))
-        await answerCurrentQuestion(['Blue'])
+        await answerQuestion({
+            quizId,
+            questionIndex: 0,
+            question: quizQuestions[0],
+            answers: ['Mars', 'Venus'],
+        })
+        await answerQuestion({
+            quizId,
+            questionIndex: 1,
+            question: quizQuestions[1],
+            answers: ['Blue'],
+        })
 
-        await goToScorePage()
+        await goToResultsPage()
 
         expect(textContent('#correct-answers')).to.equal('1.5')
         expect(textContent('#total-questions')).to.equal('2')

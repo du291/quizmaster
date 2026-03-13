@@ -2,7 +2,8 @@ import { expect } from '@esm-bundle/chai'
 import type { Question } from '../../../src/model/question.ts'
 import type { Quiz } from '../../../src/model/quiz.ts'
 import { installApiMock, type Route } from '../support/mock-api.ts'
-import { clickElement, nextFrame, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
+import { answerQuestion, goToResultsPage } from '../support/quiz-flow.ts'
+import { clickElement, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
 
 const question = (
     id: number,
@@ -58,49 +59,6 @@ const installPartialScoreMockApi = () => {
     return installApiMock(routes)
 }
 
-const selectAnswer = async (answer: string) => {
-    await waitFor(() =>
-        Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).some(
-            label => label.textContent?.trim() === answer,
-        ),
-    )
-    const label = Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).find(
-        item => item.textContent?.trim() === answer,
-    )
-    if (!label) throw new Error(`Answer label not found: ${answer}`)
-    const answerId = label.htmlFor
-    if (!answerId) throw new Error(`Missing answer input id for ${answer}`)
-    await clickElement(`input#${answerId}`)
-}
-
-const answerCurrentQuestion = async (answers: readonly string[]) => {
-    for (const answer of answers) {
-        await selectAnswer(answer)
-    }
-    await clickElement('input.submit-btn')
-}
-
-const goToScorePage = async () => {
-    for (let attempt = 0; attempt < 4; attempt++) {
-        if (document.querySelector('#results')) return
-
-        const evaluateButton = document.querySelector<HTMLButtonElement>('#evaluate')
-        if (evaluateButton) {
-            evaluateButton.click()
-            await nextFrame()
-            if (document.querySelector('#results')) return
-        }
-
-        const submitButton = document.querySelector<HTMLInputElement>('input.submit-btn')
-        if (submitButton && !submitButton.disabled) {
-            submitButton.click()
-            await nextFrame()
-        }
-    }
-
-    await waitFor(() => document.querySelector('#results') !== null, 5000)
-}
-
 describe('Quiz.Score.Partial feature (WTR mocked API)', () => {
     let cleanup = async () => {}
     let restoreFetch = () => {}
@@ -129,12 +87,21 @@ describe('Quiz.Score.Partial feature (WTR mocked API)', () => {
             await waitFor(() => window.location.pathname === `/quiz/${partialScoreQuiz.id}/questions`)
 
             const partialAnswers = example.answers.split(',').map(answer => answer.trim())
-            await answerCurrentQuestion(partialAnswers)
+            await answerQuestion({
+                quizId: partialScoreQuiz.id,
+                questionIndex: 0,
+                question: partialScoreQuiz.questions[0],
+                answers: partialAnswers,
+            })
 
-            await waitFor(() => textContent('#question') === 'What is the standard colour of sky?')
-            await answerCurrentQuestion(['Blue'])
+            await answerQuestion({
+                quizId: partialScoreQuiz.id,
+                questionIndex: 1,
+                question: partialScoreQuiz.questions[1],
+                answers: ['Blue'],
+            })
 
-            await goToScorePage()
+            await goToResultsPage()
 
             expect(textContent('#correct-answers')).to.equal(example.correct)
             expect(textContent('#total-questions')).to.equal('2')

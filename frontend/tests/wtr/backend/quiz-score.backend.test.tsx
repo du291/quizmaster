@@ -1,5 +1,6 @@
 import { expect } from '@esm-bundle/chai'
 import { createQuestionInBackend, createWorkspaceInBackend } from '../support/backend-api.ts'
+import { answerQuestion, goToResultsPage } from '../support/quiz-flow.ts'
 import { clickElement, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
 
 type QuizMode = 'exam' | 'learn'
@@ -53,27 +54,6 @@ const createQuizInBackend = async (
     return Number(response)
 }
 
-const answerByPosition = async (position: number) => {
-    await waitFor(() => document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]').length > position)
-    const labels = Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]'))
-    const label = labels[position]
-    if (!label) throw new Error(`Answer label not found at position ${position}`)
-    const answerId = label.htmlFor
-    if (!answerId) throw new Error(`Missing answer input id for position ${position}`)
-    await clickElement(`input#${answerId}`)
-    await clickElement('input.submit-btn')
-}
-
-const answerQuizSequence = async (positions: readonly number[]) => {
-    for (let i = 0; i < positions.length; i++) {
-        const questionBeforeSubmit = textContent('#question')
-        await answerByPosition(positions[i])
-        if (i < positions.length - 1) {
-            await waitFor(() => textContent('#question') !== '' && textContent('#question') !== questionBeforeSubmit)
-        }
-    }
-}
-
 describe('Quiz.Score feature (WTR real backend)', () => {
     let cleanup = async () => {}
 
@@ -86,26 +66,36 @@ describe('Quiz.Score feature (WTR real backend)', () => {
         const suffix = `${Date.now()}`
         const workspaceGuid = await createWorkspaceInBackend(`WTR Score Workspace ${suffix}`)
 
-        const question1 = await createQuestionInBackend(workspaceGuid, `Score Q1 ${suffix}`, ['A1', 'A2'])
-        const question2 = await createQuestionInBackend(workspaceGuid, `Score Q2 ${suffix}`, ['B1', 'B2'])
+        const question1Text = `Score Q1 ${suffix}`
+        const question2Text = `Score Q2 ${suffix}`
+        const question1Answers = ['A1', 'A2'] as const
+        const question2Answers = ['B1', 'B2'] as const
+        const question1 = await createQuestionInBackend(workspaceGuid, question1Text, question1Answers)
+        const question2 = await createQuestionInBackend(workspaceGuid, question2Text, question2Answers)
         const quizId = await createQuizInBackend(workspaceGuid, 'exam', 75, 120, [question1.id, question2.id])
+        const quizQuestions = [
+            { id: question1.id, question: question1Text, answers: question1Answers },
+            { id: question2.id, question: question2Text, answers: question2Answers },
+        ] as const
 
         ;({ cleanup } = await renderAppAt(`/quiz/${quizId}`))
 
         await clickElement('#start')
         await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
 
-        await answerQuizSequence([0, 1])
-
-        if (!document.querySelector('#evaluate') && !document.querySelector('#results')) {
-            await answerByPosition(1)
-        }
-
-        await waitFor(() => document.querySelector('#evaluate') !== null || document.querySelector('#results') !== null, 5000)
-        if (!document.querySelector('#results')) {
-            await clickElement('#evaluate')
-        }
-        await waitFor(() => document.querySelector('#results') !== null)
+        await answerQuestion({
+            quizId,
+            questionIndex: 0,
+            question: quizQuestions[0],
+            answers: ['A1'],
+        })
+        await answerQuestion({
+            quizId,
+            questionIndex: 1,
+            question: quizQuestions[1],
+            answers: ['B2'],
+        })
+        await goToResultsPage()
 
         expect(textContent('#correct-answers')).to.equal('1')
         expect(textContent('#total-questions')).to.equal('2')

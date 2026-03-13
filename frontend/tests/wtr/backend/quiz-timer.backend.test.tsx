@@ -1,6 +1,7 @@
 import { expect } from '@esm-bundle/chai'
 import { createSimulatedClock } from '../../../src/infrastructure/clock.tsx'
 import { createQuestionInBackend, createWorkspaceInBackend } from '../support/backend-api.ts'
+import { waitForQuestionReady } from '../support/quiz-flow.ts'
 import {
     advanceClockBy,
     clickElement,
@@ -75,6 +76,10 @@ describe('Quiz.Timer feature (WTR real backend)', () => {
         const workspaceGuid = await createWorkspaceInBackend(`WTR Timer Workspace ${suffix}`)
         const question1 = await createQuestionInBackend(workspaceGuid, `Timer Q1 ${suffix}`, ['A1', 'A2'])
         const question2 = await createQuestionInBackend(workspaceGuid, `Timer Q2 ${suffix}`, ['B1', 'B2'])
+        const quizQuestions = [
+            { id: question1.id, question: `Timer Q1 ${suffix}`, answers: ['A1', 'A2'] },
+            { id: question2.id, question: `Timer Q2 ${suffix}`, answers: ['B1', 'B2'] },
+        ] as const
 
         const quizId = await createQuizInBackend(workspaceGuid, 'exam', 85, 1, [question1.id, question2.id])
         const clock = createSimulatedClock(1_700_000_000_000)
@@ -82,6 +87,7 @@ describe('Quiz.Timer feature (WTR real backend)', () => {
 
         await clickElement('#start')
         await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
+        await waitForQuestionReady({ quizId, questionIndex: 0, question: quizQuestions[0] })
         await waitForElement<HTMLElement>('[data-testid="timerID"]')
         await flushFrames()
 
