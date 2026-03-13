@@ -1,6 +1,7 @@
 import type { Quiz } from '../../../src/model/quiz.ts'
 import { installApiMock, type Route } from '../support/mock-api.ts'
-import { clickElement, renderAppAt, textContent, waitFor, waitForElement } from '../support/test-harness.tsx'
+import { answerQuestion, waitForQuestionReady } from '../support/quiz-flow.ts'
+import { clickElement, renderAppAt, waitFor } from '../support/test-harness.tsx'
 
 const question = (id: number, title: string) => ({
     id,
@@ -14,37 +15,31 @@ const question = (id: number, title: string) => ({
     easyMode: false,
 })
 
+const examQuiz: Quiz = {
+    id: 3001,
+    title: 'Exam',
+    description: 'Exam mode quiz',
+    mode: 'exam',
+    difficulty: 'keep-question',
+    passScore: 85,
+    timeLimit: 120,
+    questions: [question(1, 'Exam Question 1'), question(2, 'Exam Question 2'), question(3, 'Exam Question 3')],
+}
+
+const learnQuiz: Quiz = {
+    id: 3002,
+    title: 'Learn',
+    description: 'Learn mode quiz',
+    mode: 'learn',
+    difficulty: 'keep-question',
+    passScore: 85,
+    timeLimit: 120,
+    questions: [question(11, 'Learn Question 1'), question(12, 'Learn Question 2'), question(13, 'Learn Question 3')],
+}
+
 const quizzesById = new Map<number, Quiz>([
-    [
-        3001,
-        {
-            id: 3001,
-            title: 'Exam',
-            description: 'Exam mode quiz',
-            mode: 'exam',
-            difficulty: 'keep-question',
-            passScore: 85,
-            timeLimit: 120,
-            questions: [question(1, 'Exam Question 1'), question(2, 'Exam Question 2'), question(3, 'Exam Question 3')],
-        },
-    ],
-    [
-        3002,
-        {
-            id: 3002,
-            title: 'Learn',
-            description: 'Learn mode quiz',
-            mode: 'learn',
-            difficulty: 'keep-question',
-            passScore: 85,
-            timeLimit: 120,
-            questions: [
-                question(11, 'Learn Question 1'),
-                question(12, 'Learn Question 2'),
-                question(13, 'Learn Question 3'),
-            ],
-        },
-    ],
+    [examQuiz.id, examQuiz],
+    [learnQuiz.id, learnQuiz],
 ])
 
 const installQuizProgressMockApi = () => {
@@ -74,23 +69,6 @@ const expectProgress = async (current: number, total: number) => {
     })
 }
 
-const answerQuestion = async (answer = 'Correct') => {
-    await waitFor(() =>
-        Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).some(
-            label => label.textContent?.trim() === answer,
-        ),
-    )
-    const label = Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).find(
-        item => item.textContent?.trim() === answer,
-    )
-    if (!label) throw new Error(`Answer label not found: ${answer}`)
-    const answerId = label.htmlFor
-    if (!answerId) throw new Error(`Missing answer input id for: ${answer}`)
-    await clickElement(`input#${answerId}`)
-    await waitFor(() => document.querySelector<HTMLInputElement>(`input#${answerId}`)?.checked ?? false)
-    await clickElement('input.submit-btn')
-}
-
 describe('Quiz.Progress feature (WTR mocked API)', () => {
     let cleanup = async () => {}
     let restoreFetch = () => {}
@@ -103,37 +81,50 @@ describe('Quiz.Progress feature (WTR mocked API)', () => {
 
     it('exam mode advances progress immediately after each answer', async () => {
         restoreFetch = installQuizProgressMockApi()
-        ;({ cleanup } = await renderAppAt('/quiz/3001'))
+        ;({ cleanup } = await renderAppAt(`/quiz/${examQuiz.id}`))
 
         await clickElement('#start')
-        await waitFor(() => window.location.pathname === '/quiz/3001/questions')
-        await waitFor(() => textContent('#question') === 'Exam Question 1')
+        await waitForQuestionReady({ quizId: examQuiz.id, questionIndex: 0, question: examQuiz.questions[0] })
         await expectProgress(1, 3)
 
-        await answerQuestion()
-        await waitFor(() => textContent('#question') === 'Exam Question 2')
+        await answerQuestion({
+            quizId: examQuiz.id,
+            questionIndex: 0,
+            question: examQuiz.questions[0],
+            answers: ['Correct'],
+        })
+        await waitForQuestionReady({ quizId: examQuiz.id, questionIndex: 1, question: examQuiz.questions[1] })
         await expectProgress(2, 3)
 
-        await answerQuestion()
-        await waitFor(() => textContent('#question') === 'Exam Question 3')
+        await answerQuestion({
+            quizId: examQuiz.id,
+            questionIndex: 1,
+            question: examQuiz.questions[1],
+            answers: ['Correct'],
+        })
+        await waitForQuestionReady({ quizId: examQuiz.id, questionIndex: 2, question: examQuiz.questions[2] })
         await expectProgress(3, 3)
     })
 
     it('learn mode advances progress only after navigating next question', async () => {
         restoreFetch = installQuizProgressMockApi()
-        ;({ cleanup } = await renderAppAt('/quiz/3002'))
+        ;({ cleanup } = await renderAppAt(`/quiz/${learnQuiz.id}`))
 
         await clickElement('#start')
-        await waitFor(() => window.location.pathname === '/quiz/3002/questions')
-        await waitFor(() => textContent('#question') === 'Learn Question 1')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 0, question: learnQuiz.questions[0] })
         await expectProgress(1, 3)
 
-        await answerQuestion()
-        await waitFor(() => textContent('#question') === 'Learn Question 1')
+        await answerQuestion({
+            quizId: learnQuiz.id,
+            questionIndex: 0,
+            question: learnQuiz.questions[0],
+            answers: ['Correct'],
+        })
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 0, question: learnQuiz.questions[0] })
         await expectProgress(1, 3)
 
         await clickElement('#next')
-        await waitFor(() => textContent('#question') === 'Learn Question 2')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 1, question: learnQuiz.questions[1] })
         await expectProgress(2, 3)
     })
 })

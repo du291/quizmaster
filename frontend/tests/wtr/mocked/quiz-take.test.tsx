@@ -1,5 +1,6 @@
 import { buildQuestion, buildQuizFixture } from '../support/fixtures.ts'
 import { installApiMock, type Route } from '../support/mock-api.ts'
+import { answerQuestion, waitForQuestionReady } from '../support/quiz-flow.ts'
 import { clickElement, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
 
 const furnitureQuestion = buildQuestion({
@@ -63,23 +64,6 @@ const startQuiz = async (quizId: number) => {
     await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
 }
 
-const answerQuestion = async (answer: string) => {
-    await waitFor(() =>
-        Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).some(
-            label => label.textContent?.trim() === answer,
-        ),
-    )
-    const label = Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).find(
-        item => item.textContent?.trim() === answer,
-    )
-    if (!label) throw new Error(`Answer label not found: ${answer}`)
-    const answerId = label.htmlFor
-    if (!answerId) throw new Error(`Missing answer input id for ${answer}`)
-    await clickElement(`input#${answerId}`)
-    await waitFor(() => document.querySelector<HTMLInputElement>(`input#${answerId}`)?.checked ?? false)
-    await clickElement('input.submit-btn')
-}
-
 describe('Quiz.Take feature (WTR mocked API)', () => {
     let cleanup = async () => {}
     let restoreFetch = () => {}
@@ -95,12 +79,16 @@ describe('Quiz.Take feature (WTR mocked API)', () => {
         ;({ cleanup } = await renderAppAt(`/quiz/${examQuiz.id}`))
 
         await startQuiz(examQuiz.id)
-        await waitFor(() => textContent('#question') === 'Jaký nábytek má Ikea?')
+        await waitForQuestionReady({ quizId: examQuiz.id, questionIndex: 0, question: examQuiz.questions[0] })
 
-        await answerQuestion('Stůl')
+        await answerQuestion({
+            quizId: examQuiz.id,
+            questionIndex: 0,
+            question: examQuiz.questions[0],
+            answers: ['Stůl'],
+        })
 
-        await waitFor(() => window.location.pathname === `/quiz/${examQuiz.id}/questions/1`)
-        await waitFor(() => textContent('#question') === 'Jaké nádobí má Ikea?')
+        await waitForQuestionReady({ quizId: examQuiz.id, questionIndex: 1, question: examQuiz.questions[1] })
         await waitFor(() => document.querySelector('.question-feedback') === null)
     })
 
@@ -109,17 +97,21 @@ describe('Quiz.Take feature (WTR mocked API)', () => {
         ;({ cleanup } = await renderAppAt(`/quiz/${learnQuiz.id}`))
 
         await startQuiz(learnQuiz.id)
-        await waitFor(() => textContent('#question') === 'Jaký nábytek má Ikea?')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 0, question: learnQuiz.questions[0] })
 
-        await answerQuestion('Stůl')
+        await answerQuestion({
+            quizId: learnQuiz.id,
+            questionIndex: 0,
+            question: learnQuiz.questions[0],
+            answers: ['Stůl'],
+        })
 
         await waitFor(() => window.location.pathname === `/quiz/${learnQuiz.id}/questions`)
         await waitFor(() => textContent('#question') === 'Jaký nábytek má Ikea?')
         await waitFor(() => feedbackText() === 'Correct!')
 
         await clickElement('#next')
-        await waitFor(() => window.location.pathname === `/quiz/${learnQuiz.id}/questions/1`)
-        await waitFor(() => textContent('#question') === 'Jaké nádobí má Ikea?')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 1, question: learnQuiz.questions[1] })
     })
 
     it('learn mode lets the user retake the same question and updates feedback', async () => {
@@ -127,12 +119,22 @@ describe('Quiz.Take feature (WTR mocked API)', () => {
         ;({ cleanup } = await renderAppAt(`/quiz/${learnQuiz.id}`))
 
         await startQuiz(learnQuiz.id)
-        await waitFor(() => textContent('#question') === 'Jaký nábytek má Ikea?')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 0, question: learnQuiz.questions[0] })
 
-        await answerQuestion('Stůl')
+        await answerQuestion({
+            quizId: learnQuiz.id,
+            questionIndex: 0,
+            question: learnQuiz.questions[0],
+            answers: ['Stůl'],
+        })
         await waitFor(() => feedbackText() === 'Correct!')
 
-        await answerQuestion('Auto')
+        await answerQuestion({
+            quizId: learnQuiz.id,
+            questionIndex: 0,
+            question: learnQuiz.questions[0],
+            answers: ['Auto'],
+        })
         await waitFor(() => textContent('#question') === 'Jaký nábytek má Ikea?')
         await waitFor(() => feedbackText() === 'Incorrect!')
     })
@@ -142,20 +144,22 @@ describe('Quiz.Take feature (WTR mocked API)', () => {
         ;({ cleanup } = await renderAppAt(`/quiz/${learnQuiz.id}`))
 
         await startQuiz(learnQuiz.id)
-        await waitFor(() => textContent('#question') === 'Jaký nábytek má Ikea?')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 0, question: learnQuiz.questions[0] })
 
-        await answerQuestion('Stůl')
+        await answerQuestion({
+            quizId: learnQuiz.id,
+            questionIndex: 0,
+            question: learnQuiz.questions[0],
+            answers: ['Stůl'],
+        })
         await waitFor(() => feedbackText() === 'Correct!')
         await clickElement('#next')
-        await waitFor(() => window.location.pathname === `/quiz/${learnQuiz.id}/questions/1`)
-        await waitFor(() => textContent('#question') === 'Jaké nádobí má Ikea?')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 1, question: learnQuiz.questions[1] })
 
         window.history.back()
-        await waitFor(() => window.location.pathname === `/quiz/${learnQuiz.id}/questions`)
-        await waitFor(() => textContent('#question') === 'Jaký nábytek má Ikea?')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 0, question: learnQuiz.questions[0] })
 
         window.history.forward()
-        await waitFor(() => window.location.pathname === `/quiz/${learnQuiz.id}/questions/1`)
-        await waitFor(() => textContent('#question') === 'Jaké nádobí má Ikea?')
+        await waitForQuestionReady({ quizId: learnQuiz.id, questionIndex: 1, question: learnQuiz.questions[1] })
     })
 })

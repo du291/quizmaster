@@ -1,57 +1,9 @@
 import { expect } from '@esm-bundle/chai'
-import { createQuestionInBackend, createWorkspaceInBackend } from '../support/backend-api.ts'
+import { createQuestionInBackend, createQuizInBackend, createWorkspaceInBackend } from '../support/backend-api.ts'
+import { answerQuestion, waitForQuestionReady } from '../support/quiz-flow.ts'
 import { clickElement, renderAppAt, textContent, waitFor } from '../support/test-harness.tsx'
 
 type QuizMode = 'exam' | 'learn'
-
-const postJson = async <T, U>(url: string, body: T): Promise<U> => {
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-    })
-
-    if (!response.ok) {
-        throw new Error(`Backend request failed: ${response.status} ${response.statusText}`)
-    }
-
-    return (await response.json()) as U
-}
-
-const createQuizInBackend = async (
-    workspaceGuid: string,
-    mode: QuizMode,
-    passScore: number,
-    timeLimit: number,
-    questionIds: readonly number[],
-): Promise<number> => {
-    const response = await postJson<
-        {
-            title: string
-            description: string
-            questionIds: readonly number[]
-            mode: QuizMode
-            passScore: number
-            timeLimit: number
-            workspaceGuid: string
-            difficulty: 'keep-question'
-        },
-        number
-    >('/api/quiz', {
-        title: `WTR Progress ${mode} ${Date.now()}`,
-        description: `${mode} mode progress test`,
-        questionIds,
-        mode,
-        passScore,
-        timeLimit,
-        workspaceGuid,
-        difficulty: 'keep-question',
-    })
-
-    return Number(response)
-}
 
 const expectProgress = async (current: number, total: number) => {
     await waitFor(() => {
@@ -63,33 +15,39 @@ const expectProgress = async (current: number, total: number) => {
     })
 }
 
-const answerQuestion = async (answer: string) => {
-    await waitFor(() =>
-        Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).some(
-            label => label.textContent?.trim() === answer,
-        ),
-    )
-    const label = Array.from(document.querySelectorAll<HTMLLabelElement>('[id^="answer-label-"]')).find(
-        item => item.textContent?.trim() === answer,
-    )
-    if (!label) throw new Error(`Answer label not found: ${answer}`)
-    const answerId = label.htmlFor
-    if (!answerId) throw new Error(`Missing answer input id for: ${answer}`)
-    await clickElement(`input#${answerId}`)
-    await waitFor(() => document.querySelector<HTMLInputElement>(`input#${answerId}`)?.checked ?? false)
-    await clickElement('input.submit-btn')
-}
-
 const prepareQuiz = async (mode: QuizMode) => {
     const suffix = `${Date.now()}-${mode}`
     const workspaceGuid = await createWorkspaceInBackend(`WTR Progress Workspace ${suffix}`)
 
-    const questionA = await createQuestionInBackend(workspaceGuid, `Progress Q1 ${suffix}`, ['A1', 'A2'])
-    const questionB = await createQuestionInBackend(workspaceGuid, `Progress Q2 ${suffix}`, ['B1', 'B2'])
-    const questionC = await createQuestionInBackend(workspaceGuid, `Progress Q3 ${suffix}`, ['C1', 'C2'])
+    const questionAText = `Progress Q1 ${suffix}`
+    const questionBText = `Progress Q2 ${suffix}`
+    const questionCText = `Progress Q3 ${suffix}`
+    const questionAAnswers = ['A1', 'A2'] as const
+    const questionBAnswers = ['B1', 'B2'] as const
+    const questionCAnswers = ['C1', 'C2'] as const
 
-    const quizId = await createQuizInBackend(workspaceGuid, mode, 85, 120, [questionA.id, questionB.id, questionC.id])
-    return { quizId }
+    const questionA = await createQuestionInBackend(workspaceGuid, questionAText, questionAAnswers)
+    const questionB = await createQuestionInBackend(workspaceGuid, questionBText, questionBAnswers)
+    const questionC = await createQuestionInBackend(workspaceGuid, questionCText, questionCAnswers)
+
+    const quizId = await createQuizInBackend({
+        workspaceGuid,
+        questionIds: [questionA.id, questionB.id, questionC.id],
+        title: `WTR Progress ${mode} ${Date.now()}`,
+        description: `${mode} mode progress test`,
+        mode,
+        passScore: 85,
+        timeLimit: 120,
+    })
+
+    return {
+        quizId,
+        quizQuestions: [
+            { id: questionA.id, question: questionAText, answers: questionAAnswers },
+            { id: questionB.id, question: questionBText, answers: questionBAnswers },
+            { id: questionC.id, question: questionCText, answers: questionCAnswers },
+        ] as const,
+    }
 }
 
 describe('Quiz.Progress feature (WTR real backend)', () => {
@@ -101,36 +59,52 @@ describe('Quiz.Progress feature (WTR real backend)', () => {
     })
 
     it('exam mode advances progress immediately after each answer', async () => {
-        const { quizId } = await prepareQuiz('exam')
+        const { quizId, quizQuestions } = await prepareQuiz('exam')
         ;({ cleanup } = await renderAppAt(`/quiz/${quizId}`))
 
         await clickElement('#start')
-        await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
+        await waitForQuestionReady({ quizId, questionIndex: 0, question: quizQuestions[0] })
         await expectProgress(1, 3)
 
-        await answerQuestion('A1')
-        await waitFor(() => textContent('#question').includes('Progress Q2'))
+        await answerQuestion({
+            quizId,
+            questionIndex: 0,
+            question: quizQuestions[0],
+            answers: ['A1'],
+        })
+        await waitForQuestionReady({ quizId, questionIndex: 1, question: quizQuestions[1] })
         await expectProgress(2, 3)
 
-        await answerQuestion('B1')
-        await waitFor(() => textContent('#question').includes('Progress Q3'))
+        await answerQuestion({
+            quizId,
+            questionIndex: 1,
+            question: quizQuestions[1],
+            answers: ['B1'],
+        })
+        await waitForQuestionReady({ quizId, questionIndex: 2, question: quizQuestions[2] })
         await expectProgress(3, 3)
     })
 
     it('learn mode advances progress only after navigating next question', async () => {
-        const { quizId } = await prepareQuiz('learn')
+        const { quizId, quizQuestions } = await prepareQuiz('learn')
         ;({ cleanup } = await renderAppAt(`/quiz/${quizId}`))
 
         await clickElement('#start')
-        await waitFor(() => window.location.pathname === `/quiz/${quizId}/questions`)
+        await waitForQuestionReady({ quizId, questionIndex: 0, question: quizQuestions[0] })
         await expectProgress(1, 3)
 
-        await answerQuestion('A1')
+        await answerQuestion({
+            quizId,
+            questionIndex: 0,
+            question: quizQuestions[0],
+            answers: ['A1'],
+        })
+        await waitForQuestionReady({ quizId, questionIndex: 0, question: quizQuestions[0] })
         await expect(textContent('#question')).to.contain('Progress Q1')
         await expectProgress(1, 3)
 
         await clickElement('#next')
-        await waitFor(() => textContent('#question').includes('Progress Q2'))
+        await waitForQuestionReady({ quizId, questionIndex: 1, question: quizQuestions[1] })
         await expectProgress(2, 3)
     })
 })
