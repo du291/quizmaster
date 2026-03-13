@@ -24,15 +24,15 @@ Hydrated from the current long-horizon state on 2026-03-13 using:
 
 ## 2) Current operating context
 - **Work type:** migration
-- **Current phase:** `Quiz.Stats` milestone complete; next feature slice ready
+- **Current phase:** `QuizRegression` milestone complete; next feature slice ready
 - **Known current state:**
   - Migration strategy is incremental.
-  - WTR coverage exists for make-flow features plus `Quiz.Bookmarks`, `Quiz.EasyMode`, `Quiz.Progress`, `Quiz.Score`, `Quiz.Score.Partial`, `Quiz.Stats`, `Quiz.Take`, `Quiz.Take.Length`, `Quiz.Timer`, and `Quiz.Welcome`, with backend smoke companions.
+  - WTR coverage exists for make-flow features plus `Quiz.Bookmarks`, `Quiz.EasyMode`, `Quiz.Progress`, `QuizRegression`, `Quiz.Score`, `Quiz.Score.Partial`, `Quiz.Stats`, `Quiz.Take`, `Quiz.Take.Length`, `Quiz.Timer`, and `Quiz.Welcome`, with backend smoke companions.
   - The current command of record is `bash ./scripts/test-migration.sh`.
   - The 2026-03-13 helper work is now complete: score-backend, partial-score, timer, take, and progress WTR tests all use explicit question-identity/state-proof contracts where those flows act across question boundaries.
   - The command of record now defaults the legacy Playwright lane to `PW_WORKERS=1` via `scripts/run-backend-wtr-and-playwright.sh`, with env override preserved.
   - Repeated full-gate evidence showed that worker pressure, not mandatory DB cleanup, was the decisive control: the gate passed once from a clean start and multiple times on accumulated DB state after the same full run.
-  - The remaining helper-specific residual is now the narrower timer-proof question; the next migration-facing milestone can move to `QuizRegression`.
+  - The remaining helper-specific residual is now the narrower timer-proof question; the next migration-facing milestone can move to `Question.Take.Image`.
 - **Source artifacts used to hydrate this plan:**
   - user prompt(s)
   - current pinboard / notes: `docs/testing/wtr-migration-pinboard.md`
@@ -60,15 +60,15 @@ Hydrated from the current long-horizon state on 2026-03-13 using:
 - Do not modify legacy Playwright tests during migration.
 
 ### Open decisions / questions
-- Whether `QuizRegression` can stay feature-local in WTR or needs stronger proof around page reload and quiz-state reset semantics.
+- Whether `Question.Take.Image` can stay feature-local in WTR or needs richer shared question-fixture/backend-helper support for image-bearing questions.
 - Final CI policy for dual-suite execution cadence.
 - Whether timer-related helpers need stronger proof obligations than the current score-family contract.
 
 ### Required evidence before current milestone is done
-- New `QuizRegression` mocked/backend coverage passes targeted checks in Chromium and Firefox.
+- New `Question.Take.Image` mocked/backend coverage passes targeted checks in Chromium and Firefox.
 - The command of record still passes after the milestone: `bash ./scripts/test-migration.sh`.
-- Any new reload/reset helper or seam is either proven with executed evidence or recorded as **UNPROVEN** with the cheapest next proof.
-- Residual timer/helper concerns outside the regression slice remain explicit rather than silently expanding the milestone.
+- Any new image/question helper or seam is either proven with executed evidence or recorded as **UNPROVEN** with the cheapest next proof.
+- Residual timer/helper concerns outside the image slice remain explicit rather than silently expanding the milestone.
 
 ## 4) Expertise boundary / pull preferences
 Use this section to capture where the user prefers autonomy vs pull-in.
@@ -99,31 +99,31 @@ Learned preference from `AGENTS.md`: proceed autonomously inside an approved mil
 
 ## 6) Milestones
 ### Current milestone
-- **Name:** Migrate `QuizRegression` in WTR lanes
-- **Intent:** Add mocked and backend WTR coverage for quiz regression behavior, especially page reload and restart semantics, without widening scope unless reset-state proof becomes too weak.
+- **Name:** Migrate `Question.Take.Image` in WTR lanes
+- **Intent:** Add mocked and backend WTR coverage for image-bearing question display, without widening scope unless question-fixture proof demands richer shared helpers.
 - **Entry conditions:**
-  - `Quiz.Stats` is complete with targeted WTR evidence and a green command of record.
+  - `QuizRegression` is complete with targeted WTR evidence and a green command of record.
   - The command of record already encodes the proven Playwright worker setting.
 - **Expected inventory / touched areas:**
-  - `frontend/tests/wtr/mocked/quiz-regression.test.tsx`
-  - `frontend/tests/wtr/backend/quiz-regression.backend.test.tsx`
-  - shared WTR support helpers only if reload/reset proof cannot stay feature-local
+  - `frontend/tests/wtr/mocked/question-take-image.test.tsx`
+  - `frontend/tests/wtr/backend/question-take-image.backend.test.tsx`
+  - shared WTR support helpers only if image-bearing question setup cannot stay feature-local
 - **Planned evidence:**
   - targeted mocked/backend WTR runs for touched files
-  - sampled rerun only if reload/reset behavior shows race-sensitive behavior
+  - sampled rerun only if image-loading behavior shows race-sensitive behavior
   - full `bash ./scripts/test-migration.sh` before milestone close
 - **Exit condition:**
-  - `QuizRegression` mocked/backend lanes are green with executed evidence, and any reload/reset helper residuals are explicitly recorded before moving to the next chosen slice.
+  - `Question.Take.Image` mocked/backend lanes are green with executed evidence, and any image-helper residuals are explicitly recorded before moving to the next chosen slice.
 
 ### Upcoming milestones
-1. Choose the next remaining take-flow or question-flow slice after `QuizRegression`, depending on whether the regression slice stays feature-local.
+1. Choose the next remaining question-flow slice after `Question.Take.Image`, depending on whether image-bearing question setup stays feature-local.
 2. Reassess whether the deferred timer-proof investigation or CI-policy decision needs to happen before the later migration batches.
 3. Decide whether any slow legacy Playwright files should be split once migration pressure drops.
 
 ## 7) Risks and residuals (top only)
 | ID | Risk / uncertainty | Why it matters | Current handling | Residual | Cheapest next proof | Escalation needed? |
 |---|---|---|---|---|---|---|
-| R1 | `QuizRegression` may need stronger proof than the current quiz-flow helpers provide | Reload and restart behavior crosses session storage and route state, so weak assertions could miss stale state reuse | Start feature-local first and reuse existing take-flow/state-proof helpers where possible | Medium | Targeted mocked/backend `QuizRegression` runs after a narrow first implementation | Pull if the slice demands broader helper or storage work |
+| R1 | `Question.Take.Image` may need richer setup than the current shared backend helper provides | Image-bearing questions may force either local backend payload helpers or a broader shared test-support change | Start feature-local first and reuse existing helpers where possible | Medium | Targeted mocked/backend `Question.Take.Image` runs after a narrow first implementation | Pull if the slice demands broader helper work |
 | R2 | Legacy Playwright stability may still vary by environment resource pressure even with the serialized gate | Could reintroduce contradictory failures in CI or on weaker dev machines | Command of record now defaults Playwright to `PW_WORKERS=1`; DB reset remains an RCA check instead of a default wipe | Low-Medium | Re-run `bash ./scripts/test-migration.sh` in the next materially different environment (fresh codespace / CI) before changing policy again | Pull if serialized runs still contradict themselves |
 | R3 | Timer-related helpers may need stronger proof obligations than the current score-family contract | Timer flows cross more boundaries and may remain partially unproven even after the helper tranche | Deferred as a separate investigation | Medium | Add a focused timer-helper experiment if timer failures or weak evidence appear | Not yet |
 | R4 | Later migration slices could pressure the test-support layer into broader redesign | Risks churn without clear gain and delays later feature batches | Low-churn shared helpers are preferred; broader extraction is deferred | Medium | Keep new helper work localized and compare it against a feature-local variant before landing | Pull if a broader redesign becomes necessary |
@@ -145,7 +145,8 @@ Learned preference from `AGENTS.md`: proceed autonomously inside an approved mil
 | 2026-03-13 take-length milestone | `Quiz.Take.Length` WTR migration | Added mocked/backend take-length WTR coverage proving that the welcome-page count matches the served question count and score total for explicit-size and full-pool quizzes | Mocked `quiz-take-length.test.tsx` green (`2 passed`, `0 failed`) in Chromium + Firefox; backend `quiz-take-length.backend.test.tsx` green (`2 passed`, `0 failed`) in Chromium + Firefox; `bash ./scripts/test-migration.sh` green with `wtr_mocked_seconds=33`, `playwright_seconds=421`, `wtr_backend_seconds=26`, `migration_total_seconds=509` | The slice stayed feature-local, and the mocked lane should mirror the backend-trimmed quiz payload rather than re-simulate upstream selection state | `f1d45630` |
 | 2026-03-13 bookmarks milestone | `Quiz.Bookmarks` WTR migration | Added mocked/backend bookmark WTR coverage for add, revisit, explicit delete, and unbookmark flows, keeping the `/questions/0` revisit nuance local to the new tests | Mocked `quiz-bookmarks.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; backend `quiz-bookmarks.backend.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; `bash ./scripts/test-migration.sh` green on accumulated DB with `wtr_mocked_seconds=32`, `playwright_seconds=399`, `wtr_backend_seconds=28`, `migration_total_seconds=484` | Bookmark coverage stayed feature-local; the gate passing on accumulated DB further weakens DB-state as the primary explanation for recent failures, while the occasional `5173`-already-in-use log remains a low-grade harness residue to watch | `58d9304d` |
 | 2026-03-13 easy-mode milestone | `Quiz.EasyMode` WTR migration | Added mocked/backend easy-mode WTR coverage proving that quiz-level difficulty overrides preserve the expected correct-answer-count visibility across single-choice, easy, and hard questions | Mocked `quiz-easy-mode.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; backend `quiz-easy-mode.backend.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; `bash ./scripts/test-migration.sh` green on accumulated DB with `wtr_mocked_seconds=33`, `playwright_seconds=411`, `wtr_backend_seconds=31`, `migration_total_seconds=500` | Difficulty-override proof stayed feature-local with no shared-helper changes, and the second repeated accumulated-DB gate further strengthens the case that DB cleanup should remain RCA-only | `d49e5765` |
-| 2026-03-13 stats milestone | `Quiz.Stats` WTR migration | Added mocked/backend stats WTR coverage for empty stats, successful/failed score history, and duration rendering using the existing clock seam plus real session-storage behavior | Mocked `quiz-stats.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; backend `quiz-stats.backend.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; `bash ./scripts/test-migration.sh` green on accumulated DB with `wtr_mocked_seconds=34`, `playwright_seconds=411`, `wtr_backend_seconds=33`, `migration_total_seconds=501` | Stats stayed feature-local: the existing clock seam was enough for deterministic duration proof, and no new storage seam was required for this slice | N/A (working tree) |
+| 2026-03-13 stats milestone | `Quiz.Stats` WTR migration | Added mocked/backend stats WTR coverage for empty stats, successful/failed score history, and duration rendering using the existing clock seam plus real session-storage behavior | Mocked `quiz-stats.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; backend `quiz-stats.backend.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; `bash ./scripts/test-migration.sh` green on accumulated DB with `wtr_mocked_seconds=34`, `playwright_seconds=411`, `wtr_backend_seconds=33`, `migration_total_seconds=501` | Stats stayed feature-local: the existing clock seam was enough for deterministic duration proof, and no new storage seam was required for this slice | `a60728d6` |
+| 2026-03-13 regression milestone | `QuizRegression` WTR migration | Added mocked/backend regression WTR coverage for first-question clean state, unanswered next-question state, reload reset, and restart-from-results reset semantics | Mocked `quiz-regression.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; backend `quiz-regression.backend.test.tsx` green (`3 passed`, `0 failed`) in Chromium + Firefox; `bash ./scripts/test-migration.sh` green on accumulated DB with `wtr_mocked_seconds=37`, `playwright_seconds=414`, `wtr_backend_seconds=37`, `migration_total_seconds=513` | Reload/reset proof stayed feature-local through real route remounts; no new storage seam was required for this slice, and the accumulated-DB gate remained stable under the serialized harness | N/A (working tree) |
 
 ## 10) Patterns / systemic learnings
 - Scenario parity belongs in scenario descriptions; scenario robustness belongs in helper contracts.
@@ -158,6 +159,7 @@ Learned preference from `AGENTS.md`: proceed autonomously inside an approved mil
 - When bookmark revisit behavior uses a route variant (`/questions/0`) that the broader helper contract does not treat as canonical, keep that nuance local unless multiple slices need the same exception.
 - Quiz-level difficulty overrides can be proven by asserting the rendered correct-answer-count contract per question; they did not require widening the shared navigation helpers.
 - Existing production seams should be reused before introducing new ones: the clock seam was sufficient to prove stats duration while preserving real session-storage behavior.
+- Quiz reload/reset semantics can be proven with real app remounts at the same route; that was strong enough for the current regression slice without inventing a dedicated storage seam.
 
 ## 11) Environment / harness notes
 - **Known environment constraints:** cross-browser WTR evidence must include Chromium and Firefox.
