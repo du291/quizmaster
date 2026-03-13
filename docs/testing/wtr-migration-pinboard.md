@@ -50,7 +50,7 @@ Last updated: 2026-03-13
 - Whether WTR backend tests or legacy Playwright need explicit database cleanup / fresh-db discipline so persistent local Postgres state does not reintroduce suite-pressure flakes.
 
 ## Handover snapshot (for next session)
-- Latest migration commit: `bedf33a8` (`test: add shared clock for timer coverage`).
+- Latest migration commit: `da6e58ae` (`test: harden WTR score and timer helpers`).
 - For seam-heavy migration work, use the `infrastructure-seams` skill and `docs/testing/infrastructure-seams.md`.
 - Current take-flow migration commits:
   - `a4c590f5` (`test: migrate quiz progress feature to WTR lanes`)
@@ -62,8 +62,7 @@ Last updated: 2026-03-13
 - Current command of record: `bash ./scripts/test-migration.sh`.
 - Current migration priority after `Quiz.Take`: `Quiz.Welcome` -> `Quiz.Take.Length` -> `Quiz.Bookmarks`.
 - Shared fixture note: current low-churn migrations may extend WTR test-support builders/helpers, but production/domain extraction is deferred unless duplication keeps repeating.
-- Current handover note: low-churn WTR helper updates in `frontend/tests/wtr/support/fixtures.ts`, `frontend/tests/wtr/support/backend-api.ts`, and `frontend/tests/wtr/support/quiz-flow.ts` now support the `Quiz.Take`, score-backend, partial-score, and timer helper contracts without introducing production-domain extraction.
-- Current local working tree note: the 2026-03-13 helper-harmonization tranche is not yet committed.
+- Current handover note: low-churn WTR helper updates in `frontend/tests/wtr/support/fixtures.ts`, `frontend/tests/wtr/support/backend-api.ts`, and `frontend/tests/wtr/support/quiz-flow.ts` now support the `Quiz.Take`, score-backend, partial-score, and timer helper contracts without introducing production-domain extraction; the highest-risk helper tranche landed in `da6e58ae`.
 - Fake timer status: quiz-taking flow now uses a production clock wrapper with a simulated clock path for WTR timer tests.
 - Last validated run status:
   - `clock.test.tsx` exit code `0` (2026-03-07)
