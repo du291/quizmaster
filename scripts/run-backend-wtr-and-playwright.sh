@@ -2,10 +2,12 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+playwright_workers="${PW_WORKERS:-1}"
 
 playwright_started_at=$(date +%s)
+echo "[migration] Playwright PW_WORKERS=${playwright_workers}"
 set +e
-FE_PORT=5173 pnpm --dir "$ROOT_DIR/specs" test:playwright
+FE_PORT=5173 PW_WORKERS="$playwright_workers" pnpm --dir "$ROOT_DIR/specs" test:playwright
 playwright_status=$?
 set -e
 playwright_finished_at=$(date +%s)
