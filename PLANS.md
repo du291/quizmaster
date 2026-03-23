@@ -31,7 +31,7 @@ Note: `PLANS-old` references `BOOTSTRAP.md`, but that file is not present in the
 
 ### Current operating context
 - **Work type:** migration
-- **Current phase:** Mission approved on 2026-03-23. `Question.Take.Image` is packaged in commit `5a4e7079`, `Question.Take.Explanation` is packaged in commit `38df0657`, the `history/` reporting workflow is now in place, and the next standalone-question milestone has not yet been selected.
+- **Current phase:** Mission approved on 2026-03-23. `Question.Take.Image` is packaged in commit `5a4e7079`, `Question.Take.Explanation` is packaged in commit `38df0657`, the `history/` reporting workflow is in place via `bdc97c10`, and `Question.Take.Feedback` is now evidence-complete in the working tree after targeted mocked/backend runs plus a green full-gate rerun.
 - **Execution mode:** autonomous milestones after Mission approval
 - **Source artifacts used to hydrate this plan:**
   - current request / prompt
@@ -100,7 +100,7 @@ Note: `PLANS-old` references `BOOTSTRAP.md`, but that file is not present in the
 ### Open decisions / questions
 - Final CI policy for dual-suite execution cadence.
 - Whether timer-related helpers need stronger proof obligations than the current score-family contract.
-- Which remaining standalone question slice should follow `Question.Take.Explanation`.
+- Which remaining standalone question slice should follow `Question.Take.Feedback`; `Question.Take.NumPad` is currently the leading candidate.
 
 ### Required evidence before current milestone is done
 - The `Question.Take.Image` closeout evidence remains the baseline for the next slice:
@@ -111,6 +111,10 @@ Note: `PLANS-old` references `BOOTSTRAP.md`, but that file is not present in the
   - mocked explanation WTR green in Chromium and Firefox
   - backend explanation WTR green in Chromium and Firefox
   - `bash ./scripts/test-migration.sh` green after the additive backend question-helper widening
+- `Question.Take.Feedback` closeout evidence now joins that baseline:
+  - mocked feedback WTR green in Chromium and Firefox
+  - backend feedback WTR green in Chromium and Firefox
+  - `bash ./scripts/test-migration.sh` green after a rerun confirmed the first isolated `Question.Take.NumPad` Playwright red was a legacy-suite race, not a deterministic feedback regression
 - If a later slice touches backend-WTR harness behavior again, rerun the command of record and compare against the current green baseline rather than treating the wrapper as permanently proven.
 - Residual timer/helper concerns outside the image slice remain explicit rather than silently expanding future milestones.
 
@@ -151,35 +155,35 @@ Mark only **Autonomous** or **Pull**.
 ## 5) Current milestone
 
 ### BRACE Milestone (current)
-- **Name:** `Question.Take.Explanation` closeout (complete)
+- **Name:** `Question.Take.Feedback` closeout (complete)
 - **Status:** complete on 2026-03-23; next slice selection pending
-- **Intent / behavior:** Add mocked and backend WTR coverage for single-question explanation display on `/question/:id`, covering selected-answer explanation for single choice plus per-answer and question explanation for multiple choice.
+- **Intent / behavior:** Add mocked and backend WTR coverage for single-question feedback on `/question/:id`, covering single-choice correctness text plus multiple-choice correctness and per-answer feedback classes.
 - **Entry conditions:**
   - `Question.Take.Image` is committed in `5a4e7079` with a green command of record and repo-local backend-WTR host hardening.
+  - `Question.Take.Explanation` is committed in `38df0657` with standalone-question route coverage and the additive backend question-helper widening already proven locally.
   - The command of record already encodes the proven Playwright worker setting.
-  - Standalone-question mocked/backend patterns already exist via the image slice.
+  - Standalone-question mocked/backend patterns already exist via the image and explanation slices.
 - **Expected inventory / touched areas:**
-  - `frontend/tests/wtr/mocked/question-take-explanation.test.tsx`
-  - `frontend/tests/wtr/backend/question-take-explanation.backend.test.tsx`
-  - `frontend/tests/wtr/support/backend-api.ts` if backend question creation needs additive explanation/correct-answer options
+  - `frontend/tests/wtr/mocked/question-take-feedback.test.tsx`
+  - `frontend/tests/wtr/backend/question-take-feedback.backend.test.tsx`
   - `PLANS.md`
 - **Top risks:**
-  - The additive backend helper widening is proven in the current environment, but not yet in a materially different environment such as CI.
-  - Future standalone question slices may want to widen the shared backend question-helper further than the current explanation-friendly contract.
-  - Broader feedback or numpad concerns must stay separate so the explanation slice remains feature-local.
+  - The first full-gate attempt hit an isolated legacy Playwright `Question.Take.NumPad` race outside the feedback slice; the current residual is that similar legacy flakes may recur in later sessions.
+  - Feedback assertions could still overfit the wrong DOM node or class target if the answer-row contract changes later.
+  - Future standalone question slices may still want wider shared helpers, but the feedback slice intentionally avoided that churn.
 - **Planned assurances:**
-  - Keep backend helper changes additive and backwards-compatible with existing simple `createQuestionInBackend(...)` callers.
-  - Reuse the standalone question route and existing fixture fields instead of inventing a broader seam.
-  - Preserve the executed image baseline and the green full gate as the acceptance floor.
+  - Reuse the standalone question route and its existing selectors instead of inventing a broader seam.
+  - Assert feedback classes on `.answer-input-row`, matching the current production contract and Playwright semantics.
+  - Preserve the executed image and explanation baselines and the green full gate as the acceptance floor.
   - Keep legacy Playwright tests unchanged.
 - **Planned evidence:**
-  - `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/question-take-explanation.test.tsx"`
-  - `pnpm --dir specs exec start-server-and-test "concurrently \"cd /workspaces/quizmaster/backend && ./gradlew bootRun\" \"cd /workspaces/quizmaster/frontend && pnpm dev\"" "8080|5173" "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_VITE_HOST=127.0.0.1 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/question-take-explanation.backend.test.tsx\""`
+  - `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/question-take-feedback.test.tsx"`
+  - `pnpm --dir specs exec start-server-and-test "concurrently \"cd /workspaces/quizmaster/backend && ./gradlew bootRun\" \"cd /workspaces/quizmaster/frontend && pnpm dev\"" "8080|5173" "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_VITE_HOST=127.0.0.1 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/question-take-feedback.backend.test.tsx\""`
   - `bash ./scripts/test-migration.sh`
-- **Exit condition:** met on 2026-03-23. `Question.Take.Explanation` mocked/backend lanes are green, the additive backend helper widening is proven by executed evidence, and the full gate remains green.
+- **Exit condition:** met on 2026-03-23. `Question.Take.Feedback` mocked/backend lanes are green, standalone feedback text and per-answer class behavior are proven with executed evidence, and the full gate is green after a rerun showed the earlier `Question.Take.NumPad` Playwright red was isolated legacy-suite race noise rather than a deterministic regression from this slice.
 
 ### Upcoming milestones
-1. Choose the next remaining standalone-question slice after explanation, likely `Question.Take.Feedback` or `Question.Take.NumPad`.
+1. Choose the next remaining standalone-question slice after feedback, likely `Question.Take.NumPad`.
 2. Decide whether future standalone question slices should keep using the additive shared backend question-helper or switch to local creators when payload needs diverge.
 3. Reassess whether the deferred timer-proof investigation or CI-policy decision needs to happen before later migration batches.
 
@@ -192,7 +196,7 @@ Keep only the risks that matter for steering.
 | ID | Risk / uncertainty | Why it matters | Current handling | Residual | Cheapest next proof | Pull class if escalation needed |
 |---|---|---|---|---|---|---|
 | R1 | The repo-local host-aware wrapper is proven in the current environment, but not yet in a materially different environment such as CI or a fresh workspace | The `localhost`/address-family seam could still reappear elsewhere even though it is fixed locally now | Wrapper landed in repo-owned test infrastructure and the full gate is green in the current environment | Low-Medium | Re-run `bash ./scripts/test-migration.sh` in CI or a fresh workspace before declaring the seam fully retired | BRACE Pull |
-| R2 | The additive backend question-helper widening is only proven in the current environment | A helper contract that looks stable locally could still expose API-shape assumptions in CI or a fresh workspace | Targeted mocked/backend explanation runs are green and the full gate is green after the helper change | Low-Medium | Re-run `bash ./scripts/test-migration.sh` in CI or a fresh workspace before widening the helper further | BRACE Pull |
+| R2 | Legacy Playwright still contains low-grade race potential outside the migrated WTR slices | A later milestone can go red on an unrelated legacy test even when the touched WTR slice is correct | The current command of record stays the acceptance gate, and isolated reruns are acceptable only when they clearly show an unrelated legacy race | Low-Medium | Re-run `bash ./scripts/test-migration.sh` in CI or a fresh workspace; pull if the same legacy red repeats or becomes deterministic | BRACE Pull |
 | R3 | Legacy Playwright stability may still vary by environment resource pressure even with the serialized gate | Contradictory failures in CI or weaker dev environments could re-open RCA | Command of record defaults Playwright to `PW_WORKERS=1`; DB reset remains RCA-only | Low-Medium | Re-run `bash ./scripts/test-migration.sh` in a materially different environment before changing policy again | BRACE Pull |
 | R4 | Timer-related helpers may still need stronger proof obligations than the current score-family contract | Timer flows cross more boundaries and may remain partially unproven after the explanation slice closes | Deferred as a separate investigation | Medium | Add a focused timer-helper experiment if timer failures or weak evidence appear | BRACE Pull |
 | R5 | Final CI policy and runtime budget remain undecided | Migration can succeed technically but still land with awkward operational cadence | Runtime tracking remains mandatory during migration | Low for the current milestone | Keep collecting per-lane timings from the command of record and decide later | BRACE Pull |
@@ -229,7 +233,8 @@ Short milestone closeouts only. These are the running history and lookup layer.
 | 2026-03-23 image milestone RCA | `Question.Take.Image` plus backend-WTR harness diagnosis | Added mocked/backend image WTR coverage in the working tree and instrumented the Playwright-to-backend-WTR handoff after an earlier red gate | Targeted mocked image WTR green (`2 passed`, `0 failed`); targeted backend image WTR green (`2 passed`, `0 failed`); two instrumented integration reruns green | The image slice stayed feature-local and DB accumulation is not the primary explanation for the red gate; the current residual is concentrated in the plugin seam between `localhost:${vitePort}` and the IPv6-only transient Vite listener | N/A (working tree, decision pending) |
 | 2026-03-23 image milestone closeout | `Question.Take.Image` WTR migration plus backend-WTR hardening | Added repo-owned `host-aware-vite-plugin.mjs`, switched WTR config to use it, and kept the image tests feature-local | Mocked image targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `49.4s`); backend image targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `6.6s` after server startup); full gate green with `wtr_mocked_seconds=42`, `playwright_seconds=441`, `wtr_backend_seconds=42`, `migration_total_seconds=552` | The failure mode was a harness proxy-host seam, not an image-feature bug; pinning the Vite listener and proxy to the same explicit host was sufficient without a broader harness split | `5a4e7079` |
 | 2026-03-23 explanation milestone closeout | `Question.Take.Explanation` WTR migration | Added mocked/backend explanation WTR coverage for selected-answer explanation in single choice plus per-answer and question explanation in multiple choice, and widened the shared backend question helper additively for explanation payloads | Mocked explanation targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `4.9s`); backend explanation targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `6s`); full gate green with `wtr_mocked_seconds=41`, `playwright_seconds=412`, `wtr_backend_seconds=44`, `migration_total_seconds=524` | The explanation slice stayed feature-local on the standalone question route, and the additive helper widening was sufficient without touching legacy Playwright or the backend-WTR wrapper | `38df0657` |
-| 2026-03-23 history bootstrap | BRACE history/reporting workflow | Added `history/`, backfilled full report files for the recent image and explanation milestones, and updated repo docs so future milestone commits reference a milestone file | Documentation/reporting only; no product tests run | `PLANS.md` remains the concise lookup layer, while full milestone reports now live in `history/` and future milestone commits should reference them directly | N/A (working tree) |
+| 2026-03-23 history bootstrap | BRACE history/reporting workflow | Added `history/`, backfilled full report files for the recent image and explanation milestones, and updated repo docs so future milestone commits reference a milestone file | Documentation/reporting only; no product tests run | `PLANS.md` remains the concise lookup layer, while full milestone reports now live in `history/` and future milestone commits should reference them directly | `bdc97c10` |
+| 2026-03-23 feedback milestone closeout | `Question.Take.Feedback` WTR migration | Added mocked/backend feedback WTR coverage for standalone question correctness text and multiple-choice per-answer feedback classes | Mocked feedback targeted green in Chromium + Firefox (`7 passed`, `0 failed`, `5.5s`); backend feedback targeted green in Chromium + Firefox (`7 passed`, `0 failed`, `6.5s`); first full gate hit an isolated legacy `Question.Take.NumPad` Playwright red; isolated numpad rerun green; second full gate green with `wtr_mocked_seconds=40`, `playwright_seconds=412`, `wtr_backend_seconds=42`, `migration_total_seconds=517` | The feedback slice stayed feature-local on `/question/:id`, and the only contradictory signal was an unrelated legacy Playwright race that did not reproduce on isolated rerun or the second full gate | N/A (working tree) |
 
 ---
 
@@ -241,6 +246,7 @@ Short milestone closeouts only. These are the running history and lookup layer.
 | BRACE history bootstrap | `history/2026-03-23-brace-history-bootstrap.md` | Records when the one-file-per-milestone reporting workflow and commit-message reference rule became repo policy |
 | `Question.Take.Image` closeout | `history/2026-03-23-question-take-image.md` | Full milestone report for the image slice, including the backend-WTR host-aware hardening evidence |
 | `Question.Take.Explanation` closeout | `history/2026-03-23-question-take-explanation.md` | Full milestone report for the explanation slice, including the additive backend-helper widening evidence |
+| `Question.Take.Feedback` closeout | `history/2026-03-23-question-take-feedback.md` | Full milestone report for the feedback slice, including the isolated legacy numpad race and the clean rerun evidence |
 
 ---
 
