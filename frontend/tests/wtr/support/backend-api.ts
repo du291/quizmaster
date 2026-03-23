@@ -10,6 +10,13 @@ type QuestionCreateResponse = {
 type QuizMode = 'exam' | 'learn'
 type Difficulty = 'easy' | 'hard' | 'keep-question'
 
+interface CreateQuestionInBackendOptions {
+    readonly correctAnswers?: readonly number[]
+    readonly explanations?: readonly string[]
+    readonly questionExplanation?: string
+    readonly easyMode?: boolean
+}
+
 interface CreateQuizInBackendOptions {
     readonly workspaceGuid: string
     readonly questionIds: readonly number[]
@@ -44,7 +51,19 @@ export const createWorkspaceInBackend = async (title: string): Promise<string> =
     return response.guid
 }
 
-export const createQuestionInBackend = async (workspaceGuid: string, question: string, answers: readonly string[]) => {
+export const createQuestionInBackend = async (
+    workspaceGuid: string,
+    question: string,
+    answers: readonly string[],
+    {
+        correctAnswers = [0],
+        explanations,
+        questionExplanation = '',
+        easyMode = false,
+    }: CreateQuestionInBackendOptions = {},
+) => {
+    const normalizedExplanations = answers.map((_, index) => explanations?.[index] ?? '')
+
     const response = await postJson<
         {
             question: string
@@ -61,10 +80,10 @@ export const createQuestionInBackend = async (workspaceGuid: string, question: s
         question,
         editId: '',
         answers,
-        correctAnswers: [0],
-        explanations: ['', ''],
-        questionExplanation: '',
-        easyMode: false,
+        correctAnswers,
+        explanations: normalizedExplanations,
+        questionExplanation,
+        easyMode,
         workspaceGuid,
     })
 
