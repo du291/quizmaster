@@ -5,6 +5,7 @@ Goal: keep confidence grounded in controls and evidence rather than line-by-line
 This repository uses:
 - `AGENTS.md` for the stable operating mode
 - `PLANS.md` for long-horizon state, current truth, milestone route, and handoff
+- `history/` for one-file-per-milestone BRACE Milestone reports
 
 If `PLANS.md` exists, load it before substantive work.
 If `PLANS.md` does not exist and the task is long-horizon, create/hydrate it from the current request and available artifacts before major action.
@@ -218,9 +219,11 @@ When resuming:
 
 After each completed milestone:
 1. produce a BRACE Milestone report
-2. update `PLANS.md`
-3. record learning, residuals, pull outcomes, and next step
-4. continue unless a pull condition fires
+2. write the full report to `history/YYYY-MM-DD-<milestone-slug>.md`
+3. update `PLANS.md`
+4. record learning, residuals, pull outcomes, and next step
+5. package the milestone in a commit whose subject is a one-line summary and whose body references the milestone report path
+6. continue unless a pull condition fires
 
 ---
 

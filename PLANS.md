@@ -31,7 +31,7 @@ Note: `PLANS-old` references `BOOTSTRAP.md`, but that file is not present in the
 
 ### Current operating context
 - **Work type:** migration
-- **Current phase:** Mission approved on 2026-03-23. `Question.Take.Image` is packaged in commit `5a4e7079`, and `Question.Take.Explanation` is now evidence-complete in the working tree after targeted mocked/backend runs and a green full gate. The next standalone-question milestone has not yet been selected.
+- **Current phase:** Mission approved on 2026-03-23. `Question.Take.Image` is packaged in commit `5a4e7079`, `Question.Take.Explanation` is packaged in commit `38df0657`, the `history/` reporting workflow is now in place, and the next standalone-question milestone has not yet been selected.
 - **Execution mode:** autonomous milestones after Mission approval
 - **Source artifacts used to hydrate this plan:**
   - current request / prompt
@@ -54,9 +54,9 @@ Note: `PLANS-old` references `BOOTSTRAP.md`, but that file is not present in the
   - Timer-related helper proof remains narrower than the broader score-family contract.
   - Final CI cadence and runtime budget are still open policy decisions.
 - **Initial route / milestone sequence:**
-  1. Package the now-evidence-backed `Question.Take.Explanation` slice.
-  2. Choose the next remaining standalone question slice after explanation.
-  3. Keep using `bash ./scripts/test-migration.sh` as the validation gate and watch the host-aware wrapper in later environments.
+  1. Choose the next remaining standalone question slice after explanation.
+  2. Keep using `bash ./scripts/test-migration.sh` as the validation gate and watch the host-aware wrapper in later environments.
+  3. Write each completed milestone report to `history/` and reference that file from the milestone commit message.
   4. Reassess deferred timer-proof and CI-policy decisions as needed.
 - **Validation gate(s):**
   - `bash ./scripts/test-migration.sh`
@@ -89,6 +89,7 @@ Note: `PLANS-old` references `BOOTSTRAP.md`, but that file is not present in the
 - The command of record defaults the legacy Playwright lane to `PW_WORKERS=1`; explicit env override remains available for future tuning.
 - DB reset stays an RCA tool, not a default step in the command of record, because the serialized gate has already passed on accumulated local DB state.
 - Backend WTR now uses a repo-local host-aware Vite wrapper so the transient Vite listener and the proxy target stay on the same explicit host (`127.0.0.1` by default) instead of relying on `localhost`.
+- Each completed BRACE milestone gets a full report file under `history/`, and milestone commit messages reference that file.
 
 ### Constraints
 - Keep CI and local developer flow usable during migration.
@@ -227,7 +228,8 @@ Short milestone closeouts only. These are the running history and lookup layer.
 | 2026-03-13 regression milestone | `QuizRegression` WTR migration | Added mocked/backend regression WTR coverage for first-question clean state, unanswered next-question state, reload reset, and restart-from-results reset semantics | Targeted regression tests green in Chromium and Firefox; full gate green on accumulated DB with `migration_total_seconds=513` | Reload/reset proof stayed feature-local through real route remounts with no new storage seam | N/A (working tree at that time) |
 | 2026-03-23 image milestone RCA | `Question.Take.Image` plus backend-WTR harness diagnosis | Added mocked/backend image WTR coverage in the working tree and instrumented the Playwright-to-backend-WTR handoff after an earlier red gate | Targeted mocked image WTR green (`2 passed`, `0 failed`); targeted backend image WTR green (`2 passed`, `0 failed`); two instrumented integration reruns green | The image slice stayed feature-local and DB accumulation is not the primary explanation for the red gate; the current residual is concentrated in the plugin seam between `localhost:${vitePort}` and the IPv6-only transient Vite listener | N/A (working tree, decision pending) |
 | 2026-03-23 image milestone closeout | `Question.Take.Image` WTR migration plus backend-WTR hardening | Added repo-owned `host-aware-vite-plugin.mjs`, switched WTR config to use it, and kept the image tests feature-local | Mocked image targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `49.4s`); backend image targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `6.6s` after server startup); full gate green with `wtr_mocked_seconds=42`, `playwright_seconds=441`, `wtr_backend_seconds=42`, `migration_total_seconds=552` | The failure mode was a harness proxy-host seam, not an image-feature bug; pinning the Vite listener and proxy to the same explicit host was sufficient without a broader harness split | `5a4e7079` |
-| 2026-03-23 explanation milestone closeout | `Question.Take.Explanation` WTR migration | Added mocked/backend explanation WTR coverage for selected-answer explanation in single choice plus per-answer and question explanation in multiple choice, and widened the shared backend question helper additively for explanation payloads | Mocked explanation targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `4.9s`); backend explanation targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `6s`); full gate green with `wtr_mocked_seconds=41`, `playwright_seconds=412`, `wtr_backend_seconds=44`, `migration_total_seconds=524` | The explanation slice stayed feature-local on the standalone question route, and the additive helper widening was sufficient without touching legacy Playwright or the backend-WTR wrapper | N/A (working tree) |
+| 2026-03-23 explanation milestone closeout | `Question.Take.Explanation` WTR migration | Added mocked/backend explanation WTR coverage for selected-answer explanation in single choice plus per-answer and question explanation in multiple choice, and widened the shared backend question helper additively for explanation payloads | Mocked explanation targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `4.9s`); backend explanation targeted green in Chromium + Firefox (`2 passed`, `0 failed`, `6s`); full gate green with `wtr_mocked_seconds=41`, `playwright_seconds=412`, `wtr_backend_seconds=44`, `migration_total_seconds=524` | The explanation slice stayed feature-local on the standalone question route, and the additive helper widening was sufficient without touching legacy Playwright or the backend-WTR wrapper | `38df0657` |
+| 2026-03-23 history bootstrap | BRACE history/reporting workflow | Added `history/`, backfilled full report files for the recent image and explanation milestones, and updated repo docs so future milestone commits reference a milestone file | Documentation/reporting only; no product tests run | `PLANS.md` remains the concise lookup layer, while full milestone reports now live in `history/` and future milestone commits should reference them directly | N/A (working tree) |
 
 ---
 
@@ -236,6 +238,9 @@ Short milestone closeouts only. These are the running history and lookup layer.
 | Milestone | Artifact path / ref | Why it may matter later |
 |---|---|---|
 | Pre-v2.1 transferred history | `PLANS-old` | Source of the migrated plan state, prior journal, and pre-hydration pull history |
+| BRACE history bootstrap | `history/2026-03-23-brace-history-bootstrap.md` | Records when the one-file-per-milestone reporting workflow and commit-message reference rule became repo policy |
+| `Question.Take.Image` closeout | `history/2026-03-23-question-take-image.md` | Full milestone report for the image slice, including the backend-WTR host-aware hardening evidence |
+| `Question.Take.Explanation` closeout | `history/2026-03-23-question-take-explanation.md` | Full milestone report for the explanation slice, including the additive backend-helper widening evidence |
 
 ---
 
@@ -256,7 +261,8 @@ Use this for things that should influence future work.
 - Quiz reload/reset semantics can be proven with real app remounts at the same route; that was strong enough for the current regression slice without inventing a dedicated storage seam.
 - When a third-party harness proxies to `localhost`, capture the actual listener address before treating the problem as generic port contention; `localhost` vs `::1` / `127.0.0.1` ambiguity can be the real seam.
 - When that seam is confirmed, prefer a repo-owned wrapper that keeps the listener and proxy on the same explicit host instead of relying on `localhost` resolution order.
-- After each completed milestone, package it in a commit whose message names the BRACE milestone.
+- After each completed milestone, write the full BRACE report to `history/YYYY-MM-DD-<milestone-slug>.md`.
+- Package each completed milestone in a commit whose subject is a one-line summary and whose body references the milestone report path.
 
 ---
 
@@ -282,9 +288,11 @@ Use this for things that should influence future work.
 When resuming from this file:
 1. read BRACE Mission, Current Pinboard, Validation gate(s), Current milestone, Risks, and the last 1–3 journal entries
 2. restate the current pinboard and current milestone
-3. confirm whether the next step is still valid
-4. continue autonomously only after Mission approval, unless a pull condition fires
-5. after milestone closeout, update current milestone, residuals, journal, and pull log as needed
+3. check whether a recent milestone report exists in `history/` for the latest completed slice
+4. confirm whether the next step is still valid
+5. continue autonomously only after Mission approval, unless a pull condition fires
+6. after milestone closeout, update current milestone, residuals, journal, pull log, and the milestone artifact index as needed
+
 
 ---
 
