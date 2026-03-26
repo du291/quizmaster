@@ -32,7 +32,7 @@ Hydrated on 2026-03-26 from:
 
 ### Current operating context
 - **Work type:** migration
-- **Current phase:** BRACE v2.2 is active. `Question.Take.Image` is committed in `5a4e7079`, `Question.Take.Explanation` in `38df0657`, the history/reporting workflow in `bdc97c10`, `Question.Take.Feedback` in `dc1ca936`, `Question.Take.NumPad` in `2e0e0ced`, and `Question.Take.Feedback.Numerical` is now evidence-complete in the working tree with targeted mocked/backend greens plus a green full migration gate.
+- **Current phase:** BRACE v2.2 is active. `Question.Take.Image` is committed in `5a4e7079`, `Question.Take.Explanation` in `38df0657`, the history/reporting workflow in `bdc97c10`, `Question.Take.Feedback` in `dc1ca936`, `Question.Take.NumPad` in `2e0e0ced`, `Question.Take.Feedback.Numerical` in `59f52606`, and `Question.Take.MultipleChoice.Score` is now evidence-complete in the working tree with targeted mocked/backend greens plus a green second full migration gate after an isolated legacy numpad replay.
 - **Execution mode:** autonomous milestones after upgrade approval
 - **Source artifacts used to hydrate this plan:**
   - current request / prompt
@@ -108,7 +108,7 @@ Rule: a pull is required if either tier guidance or expertise preference require
 - Do not modify legacy Playwright tests during migration.
 
 ### Open decisions / questions
-- Whether `Question.Take.EasyMode` still needs dedicated standalone WTR coverage after the score slice closes; current quiz-level easy-mode coverage is strong, but standalone `/question/:id` proof is still absent.
+- Whether any standalone `Question.Take.*` gap remains after `Question.Take.EasyMode`; current evidence says easy mode is the last open standalone route seam because `/question/:id` uses `question.easyMode` without the quiz difficulty override branch.
 - Final CI policy for dual-suite execution cadence.
 - Whether timer-related helpers need stronger proof obligations than the current score-family contract.
 
@@ -122,9 +122,13 @@ Rule: a pull is required if either tier guidance or expertise preference require
   - mocked numerical-feedback WTR green in Chromium and Firefox
   - backend numerical-feedback WTR green in Chromium and Firefox
   - `bash ./scripts/test-migration.sh` green with the legacy Playwright lane still passing inside the same run
-- The next implementation milestone is `Question.Take.MultipleChoice.Score` and must still prove targeted mocked/backend WTR green in Chromium and Firefox plus `bash ./scripts/test-migration.sh`.
+- `Question.Take.MultipleChoice.Score` now joins the acceptance baseline:
+  - mocked standalone score WTR green in Chromium and Firefox
+  - backend standalone score WTR green in Chromium and Firefox
+  - first full gate red was isolated to the recurring legacy Playwright numpad residue; the isolated numpad replay passed `5/5`, and the second `bash ./scripts/test-migration.sh` rerun exited green
+- The next implementation milestone is `Question.Take.EasyMode` and must still prove targeted mocked/backend WTR green in Chromium and Firefox plus `bash ./scripts/test-migration.sh`.
 - If a later slice touches backend-WTR harness behavior again, rerun the full gate and compare against the current host-aware wrapper baseline.
-- If the next slice involves numpad behavior, treat any repeat of the earlier isolated legacy Playwright numpad red as a real RCA input until disproven.
+- If the next full gate repeats the legacy Playwright numpad red again, escalate with the accumulated recurrence evidence instead of silently accepting it.
 
 ---
 
@@ -150,37 +154,38 @@ Rule: a pull is required if either tier guidance or expertise preference require
 ## 6) Current milestone
 
 ### BRACE Milestone (current)
-- **Name:** `Question.Take.MultipleChoice.Score`
-- **Intent / behavior:** Add dedicated mocked and backend WTR coverage for standalone partially scored multiple-choice questions on `/question/:id`, proving question-page score and feedback combinations without widening the broader quiz score helpers unless repetition forces it.
+- **Name:** `Question.Take.EasyMode`
+- **Intent / behavior:** Add dedicated mocked and backend WTR coverage for standalone easy-mode correct-answer count behavior on `/question/:id`, proving the question-level `easyMode` branch without the quiz difficulty override layer.
 - **Entry conditions:**
   - `Question.Take.Image`, `Question.Take.Explanation`, and `Question.Take.Feedback` are already committed with milestone reports.
   - `Question.Take.NumPad` is committed in `2e0e0ced`.
-  - `Question.Take.Feedback.Numerical` is evidence-complete with targeted mocked/backend greens and a green full gate.
-  - Remaining standalone candidates were rechecked against current WTR coverage; `Question.Take.MultipleChoice.Score` is the thinner remaining standalone seam because `Question.Take.EasyMode` already has dedicated quiz-level WTR overlap.
+  - `Question.Take.Feedback.Numerical` is committed in `59f52606`.
+  - `Question.Take.MultipleChoice.Score` is evidence-complete with targeted mocked/backend greens, an isolated legacy numpad replay green, and a green second full gate.
+  - `Question.Take.EasyMode` remains the last apparent standalone gap because `QuestionTakePage` passes no `quizDifficulty`, so the quiz-level easy-mode tests do not prove the standalone route branch directly.
 - **Expected inventory / touched areas:**
-  - `frontend/tests/wtr/mocked/question-take-multiple-choice-score.test.tsx`
-  - `frontend/tests/wtr/backend/question-take-multiple-choice-score.backend.test.tsx`
+  - `frontend/tests/wtr/mocked/question-take-easy-mode.test.tsx`
+  - `frontend/tests/wtr/backend/question-take-easy-mode.backend.test.tsx`
   - `PLANS.md`
-  - `history/2026-03-26-question-take-multiple-choice-score.md`
+  - `history/2026-03-26-question-take-easy-mode.md`
 - **Top risks (with tiers / mission-area mapping):**
-  - Existing quiz-level partial-score WTR coverage could create false confidence about standalone `/question/:id` score rendering. (High / Standalone question behavior integrity)
-  - The score slice mixes feedback and point display, so a naive test could duplicate quiz-result coverage without proving the standalone question-page contract. (Medium / Scope drift)
-  - The full gate could still surface unrelated legacy or backend-harness residue after the targeted score tests are green. (Medium / Harness / gate reliability)
+  - Existing quiz-level easy-mode WTR coverage could create false confidence about standalone `/question/:id` correct-answer count behavior. (High / Standalone question behavior integrity)
+  - The standalone route only exercises the `question.easyMode` branch, so naive reuse of the quiz tests could miss the absence/presence contract for single-choice vs multiple-choice questions. (Medium / Scope drift)
+  - The full gate could still surface the recurring legacy numpad residue again after the targeted easy-mode tests are green. (Medium / Harness / gate reliability)
 - **Planned assurances:**
-  - Keep the slice feature-local on `/question/:id` and assert both score text and correctness feedback directly on the question page.
-  - Reuse existing quiz-level partial-score evidence only as overlap context, not as proof of standalone parity.
-  - Preserve the existing full-gate baseline as the acceptance floor after the targeted score runs.
+  - Keep the slice feature-local on `/question/:id` and assert both presence and absence of `.correct-answers-count` directly on the standalone question page.
+  - Reuse existing quiz-level easy-mode evidence only as overlap context, not as proof of standalone parity.
+  - Preserve the full-gate recurrence protocol: targeted greens first, then the command of record, escalating only if the numpad residue persists after isolation.
 - **Planned evidence:**
-  - direct inspection of the standalone feature spec vs current quiz-level score coverage
-  - targeted mocked/backend WTR runs for the new standalone score files
+  - direct inspection of the standalone feature spec vs current `QuestionForm` easy-mode branch and quiz-level overlap
+  - targeted mocked/backend WTR runs for the new standalone easy-mode files
   - `bash ./scripts/test-migration.sh`
-- **Exit condition:** met when the standalone score route has dedicated mocked/backend coverage, the full gate is green, and the milestone report plus commit are recorded
-- **Expected commit shape:** one milestone commit referencing the score report path
+- **Exit condition:** met when the standalone easy-mode route has dedicated mocked/backend coverage, the full gate is green, and the milestone report plus commit are recorded
+- **Expected commit shape:** one milestone commit referencing the easy-mode report path
 
 ### Upcoming milestones
-1. Implement mocked and backend WTR coverage for `Question.Take.MultipleChoice.Score` while keeping helper churn feature-local unless repetition justifies widening a shared seam.
-2. Run targeted evidence plus `bash ./scripts/test-migration.sh`, write the score milestone report, commit the slice, and update residuals.
-3. Reassess the remaining `Question.Take.EasyMode` standalone gap and continue unless a pull condition fires.
+1. Implement mocked and backend WTR coverage for `Question.Take.EasyMode` while keeping helper churn feature-local unless repetition justifies widening a shared seam.
+2. Run targeted evidence plus `bash ./scripts/test-migration.sh`, write the easy-mode milestone report, commit the slice, and update residuals.
+3. Reassess whether the standalone `Question.Take.*` backlog is fully closed and continue unless a pull condition fires.
 
 ---
 
@@ -190,10 +195,10 @@ Keep only the risks that matter for steering.
 
 | ID | Risk / uncertainty | Tier | Mission risk area | Why it matters | Current handling | Residual | Cheapest next proof | Pull class if escalation needed |
 |---|---|---|---|---|---|---|---|---|
-| R1 | Quiz-level partial-score coverage could still hide a standalone `/question/:id` score gap now that `Question.Take.Feedback.Numerical` is closed. | High | Standalone question behavior integrity | Results-page score coverage does not automatically prove the question-page score label and feedback contract. | Take `Question.Take.MultipleChoice.Score` next with dedicated standalone mocked/backend tests. | Medium until the standalone score slice is closed. | Add standalone question-page score assertions in mocked and backend WTR tests, then rerun the full gate. | BRACE Pull |
-| R2 | Legacy Playwright still has low-grade race potential around `Question.Take.NumPad`, even though the latest full gate was green. | Medium | Harness / gate reliability | A repeated numpad red in a different environment could still be either legacy race noise or a real regression signal. | The latest full gate passed cleanly; keep the recurrence protocol instead of treating the residue as closed everywhere. | Low | Re-run the full gate in CI or a fresh workspace; if the same failure repeats, escalate. | BRACE Pull |
+| R1 | Quiz-level easy-mode coverage could still hide a standalone `/question/:id` easy-mode gap now that the score slice is closed. | High | Standalone question behavior integrity | The standalone route uses `question.easyMode` directly and does not traverse the quiz difficulty override branch. | Take `Question.Take.EasyMode` next with dedicated standalone mocked/backend tests. | Medium until the standalone easy-mode slice is closed. | Add standalone presence/absence assertions for `.correct-answers-count`, then rerun the full gate. | BRACE Pull |
+| R2 | Legacy Playwright still has low-grade race potential around `Question.Take.NumPad`, and it recurred once during the score milestone before clearing on isolation and rerun. | Medium | Harness / gate reliability | The recurrence could still be either load-related residue or a real regression signal in another environment. | Keep the recurrence protocol explicit: isolated legacy rerun first, then a second full gate before accepting the slice. | Low-Medium | Re-run the full gate in CI or a fresh workspace; if the same failure repeats again, escalate with the accumulated evidence. | BRACE Pull |
 | R3 | The host-aware backend-WTR wrapper is proven locally but not yet in a materially different environment. | Medium | Environment / external variability | CI or a fresh workspace could surface a new listener/proxy seam. | Keep the current wrapper as the baseline and compare future contradictory evidence against it. | Medium | Run the command of record in CI or a fresh workspace after the next slice. | System Pull |
-| R4 | `Question.Take.EasyMode` still lacks dedicated standalone WTR coverage even though quiz-level easy-mode tests already exist. | Medium | Scope / sequencing drift | Borrowed quiz-level confidence can mask a remaining standalone route gap. | Close the score slice first, then reassess whether easy mode still needs dedicated `/question/:id` proof. | Medium | Re-check the standalone easy-mode route after the score milestone and either implement it or mark the residual explicitly. | BRACE Pull |
+| R4 | Timer/helper proof remains narrower than the overall quiz-flow contract. | Medium | Standalone question behavior integrity | Future timer-related changes could reach beyond the currently proven score-family helper contract. | Keep the residual explicit instead of silently assuming the timer concern is closed. | Medium | Add a focused timer-helper experiment only if a later slice touches timer-sensitive behavior. | BRACE Pull |
 | R5 | Repo-local `AGENTS.md` is no longer the active control source because instructions moved to `$HOME/.codex`. | Low | Environment / external variability | Future resumes need the right control source and should not treat the staged repo deletion as accidental breakage. | Record the system-wide source explicitly in plan notes and resume protocol context. | Low | Confirm future resumes still load the system-wide instructions first. | Environment Pull |
 
 ---
@@ -226,7 +231,8 @@ Short milestone closeouts only. These are the running history and lookup layer.
 | 2026-03-23 | `Question.Take.Feedback` closeout | Added mocked/backend feedback WTR coverage for standalone question correctness text and multiple-choice per-answer feedback classes. | Targeted mocked feedback green; targeted backend feedback green; first full gate hit one isolated legacy numpad red; isolated rerun green; second full gate green with `migration_total_seconds=517`. | The only contradictory signal was an unrelated legacy Playwright race that did not reproduce. | `dc1ca936` |
 | 2026-03-26 | BRACE v2.2 upgrade hydration | Rehydrated the v2.2 `PLANS.md` stub from `PLANS-old`, the committed post-feedback baseline, and the new bootstrap prompt. | Documentation and repo-state inspection only. | The active run remains valid; upgrade approval confirmed the repo-level `AGENTS.md` has been replaced by system-wide instructions in `$HOME/.codex`. | N/A |
 | 2026-03-26 | `Question.Take.NumPad` closeout | Added mocked/backend WTR coverage for standalone numpad answer selection on `/question/:id`, including a WTR-specific wait for the window keydown listener effect before dispatching the synthetic event. | Targeted mocked numpad green (`5 passed`, `0 failed`, `10.9s`); targeted backend numpad green (`5 passed`, `0 failed`, `6.1s` after server startup); full gate green with `wtr_mocked_seconds=47`, `playwright_seconds=410`, `wtr_backend_seconds=47`, `migration_total_seconds=529`. | The keyboard path stayed feature-local; the only issue was a test-timing race around the mount effect, not a production bug. | `2e0e0ced` |
-| 2026-03-26 | `Question.Take.Feedback.Numerical` closeout | Added mocked/backend WTR coverage for the standalone `/test-numerical-question` route and reduced the remaining standalone backlog to score and easy mode. | Targeted mocked numerical green (`2 passed`, `0 failed`, `10.3s`); targeted backend numerical green (`2 passed`, `0 failed`, `5.1s` after server startup); full gate green with `wtr_mocked_seconds=48`, `playwright_seconds=412`, `wtr_backend_seconds=52`, `migration_total_seconds=537`. | The numerical route needed only feature-local proof; no production or shared-helper changes were required. | pending milestone commit |
+| 2026-03-26 | `Question.Take.Feedback.Numerical` closeout | Added mocked/backend WTR coverage for the standalone `/test-numerical-question` route and reduced the remaining standalone backlog to score and easy mode. | Targeted mocked numerical green (`2 passed`, `0 failed`, `10.3s`); targeted backend numerical green (`2 passed`, `0 failed`, `5.1s` after server startup); full gate green with `wtr_mocked_seconds=48`, `playwright_seconds=412`, `wtr_backend_seconds=52`, `migration_total_seconds=537`. | The numerical route needed only feature-local proof; no production or shared-helper changes were required. | `59f52606` |
+| 2026-03-26 | `Question.Take.MultipleChoice.Score` closeout | Added mocked/backend WTR coverage for standalone partial score feedback and score labels on `/question/:id`, then resolved one contradictory full-gate red via the legacy numpad recurrence protocol. | Targeted mocked score green (`6 passed`, `0 failed`, `11.2s`); targeted backend score green (`6 passed`, `0 failed`, `6.6s` after server startup); first full gate hit one isolated legacy Chromium numpad red; isolated legacy rerun green (`5 passed`, `11.0s`); second full gate green with mocked WTR `71 passed`, backend WTR `50 passed`, `wtr_backend_seconds=48`, `migration_total_seconds=511`, and Playwright lane status `passed` in `test-results/.last-run.json` (exact green summary line was not retained in the terminal capture). | The score slice stayed feature-local; the only contradiction was the known legacy numpad residue, not a score-route regression. | pending milestone commit |
 
 ---
 
@@ -243,6 +249,7 @@ Use this if milestone BRACE reports are stored as separate files.
 | `Question.Take.Feedback` closeout | `history/2026-03-23-question-take-feedback.md` | Full milestone report for the feedback slice, including the isolated legacy numpad race and the clean rerun evidence. |
 | `Question.Take.NumPad` closeout | `history/2026-03-26-question-take-numpad.md` | Full milestone report for the numpad slice, including the WTR listener-timing fix and the green full gate. |
 | `Question.Take.Feedback.Numerical` closeout | `history/2026-03-26-question-take-feedback-numerical.md` | Full milestone report for the numerical standalone route, including the dedicated route-level evidence and the updated remaining backlog. |
+| `Question.Take.MultipleChoice.Score` closeout | `history/2026-03-26-question-take-multiple-choice-score.md` | Full milestone report for the standalone score route, including the contradictory legacy numpad rerun and the green second full gate. |
 | BRACE v2.2 milestone template | `history/TEMPLATE-v2.2.md` | Template to use for future v2.2 milestone plan/report files. |
 
 ---
@@ -264,6 +271,7 @@ Examples: helper-contract rule, seam pattern, quality-control rule, isolation ru
 - After each completed milestone, write the full BRACE report to `history/YYYY-MM-DD-<milestone-slug>.md` and reference that path in the milestone commit message.
 - For WTR tests that drive window-level keyboard listeners installed in `useEffect`, wait for mount effects before dispatching the synthetic key event.
 - Special standalone routes like `/test-numerical-question` can usually stay feature-local by reusing the existing form harness helpers instead of widening shared fixtures.
+- Standalone partial-score proof can also stay feature-local by reusing the existing question-form selection helpers and the `(Partial Score)` title marker that already drives the product correctness label.
 
 ---
 
