@@ -5,7 +5,7 @@ Date: 2026-03-27
 Status: completed
 Primary mission: Continue the incremental Playwright-BDD to WTR migration while preserving the legacy Playwright suite until parity is proven.
 PLANS ref: `PLANS.md`
-Commit(s): pending milestone commit
+Commit(s): `14aa5824`
 Related pull(s): none
 Depends on: `Question.Take.Image`, `Question.Take.Explanation`, `Question.Take.Feedback`, `Question.Take.NumPad`, `Question.Take.Feedback.Numerical`, `Question.Take.MultipleChoice.Score`, `Question.Take.EasyMode`, frontier selection closeout
 

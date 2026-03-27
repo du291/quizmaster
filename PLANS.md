@@ -28,7 +28,7 @@ Use milestone artifacts in `history/` for detailed BRACE Plan/Report history, pu
 
 ### Current operating context
 - **Work type:** migration
-- **Current phase:** The dedicated standalone `Question.Take.*` backlog is closed through `7c70d13f`; BRACE v2.3 upgrade is approved; `Question.Edit.GUI` is evidence-complete in the working tree with targeted mocked/backend greens plus a green full migration gate.
+- **Current phase:** The dedicated standalone `Question.Take.*` backlog is closed through `7c70d13f`; BRACE v2.3 upgrade is approved; `Question.Edit.GUI` and `Question.Edit.GUI.ShowHideExplanation` are closed with targeted mocked/backend greens plus green full migration gates.
 - **Execution mode:** autonomous milestones
 - **Source artifacts used to hydrate this plan:**
   - current request / prompt
@@ -105,7 +105,7 @@ Rule: a pull is required if either tier guidance or expertise preference require
 - Do not modify legacy Playwright tests during migration.
 
 ### Open decisions / questions
-- Which remaining `Question.Edit.*` variant should come next now that `Question.Edit.GUI` is closed.
+- Whether the remaining edit validations should stay bundled as one final edit-family milestone after `Question.Edit.GUI.DeleteAnswer`.
 - Final CI policy for dual-suite execution cadence.
 - Whether timer-related helpers need stronger proof obligations than the current score-family contract.
 
@@ -134,11 +134,11 @@ Rule: a pull is required if either tier guidance or expertise preference require
 
 This section is intentionally compact. The authoritative body for the current milestone lives in the referenced artifact.
 
-- **Milestone ID:** `2026-03-27-question-edit-gui`
+- **Milestone ID:** `2026-03-27-question-edit-gui-show-hide-explanation`
 - **Status:** completed
-- **One-line goal:** Close `Question.Edit.GUI` as the first non-standalone edit-route migration slice.
-- **Exit condition:** met; targeted mocked/backend greens plus a green full migration gate are recorded in `history/2026-03-27-question-edit-gui.md`.
-- **Active artifact path:** `history/2026-03-27-question-edit-gui.md`
+- **One-line goal:** Close `Question.Edit.GUI.ShowHideExplanation` as the next bounded edit-route migration slice.
+- **Exit condition:** met; targeted mocked/backend greens plus a green full migration gate are recorded in `history/2026-03-27-question-edit-gui-show-hide-explanation.md`.
+- **Active artifact path:** `history/2026-03-27-question-edit-gui-show-hide-explanation.md`
 - **Expected commit shape:** One or more VCS commits when VCS is available.
 
 Before working, read the active artifact referenced here.
@@ -152,7 +152,7 @@ Resolved or milestone-local detail should move to milestone artifacts and journa
 
 | ID | Risk / uncertainty | Tier | Mission risk area | Current handling | Residual | Cheapest next proof | Pull class if escalation needed |
 |---|---|---|---|---|---|---|---|
-| R1 | `Question.Edit.GUI` is closed, but the remaining `Question.Edit.*` variants still need a deliberate next-slice choice. | Medium | Scope / sequencing drift | Keep the next slice inside the remaining edit family unless a fresh inventory check shows a better frontier. | Medium until the next edit variant is selected explicitly. | Compare delete-answer, show-hide-explanation, and validation variants against the new helper and pick the cheapest high-value slice. | BRACE Pull |
+| R1 | `Question.Edit.GUI.ShowHideExplanation` is closed, but the remaining edit frontier is still open: `Question.Edit.GUI.DeleteAnswer` plus the validation variants. | Medium | Scope / sequencing drift | Keep the next slice inside the remaining edit family, with delete-answer currently looking like the cheapest route-local behavior before validations. | Medium until the next edit slice is executed. | Add mocked/backend WTR coverage for `Question.Edit.GUI.DeleteAnswer` and then reassess whether the remaining validations should stay bundled. | BRACE Pull |
 | R2 | Legacy Playwright still has low-grade race potential around `Question.Take.NumPad`, and it recurred once during the score milestone before clearing on isolation and rerun. | Medium | Harness / gate reliability | Keep the recurrence protocol explicit: isolated legacy rerun first, then a second full gate before accepting the slice. | Low-Medium | Re-run the full gate in CI or a fresh workspace; if the same failure repeats again, escalate with the accumulated evidence. | BRACE Pull |
 | R3 | The host-aware backend-WTR wrapper is proven locally but not yet in a materially different environment. | Medium | Environment / external variability | Keep the current wrapper as the baseline and compare future contradictory evidence against it. | Medium | Run the command of record in CI or a fresh workspace after the next slice. | System Pull |
 | R4 | Timer/helper proof remains narrower than the overall quiz-flow contract. | Medium | Slice-level behavior integrity | Keep the residual explicit instead of silently assuming the timer concern is closed. | Medium | Add a focused timer-helper experiment only if a later slice touches timer-sensitive behavior. | BRACE Pull |
@@ -190,7 +190,8 @@ Use milestone artifacts for the full detail.
 | 2026-03-26 | `Question.Take.EasyMode` closeout | Added mocked/backend WTR coverage for standalone easy-mode correct-answer count behavior and closed the dedicated standalone question backlog. | Targeted mocked/backend easy mode green; full gate green with mocked WTR `75 passed`, backend WTR `54 passed`, `migration_total_seconds=517`, and Playwright lane status `passed`. | The standalone `Question.Take.*` backlog now appears fully covered. | `7c70d13f` |
 | 2026-03-27 | BRACE v2.3 upgrade hydration | Rehydrated the blank v2.3 `PLANS.md` from `PLANS-old`, `BOOTSTRAP_PROMPT.md`, recent history artifacts, and current repo inventory. | Repo-state inspection and inventory spot checks only; no product tests run. | BRACE v2.3 changes the control surface shape, not the underlying migration mission. | N/A |
 | 2026-03-27 | Frontier selection closeout | Remapped the remaining inventory after standalone question closure and selected `Question.Edit.GUI` as the next implementation slice. | Inventory comparison between `specs/features/` and `frontend/tests/wtr/`; committed baseline anchored to `7c70d13f`. | `make/question` is now the highest-leverage uncovered family because it reuses the proven question-form seam while opening the whole edit tranche. | N/A |
-| 2026-03-27 | `Question.Edit.GUI` closeout | Added mocked/backend WTR coverage for edit-route prepopulation, persisted edits, and single-to-multiple-choice persistence, plus a shared WTR question-form helper. | Targeted mocked green (`3 passed`, `0 failed`, `45.2s`); targeted backend green (`3 passed`, `0 failed`, `7.4s` after server startup); full gate green with mocked WTR `78 passed`, Playwright `153 passed`, `2 skipped`, backend WTR `57 passed`, and `migration_total_seconds=555`. | The first non-standalone edit slice stayed WTR-local and did not trigger the known legacy numpad residue. | pending milestone commit |
+| 2026-03-27 | `Question.Edit.GUI` closeout | Added mocked/backend WTR coverage for edit-route prepopulation, persisted edits, and single-to-multiple-choice persistence, plus a shared WTR question-form helper. | Targeted mocked green (`3 passed`, `0 failed`, `45.2s`); targeted backend green (`3 passed`, `0 failed`, `7.4s` after server startup); full gate green with mocked WTR `78 passed`, Playwright `153 passed`, `2 skipped`, backend WTR `57 passed`, and `migration_total_seconds=555`. | The first non-standalone edit slice stayed WTR-local and did not trigger the known legacy numpad residue. | `14aa5824` |
+| 2026-03-27 | `Question.Edit.GUI.ShowHideExplanation` closeout | Added mocked/backend WTR coverage for edit-route explanation visibility defaults and toggle behavior. | Targeted mocked green (`3 passed`, `0 failed`, `5.8s`); targeted backend green (`3 passed`, `0 failed`, `8.0s` after server startup); full gate green with mocked WTR `81 passed`, Playwright `153 passed`, `2 skipped`, backend WTR `60 passed`, and `migration_total_seconds=618`. | Direct DOM assertions were enough; no new helper seam was needed for the explanation-visibility slice. | pending milestone commit |
 
 ---
 
@@ -200,9 +201,10 @@ Use this as the deterministic map from live state to milestone detail.
 
 | Artifact kind | ID / Milestone | Path / ref | Why it may matter later |
 |---|---|---|---|
-| Current milestone | `2026-03-27-question-edit-gui` | `history/2026-03-27-question-edit-gui.md` | Authoritative plan and report for the active `Question.Edit.GUI` implementation slice. |
+| Current milestone | `2026-03-27-question-edit-gui-show-hide-explanation` | `history/2026-03-27-question-edit-gui-show-hide-explanation.md` | Authoritative plan and report for the active `Question.Edit.GUI.ShowHideExplanation` slice. |
 | Milestone history | `2026-03-27-frontier-selection` | `history/2026-03-27-migration-frontier-selection.md` | Records why `Question.Edit.GUI` became the first non-standalone slice after standalone question closure. |
 | Milestone history | `2026-03-27-question-edit-gui` | `history/2026-03-27-question-edit-gui.md` | Full milestone report for the first non-standalone edit-route slice, including targeted mocked/backend proof and the green full gate. |
+| Milestone history | `2026-03-27-question-edit-gui-show-hide-explanation` | `history/2026-03-27-question-edit-gui-show-hide-explanation.md` | Full milestone report for the edit-route explanation-visibility slice, including targeted mocked/backend proof and the green full gate. |
 | Milestone history | `Question.Take.EasyMode` | `history/2026-03-26-question-take-easy-mode.md` | Proves the dedicated standalone question backlog is closed and captures the latest green full gate. |
 | Milestone history | `Question.Take.MultipleChoice.Score` | `history/2026-03-26-question-take-multiple-choice-score.md` | Captures the most recent contradictory legacy numpad rerun protocol. |
 | Milestone history | `Question.Take.NumPad` | `history/2026-03-26-question-take-numpad.md` | Records the WTR keyboard-listener timing seam and the accepted local fix. |
@@ -227,6 +229,7 @@ Use this for things that should influence future work.
 - For WTR tests that drive window-level keyboard listeners installed in `useEffect`, wait for mount effects before dispatching the synthetic key event.
 - Standalone display-only proof can stay feature-local when route behavior is driven entirely by render-time state and does not require answer submission.
 - For edit-route persistence proof, reopening through the workspace redirect is stronger and cheaper than bypassing navigation because it proves both the PATCH contract and the post-save route.
+- For edit-route explanation-visibility proof, direct assertions against `.answer-row input.explanation` can be enough; no extra helper seam is needed when the contract is purely local DOM state.
 
 ---
 
