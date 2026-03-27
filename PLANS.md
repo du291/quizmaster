@@ -109,17 +109,6 @@ Rule: a pull is required if either tier guidance or expertise preference require
 - Final CI policy for dual-suite execution cadence.
 - Whether timer-related helpers need stronger proof obligations than the current score-family contract.
 
-### Required evidence before current milestone is done
-- `PLANS.md` must reflect the committed post-easy-mode baseline through `7c70d13f`, the BRACE v2.3 scaffold in `082579f6`, and the completed `Question.Edit.GUI` milestone state.
-- The frontier-selection artifact must record why `Question.Edit.GUI` became the next slice.
-- `Question.Edit.GUI` now joins the acceptance baseline:
-  - targeted mocked edit WTR green in Chromium and Firefox (`3 passed`, `0 failed`, `45.2s`)
-  - targeted backend edit WTR green in Chromium and Firefox (`3 passed`, `0 failed`, `7.4s` after server startup)
-  - `bash ./scripts/test-migration.sh` green with mocked WTR `78 passed`, Playwright `153 passed`, `2 skipped`, backend WTR `57 passed`, `wtr_mocked_seconds=56`, `playwright_seconds=415`, `wtr_backend_seconds=59`, `migration_total_seconds=555`, and Playwright lane status `passed` in `test-results/.last-run.json`
-- The next milestone should likely stay inside the remaining `Question.Edit.*` family unless a fresh inventory check materially changes the frontier map.
-- If a later slice touches backend-WTR harness behavior again, rerun the full gate and compare against the current host-aware wrapper baseline.
-- If the next full gate repeats the legacy Playwright numpad red again, escalate with the accumulated recurrence evidence instead of silently accepting it.
-
 ---
 
 ## 5) Validation gate(s)
