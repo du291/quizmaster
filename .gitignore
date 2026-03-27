@@ -23,3 +23,5 @@ site/docs/*.html
 node_modules/
 pnpm-lock.yaml
 package.json
+
+BOOTSTRAP_PROMPT.md

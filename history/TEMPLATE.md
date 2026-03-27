@@ -106,7 +106,6 @@ Record each item as:
 If VCS is available, include objective scope evidence:
 
 ```text
-
 git diff --name-status
 <output>
 
@@ -142,3 +141,9 @@ Write `None` if there were no meaningful deltas.
 - 
 - 
 
+## Milestone Closeout Choice
+
+Choose exactly one and say it explicitly:
+1. **Continue autonomously** — instantiate the next milestone and continue.
+2. **Emit a Pull** — the next step is a real crossroads or needs user action.
+3. **Emit BRACE Final** — the approved mission is complete or further work would exceed scope.
