@@ -1,13 +1,13 @@
 # BRACE Milestone
 
-Milestone: 
-Date: 
-Status: planned / in_progress / completed / blocked
-Primary mission: 
-PLANS ref: 
-Commit(s): 
-Related pull(s): none / 
-Depends on: none / 
+Milestone: `<short id / name>`
+Date: `<YYYY-MM-DD>`
+Status: `pending | in_progress | blocked | completed | failed | abandoned`
+Primary mission: `<one line>`
+PLANS ref: `<PLANS.md section / anchor / line>`
+Commit(s): `<hashes | pending milestone commit | none>`
+Related pull(s): `<none | refs>`
+Depends on: `<prior milestones or none>`
 
 ## BRACE Plan Snapshot
 
@@ -16,11 +16,9 @@ Depends on: none /
 - 
 
 ### R — Risks (top 1–5)
-1. 
+1. `<Tier / Risk area>: ...`
 2. 
 3. 
-
-For each risk, include tier and mission risk-area mapping where possible.
 
 ### A — Assurances
 - 
@@ -35,49 +33,48 @@ For each risk, include tier and mission risk-area mapping where possible.
   - Cheapest proof: 
 
 ### Planned Evidence
-Record each item as:
-- **Intent:** what this check is meant to prove
-- **Command / artifact:** what was run or inspected
-- **Result:** what happened
-- **Interpretation:** what this proves and what it does not prove
-
-- Intent: 
-  Command / artifact: 
-  Result: 
-  Interpretation: 
+- Intent:
+  Command / artifact:
+  Result:
+  Interpretation:
+- Intent:
+  Command / artifact:
+  Result:
+  Interpretation:
 
 ### Planned Scope Inventory
 - 
+- 
+
+### Exit condition
+- 
 
 ### Planned Trace
-
 | Behavior | Risk (Tier / Area) | Assurance | Planned Evidence | Residual risk | Cheapest proof |
 |---|---|---|---|---|---|
-|  |  |  |  |  |  |
+| | | | | | |
 
 ## Execution Notes
 - 
 - 
 
 ## Pulls Handled During This Milestone
-
 ### Pull 1
-- **Type:** BRACE Pull / System Pull / Environment Pull
-- **Trigger:** 
-- **Question / decision needed:** 
-- **Resolution:** 
-- **Impact on milestone:** 
+- Type: `BRACE Pull | System Pull | Environment Pull`
+- Trigger:
+- Question / decision needed:
+- Resolution:
+- Impact on milestone:
 
-### Pull 2
-- **Type:** BRACE Pull / System Pull / Environment Pull
-- **Trigger:** 
-- **Question / decision needed:** 
-- **Resolution:** 
-- **Impact on milestone:** 
-
-(omit unused pull blocks if none occurred)
+## Current State
+Use this section when status is `pending`, `in_progress`, or `blocked`.
+- What is true right now:
+- What remains blocked / incomplete:
+- Current evidence or hydration notes:
+- Next action / cheapest proof:
 
 ## BRACE Report
+Use this section when status is `completed`, `failed`, or `abandoned`.
 
 ### Outcome
 - 
@@ -88,42 +85,34 @@ Record each item as:
 - 
 
 ### Evidence Run
-Record each item as:
-- **Intent:**
-- **Command / artifact:**
-- **Result:**
-- **Interpretation:**
-
-- Intent: 
-  Command / artifact: 
-  Result: 
-  Interpretation: 
+- Intent:
+  Command / artifact:
+  Result:
+  Interpretation:
+- Intent:
+  Command / artifact:
+  Result:
+  Interpretation:
 
 ### Actual Scope Inventory
 - 
 - 
 
 If VCS is available, include objective scope evidence:
-
 ```text
 git diff --name-status
-<output>
 
 git status --porcelain
-<output>
 ```
-
-If no VCS is available, say so explicitly.
 
 ### Remaining Uncertainty
 - 
 - Cheapest next proof: 
 
 ### Actual Trace
-
 | Behavior | Risk (Tier / Area) | Assurance | Actual Evidence | Residual risk | Cheapest proof |
 |---|---|---|---|---|---|
-|  |  |  |  |  |  |
+| | | | | | |
 
 ## Delta From Plan
 - New risks discovered:
@@ -135,15 +124,19 @@ If no VCS is available, say so explicitly.
 - Decision changes:
   - 
 
-Write `None` if there were no meaningful deltas.
-
 ## Reusable Learning / Handoff
 - 
 - 
 
-## Milestone Closeout Choice
+## Milestone closeout choice
+Choose exactly one and state it explicitly:
+- **Continue autonomously**
+- **Emit a Pull**
+- **Emit BRACE Final**
 
-Choose exactly one and say it explicitly:
-1. **Continue autonomously** — instantiate the next milestone and continue.
-2. **Emit a Pull** — the next step is a real crossroads or needs user action.
-3. **Emit BRACE Final** — the approved mission is complete or further work would exceed scope.
+Before choosing, run the closeout consistency check.
+If choosing **Continue autonomously**, complete the state transition:
+- mark current milestone closed
+- instantiate/select next active milestone
+- update `PLANS.md`
+- repair stale bookkeeping
