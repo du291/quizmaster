@@ -1,4 +1,4 @@
-import { setElementValue, setTextValue, waitFor, waitForElement } from './test-harness.tsx'
+import { clickElement, setElementValue, setTextValue, waitFor, waitForElement } from './test-harness.tsx'
 
 export interface QuestionFormAnswerSnapshot {
     readonly text: string
@@ -39,6 +39,9 @@ const answerCorrectInput = (index: number) =>
         answerRow(index).querySelector<HTMLInputElement>('input[type="checkbox"], input[type="radio"]'),
         `Missing answer correctness input ${index}`,
     )
+
+const validationErrorAlerts = () =>
+    Array.from(document.querySelectorAll<HTMLElement>('.alert.error[data-testid]'))
 
 export const waitForQuestionEditLoaded = async (expectedQuestionText?: string) => {
     await waitFor(() => document.querySelector<HTMLInputElement>('#is-loaded')?.value === 'loaded', 5000)
@@ -86,6 +89,37 @@ export const selectAnswerAsCorrect = async (index: number) => {
     if (input.checked) return
     input.click()
     await waitFor(() => answerCorrectInput(index).checked)
+}
+
+export const setAnswerCorrect = async (index: number, checked: boolean) => {
+    const input = answerCorrectInput(index)
+    if (input.checked === checked) return
+    input.click()
+    await waitFor(() => answerCorrectInput(index).checked === checked)
+}
+
+export const addAnswer = async () => {
+    const nextAnswerCount = answerRows().length + 1
+    await clickElement('#add-answer')
+    await waitFor(() => answerRows().length === nextAnswerCount)
+}
+
+export const readAnswerCorrectInputTypes = (): readonly string[] => answerRows().map((_, index) => answerCorrectInput(index).type)
+
+export const waitForAnswerCorrectInputTypes = async (expectedTypes: readonly string[], timeoutMs = 5000) => {
+    const expected = JSON.stringify(expectedTypes)
+    await waitFor(() => JSON.stringify(readAnswerCorrectInputTypes()) === expected, timeoutMs)
+}
+
+export const readValidationErrorCodes = (): readonly string[] =>
+    validationErrorAlerts()
+        .map(alert => alert.dataset.testid ?? '')
+        .filter(code => code !== '')
+        .sort()
+
+export const waitForValidationErrors = async (expectedCodes: readonly string[], timeoutMs = 5000) => {
+    const expected = [...expectedCodes].sort()
+    await waitFor(() => JSON.stringify(readValidationErrorCodes()) === JSON.stringify(expected), timeoutMs)
 }
 
 export const readQuestionFormSnapshot = (): QuestionFormSnapshot => ({
