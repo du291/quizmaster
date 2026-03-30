@@ -5,7 +5,7 @@ Date: `<YYYY-MM-DD>`
 Status: `pending | in_progress | blocked | completed | failed | abandoned`
 Primary mission: `<one line>`
 PLANS ref: `<PLANS.md section / anchor / line>`
-Commit(s): `<hashes | pending milestone commit | none>`
+Commit(s): `<hashes | packaging milestone | pending milestone commit | none>`
 Related pull(s): `<none | refs>`
 Depends on: `<prior milestones or none>`
 
@@ -60,9 +60,10 @@ Depends on: `<prior milestones or none>`
 
 ## Pulls Handled During This Milestone
 ### Pull 1
-- Type: `BRACE Pull | System Pull | Environment Pull`
+- Type: `Decision Ownership Pull | Evidence Pull | Capability Pull`
+- Area tag(s): `<product | risk | testing | debugging | system/harness | environment | security | ...>`
 - Trigger:
-- Question / decision needed:
+- Question / decision / evidence / capability needed:
 - Resolution:
 - Impact on milestone:
 
@@ -137,6 +138,8 @@ Choose exactly one and state it explicitly:
 Before choosing, run the closeout consistency check.
 If choosing **Continue autonomously**, complete the state transition:
 - mark current milestone closed
+- create the bookkeeping boundary: milestone commit, explicit packaging milestone, or Pull
 - instantiate/select next active milestone
 - update `PLANS.md`
 - repair stale bookkeeping
+- re-seed the tool-facing plan with the next concrete proof target
