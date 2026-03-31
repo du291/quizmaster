@@ -3,7 +3,7 @@
 ## Version / status
 - BRACE version: `2.5`
 - Plan status: `active`
-- Last updated: `2026-03-30 20:32 CEST`
+- Last updated: `2026-03-31 13:07 CEST`
 
 ## Primary mission
 - Goal: Continue the Playwright-BDD to WTR migration until the retained Playwright feature inventory has full WTR parity, while preserving the legacy Playwright suite until parity is proven slice by slice.
@@ -16,8 +16,8 @@
 
 ## Current operating context
 - Current mode: `autonomous milestones`
-- Short state summary: `Quiz.Validations` now has dedicated mocked/backend WTR coverage plus green whole-lane WTR evidence, while the command of record remains `UNPROVEN` because legacy Playwright contradicted once on an unrelated workspace scenario that passed when isolated. `Quiz.FilterQuestions` is the new active proof target.
-- Current VCS / recoverability note: The closed `Quiz.Validations` slice and the activation of `Quiz.FilterQuestions` are packaged together under the `2026-03-30-quiz-validations-packaging` milestone, which establishes the clean bookkeeping boundary before the next quiz-authoring implementation step.
+- Short state summary: `Quiz.FilterQuestions` now has dedicated mocked/backend WTR coverage plus a green `bash ./scripts/test-migration.sh`, which closes the bounded quiz-create tranche. `Workspace.DeleteConstraints` is the new active proof target for the remaining workspace-list family.
+- Current VCS / recoverability note: The closed `Quiz.FilterQuestions` slice and the activation of `Workspace.DeleteConstraints` are packaged together under the `2026-03-31-quiz-filter-questions-packaging` milestone, which establishes the clean bookkeeping boundary before the next workspace-list implementation step.
 - Tool-facing plan note: keep one concrete next proof target live unless emitting a Pull or BRACE Final
 
 ## Current pinboard
@@ -33,8 +33,10 @@
 - The prior mission's risk areas carry over substantively into the repo-wide parity mission; no prior mission-level default risk area has been dropped, and no new mission-level default risk area is required yet.
 - `Workspace.CreateQuiz.feature` is currently treated as substantively covered by the existing `Quiz.CreateNew` WTR slice because the current WTR tests already prove creating a quiz from workspace questions and returning to the workspace list.
 - `Quiz.Edit.feature` is now treated as covered by dedicated mocked/backend WTR tests plus a green `bash ./scripts/test-migration.sh` run.
-- `Quiz.Validations.feature` is now treated as covered by dedicated mocked/backend WTR tests plus green full mocked/backend WTR lanes; the combined command of record is currently `UNPROVEN` because an unrelated legacy Playwright workspace scenario contradicted once and then passed when isolated.
-- The next repo-wide migration frontier remains quiz and workspace authoring, with `Quiz.FilterQuestions` selected as the next bounded implementation slice because it closes the last uncovered quiz-create seam before the broader workspace list family.
+- `Quiz.Validations.feature` is now treated as covered by dedicated mocked/backend WTR tests, and a later green `bash ./scripts/test-migration.sh` run reconfirmed the repository baseline with that slice in place.
+- `Quiz.FilterQuestions.feature` is now treated as covered by dedicated mocked/backend WTR tests plus a green `bash ./scripts/test-migration.sh` run.
+- `Workspace.feature` scenario `Show edited question in a workspace` is treated as substantively covered by the existing `Question.Edit.GUI` WTR slice because it already proves saving from the edit route returns to the workspace list with the updated question text and supports reopening from that list.
+- The next repo-wide migration frontier remains workspace list authoring, with `Workspace.DeleteConstraints` selected as the next bounded implementation slice because it closes the destructive-action seam before the remaining row navigation and copy-link actions.
 
 ### Constraints
 - Keep CI and local developer flow usable during migration.
@@ -70,20 +72,20 @@
 | Environment / external blockers | Pull | External blockers should be escalated with a concrete action request. |
 
 ## Current milestone header
-- ID: `2026-03-30-quiz-filter-questions`
+- ID: `2026-03-31-workspace-delete-constraints`
 - Status: `in_progress`
-- One-line goal: Add mocked and backend WTR coverage for `Quiz.FilterQuestions.feature`.
+- One-line goal: Add mocked and backend WTR coverage for workspace question deletion and hidden delete-button constraints from `Workspace.feature`.
 - Exit condition: Targeted mocked/backend greens plus a green `bash ./scripts/test-migration.sh` are recorded, and `PLANS.md` points to the correct next action at closeout.
-- Active artifact: `history/2026-03-30-quiz-filter-questions.md`
+- Active artifact: `history/2026-03-31-workspace-delete-constraints.md`
 
 ## Active residuals
 | Residual | Tier | Why it matters now | Cheapest next proof / action |
 |---|---|---|---|
-| `Quiz.FilterQuestions.feature` is now the last uncovered bounded quiz-create seam. | Medium | The quiz-authoring tranche is not closed until the create-form filter behavior has dedicated WTR proof or is explicitly subsumed. | Implement the dedicated mocked/backend filter tests and then rerun the acceptance evidence. |
-| `Workspace.feature` remains a broad uncovered family that mixes delete, copy-link, take, and edit flows. | Medium | It is still the largest heterogeneous workspace surface once the bounded quiz-authoring slices are exhausted. | Finish the bounded quiz-authoring tranche first, then split workspace list actions into smaller milestones. |
+| `Workspace.feature` question-delete affordance is now the next bounded workspace-list seam. | Medium | The workspace family is not credibly closing until destructive deletion and the in-quiz guard are proven directly on the workspace list. | Implement dedicated mocked/backend delete-constraint tests and rerun the acceptance evidence. |
+| `Workspace.feature` still has uncovered row actions for take, edit, and copied URLs after the delete seam. | Medium | Workspace list parity remains incomplete even after delete constraints close, and the remaining actions mix routing with clipboard behavior. | Split the remaining row actions into a follow-up milestone after delete constraints. |
 | `Home.feature` currently has mocked-only WTR proof. | Low | The feature is static and low-risk, but final parity accounting still needs an explicit closure rule for frontend-only surfaces. | Decide later whether mocked-only proof is sufficient or whether a lightweight browser-capability slice is still warranted. |
 | The host-aware backend-WTR wrapper remains primarily proven in the local environment. | Medium | A fresh environment could still expose a host or proxy contradiction. | Reuse the command of record in CI or another fresh workspace and compare it to the local baseline. |
-| Legacy Playwright still carries contradictory-red risk outside the touched WTR slice; the latest full gate failed once on `Workspace.feature` and then passed when isolated. | Medium | The command of record remains useful, but its legacy lane is not perfectly stable enough to treat every single combined run as authoritative without follow-up. | If it recurs, isolate the legacy lane first and require a second run before interpreting the result as slice-level evidence. |
+| Legacy Playwright still carries recent contradictory-red history outside the touched WTR slice, even though the latest full gate is green. | Medium | The command of record is authoritative again today, but the retained lane has shown enough drift to justify caution if it contradicts a later slice. | If it recurs, isolate the legacy lane first and require a second run before interpreting the result as slice-level evidence. |
 
 ## Pull log
 | Date | Pull type | Area tag(s) | Trigger | Decision / action requested | Resolution | Notes |
@@ -96,7 +98,9 @@
 ## Milestone index
 | Milestone | Status | Summary | Commit(s) | Artifact | Pull(s) |
 |---|---|---|---|---|---|
-| `2026-03-30-quiz-filter-questions` | in_progress | Active slice: add mocked/backend WTR coverage for create-form filter behavior in `Quiz.FilterQuestions.feature`. | none | `history/2026-03-30-quiz-filter-questions.md` | none |
+| `2026-03-31-workspace-delete-constraints` | in_progress | Active slice: add mocked/backend WTR coverage for workspace question deletion plus hidden delete affordance when a question is already used in a quiz. | none | `history/2026-03-31-workspace-delete-constraints.md` | none |
+| `2026-03-31-quiz-filter-questions-packaging` | completed | Packaged the closed `Quiz.FilterQuestions` slice and activated `Workspace.DeleteConstraints` as the next live proof target. | packaging milestone | `history/2026-03-31-quiz-filter-questions-packaging.md` | none |
+| `2026-03-30-quiz-filter-questions` | completed | Added mocked/backend WTR coverage for create-form filter behavior in `Quiz.FilterQuestions.feature` and closed the bounded quiz-create tranche. | packaged by `2026-03-31-quiz-filter-questions-packaging` | `history/2026-03-30-quiz-filter-questions.md` | none |
 | `2026-03-30-quiz-validations-packaging` | completed | Packaged the closed `Quiz.Validations` slice and activated `Quiz.FilterQuestions` as the next live proof target. | packaging milestone | `history/2026-03-30-quiz-validations-packaging.md` | none |
 | `2026-03-30-quiz-validations` | completed | Added mocked/backend WTR coverage for create-form defaults and validation behavior in `Quiz.Validations.feature`. | packaged by `2026-03-30-quiz-validations-packaging` | `history/2026-03-30-quiz-validations.md` | none |
 | `2026-03-30-quiz-edit-packaging` | completed | Packaged the closed `Quiz.Edit` slice and activated `Quiz.Validations` as the next live proof target. | packaging milestone | `history/2026-03-30-quiz-edit-packaging.md` | none |
@@ -118,7 +122,7 @@
 ## BRACE Final scaffold
 - Mission completion status: Open. Repo-wide WTR parity is not yet proven.
 - Explicit decisions made through pulls: Preserve the repo-local host-aware backend baseline, keep the legacy Playwright suite during migration, and reopen under a new BRACE 2.5 full-parity mission after archiving the prior final.
-- Autonomous milestone work completed: Prior-mission BRACE Final preservation, repo-wide mission selection, planning-bookkeeping packaging, `Quiz.Edit` closure, `Quiz.Validations` closure, and `Quiz.FilterQuestions` activation.
-- Evidence summary: Repo inventory confirms `take/*`, `make/question/*`, `Workspace.Create`, `Quiz.CreateNew`, `Quiz.Edit`, and `Quiz.Validations` coverage is strong, while the remaining open work clusters around quiz-create filter behavior plus workspace list actions.
-- Remaining unknowns / unproven areas: Quiz/workspace authoring parity remains open, the combined command-of-record legacy lane still has contradictory-red risk, `Home.feature` closure criteria are still low-risk but explicit, and cross-environment proof of the host-aware wrapper remains outstanding.
-- Recommended next proof / next mission: Execute the `Quiz.FilterQuestions` milestone with targeted mocked/backend evidence and then rerun `bash ./scripts/test-migration.sh`.
+- Autonomous milestone work completed: Prior-mission BRACE Final preservation, repo-wide mission selection, planning-bookkeeping packaging, `Quiz.Edit` closure, `Quiz.Validations` closure, `Quiz.FilterQuestions` closure, and `Workspace.DeleteConstraints` activation.
+- Evidence summary: Repo inventory confirms `take/*`, `make/question/*`, `Workspace.Create`, the bounded quiz-create tranche (`Quiz.CreateNew`, `Quiz.Edit`, `Quiz.Validations`, `Quiz.FilterQuestions`), and substantial edit-return workspace behavior are covered, while the remaining open work clusters around workspace list delete and row-action seams.
+- Remaining unknowns / unproven areas: Workspace list parity remains open, the retained legacy lane still has recent contradictory-red history even though the latest command of record is green, `Home.feature` closure criteria are still low-risk but explicit, and cross-environment proof of the host-aware wrapper remains outstanding.
+- Recommended next proof / next mission: Execute the `Workspace.DeleteConstraints` milestone with targeted mocked/backend evidence and then rerun `bash ./scripts/test-migration.sh`.
