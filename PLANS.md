@@ -2,8 +2,8 @@
 
 ## Version / status
 - BRACE version: `2.5`
-- Plan status: `active`
-- Last updated: `2026-03-31 14:21 CEST`
+- Plan status: `finalized`
+- Last updated: `2026-03-31 14:25 CEST`
 
 ## Primary mission
 - Goal: Continue the Playwright-BDD to WTR migration until the retained Playwright feature inventory has full WTR parity, while preserving the legacy Playwright suite until parity is proven slice by slice.
@@ -15,9 +15,9 @@
 - Command of record / acceptance floor: `bash ./scripts/test-migration.sh`
 
 ## Current operating context
-- Current mode: `autonomous milestones`
-- Short state summary: `Home.BrowserProof` now has explicit routed browser-level WTR evidence plus a green `bash ./scripts/test-migration.sh`, which closes the last implementation slice under the repo-wide parity mission. The new active milestone is BRACE Final for mission-closeout verification and bookkeeping.
-- Current VCS / recoverability note: The closed `Home.BrowserProof` slice and the activation of the repo-wide BRACE Final milestone are packaged together under the `2026-03-31-home-browser-proof-packaging` milestone, which establishes the clean bookkeeping boundary before final closeout.
+- Current mode: `BRACE Final`
+- Short state summary: The repo-wide WTR parity mission is now closed as complete enough to finish. `Home.BrowserProof` landed the last implementation proof, the final feature inventory and overlap decisions are reconciled, and no active implementation slice remains.
+- Current VCS / recoverability note: The row-navigation, copied-links, and home-proof slices are committed locally (`94850e77`, `3bad9bd4`, `eec464ba`), and this BRACE Final bookkeeping commit closes the mission boundary cleanly.
 - Tool-facing plan note: keep one concrete next proof target live unless emitting a Pull or BRACE Final
 
 ## Current pinboard
@@ -40,7 +40,7 @@
 - `Workspace.feature` scenarios `Take question in a workspace` and `Edit question in a workspace` are now treated as covered by dedicated mocked/backend WTR tests plus a green `bash ./scripts/test-migration.sh` run.
 - `Workspace.feature` scenarios `Copy a take question URL` and `Copy an edit question URL` are now treated as covered by dedicated mocked/backend WTR tests plus a green `bash ./scripts/test-migration.sh` run.
 - `Home.feature` is now treated as covered by the existing mocked WTR file plus explicit routed backend/browser WTR proof and a green `bash ./scripts/test-migration.sh` run.
-- Slice-level repo-wide parity now appears complete enough for BRACE Final verification; no further implementation slice is currently selected.
+- The retained Playwright feature inventory is now treated as fully represented by dedicated WTR slices plus explicit overlap decisions, and the mission is complete enough to close.
 
 ### Constraints
 - Keep CI and local developer flow usable during migration.
@@ -77,17 +77,17 @@
 
 ## Current milestone header
 - ID: `2026-03-31-full-wtr-parity-mission-final`
-- Status: `in_progress`
+- Status: `completed`
 - One-line goal: Reconcile the final feature inventory, overlap decisions, and latest green gate into a coherent BRACE Final plus final bookkeeping commit.
-- Exit condition: The BRACE Final artifact, live control surface, and git state all agree that the repo-wide parity mission is complete enough to close.
+- Exit condition: Met; `PLANS.md`, `history/2026-03-31-full-wtr-parity-mission-final.md`, and git state now agree that the repo-wide parity mission is complete enough to close.
 - Active artifact: `history/2026-03-31-full-wtr-parity-mission-final.md`
 
 ## Active residuals
 | Residual | Tier | Why it matters now | Cheapest next proof / action |
 |---|---|---|---|
-| Repo-wide parity is now complete in substance, but BRACE Final and final bookkeeping are not yet emitted. | Medium | The mission could look complete in code and evidence while the live control surface still officially remains open. | Complete the BRACE Final artifact, reconcile `PLANS.md`, and create the final bookkeeping commit. |
 | The host-aware backend-WTR wrapper remains primarily proven in the local environment. | Medium | A fresh environment could still expose a host or proxy contradiction. | Reuse the command of record in CI or another fresh workspace and compare it to the local baseline. |
 | Legacy Playwright still carries earlier contradictory-red history even though the three latest full gates are green. | Medium | The command of record is authoritative again today, but the retained lane has shown enough drift to justify caution if it contradicts a later environment or follow-on change. | If it recurs, isolate the legacy lane first and require a second run before interpreting the result as slice-level evidence. |
+| Final CI cadence and any eventual legacy-suite retirement policy remain undecided. | Low | Migration parity is now strong enough to close this mission, but the post-parity operating policy is still user-owned and should not be implied by this final. | Choose the follow-on CI / legacy-suite policy in a new mission. |
 
 ## Pull log
 | Date | Pull type | Area tag(s) | Trigger | Decision / action requested | Resolution | Notes |
@@ -100,7 +100,7 @@
 ## Milestone index
 | Milestone | Status | Summary | Commit(s) | Artifact | Pull(s) |
 |---|---|---|---|---|---|
-| `2026-03-31-full-wtr-parity-mission-final` | in_progress | Active step: complete BRACE Final for the repo-wide parity mission and create the final bookkeeping boundary. | none | `history/2026-03-31-full-wtr-parity-mission-final.md` | none |
+| `2026-03-31-full-wtr-parity-mission-final` | completed | Closed the repo-wide full-parity mission with reconciled inventory, overlap decisions, latest green gate evidence, and explicit residuals. | final bookkeeping commit | `history/2026-03-31-full-wtr-parity-mission-final.md` | none |
 | `2026-03-31-home-browser-proof-packaging` | completed | Packaged the closed `Home.BrowserProof` slice and activated the repo-wide BRACE Final milestone. | packaging milestone | `history/2026-03-31-home-browser-proof-packaging.md` | none |
 | `2026-03-31-home-browser-proof` | completed | Added routed browser-level WTR proof for `Home.feature` and closed the last explicit mocked-only parity question. | packaged by `2026-03-31-home-browser-proof-packaging` | `history/2026-03-31-home-browser-proof.md` | none |
 | `2026-03-31-workspace-copied-links-packaging` | completed | Packaged the closed `Workspace.CopiedLinks` slice and activated `Home.BrowserProof` as the next live proof target. | packaging milestone | `history/2026-03-31-workspace-copied-links-packaging.md` | none |
@@ -130,9 +130,9 @@
 | `2026-03-26-question-take-easy-mode` | completed | Closed the dedicated standalone `Question.Take.*` backlog and established the latest committed product baseline before the edit tranche. | `7c70d13f` | `history/2026-03-26-question-take-easy-mode.md` | none |
 
 ## BRACE Final scaffold
-- Mission completion status: Pending BRACE Final validation. Repo-wide WTR parity now appears complete enough to close.
+- Mission completion status: Complete enough to close. The retained Playwright feature inventory is now represented by dedicated WTR slices or explicit overlap decisions, and the latest acceptance floor is green.
 - Explicit decisions made through pulls: Preserve the repo-local host-aware backend baseline, keep the legacy Playwright suite during migration, and reopen under a new BRACE 2.5 full-parity mission after archiving the prior final.
-- Autonomous milestone work completed: Prior-mission BRACE Final preservation, repo-wide mission selection, planning-bookkeeping packaging, `Quiz.Edit` closure, `Quiz.Validations` closure, `Quiz.FilterQuestions` closure, `Workspace.DeleteConstraints` closure, `Workspace.RowNavigation` closure, `Workspace.CopiedLinks` closure, `Home.BrowserProof` closure, and BRACE Final activation.
-- Evidence summary: Repo inventory now indicates coverage for `take/*`, `make/question/*`, the bounded quiz-create tranche (`Quiz.CreateNew`, `Quiz.Edit`, `Quiz.Validations`, `Quiz.FilterQuestions`), `Workspace.Create`, `Workspace.CreateQuiz` by overlap, the full `Workspace.feature` authoring surface, and `Home.feature` with explicit routed browser proof.
-- Remaining unknowns / unproven areas: cross-environment proof of the host-aware wrapper remains outstanding, and the retained legacy lane still carries historical contradictory-red residue despite the three latest command-of-record runs being green.
-- Recommended next proof / next mission: Complete the repo-wide BRACE Final consistency check, emit the final bookkeeping commit, and close the mission if the artifacts still agree.
+- Autonomous milestone work completed: Prior-mission BRACE Final preservation, repo-wide mission selection, planning-bookkeeping packaging, `Quiz.Edit` closure, `Quiz.Validations` closure, `Quiz.FilterQuestions` closure, `Workspace.DeleteConstraints` closure, `Workspace.RowNavigation` closure, `Workspace.CopiedLinks` closure, `Home.BrowserProof` closure, and this repo-wide BRACE Final closeout.
+- Evidence summary: The latest acceptance floor is green with mocked WTR `105 passed`, retained Playwright `153 passed` / `2 skipped`, backend WTR `86 passed`, and `migration_total_seconds=579`. The final inventory and overlap review covers `take/*`, `make/question/*`, the bounded quiz-create tranche, `Workspace.Create`, `Workspace.CreateQuiz` by overlap, the full `Workspace.feature` authoring surface, and `Home.feature` with explicit routed browser proof.
+- Remaining unknowns / unproven areas: Cross-environment proof of the host-aware wrapper remains outstanding, the retained legacy lane still carries historical contradictory-red residue despite the three latest command-of-record runs being green, and the post-parity dual-suite policy is still undecided.
+- Recommended next proof / next mission: Reuse `bash ./scripts/test-migration.sh` in CI or another fresh workspace, then decide the follow-on CI cadence and any legacy-suite retirement policy in a new mission.
