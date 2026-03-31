@@ -2,10 +2,10 @@
 
 Milestone: `Workspace.CopiedLinks`
 Date: 2026-03-31
-Status: in_progress
+Status: completed
 Primary mission: Continue the Playwright-BDD to WTR migration until the retained Playwright feature inventory has full WTR parity while preserving the legacy Playwright suite until parity is proven.
 PLANS ref: `PLANS.md`
-Commit(s): none
+Commit(s): `packaged by 2026-03-31-workspace-copied-links-packaging`
 Related pull(s): none
 Depends on: `Workspace.RowNavigation`, `Question.Take.*`, `Question.Edit.GUI`, `2026-03-30-full-wtr-parity-mission-selection`
 
@@ -41,18 +41,19 @@ Depends on: `Workspace.RowNavigation`, `Question.Take.*`, `Question.Edit.GUI`, `
 ### Planned Evidence
 - Intent: prove copied workspace links under deterministic mocked responses
   Command / artifact: `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/workspace-copied-links.test.tsx"`
-  Result: pending
-  Interpretation: will prove copied-link behavior without backend variability
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `5.7s`
+  Interpretation: proved copied-link behavior without backend variability
 - Intent: prove the same copied-link behavior against the real backend
   Command / artifact: `pnpm --dir specs exec start-server-and-test "concurrently \"cd /workspaces/quizmaster/backend && ./gradlew bootRun\" \"cd /workspaces/quizmaster/frontend && pnpm dev\"" "8080|5173" "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_VITE_HOST=127.0.0.1 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/workspace-copied-links.backend.test.tsx\""`
-  Result: pending
-  Interpretation: will prove the same copied-link contract against the real workspace, take, and edit routes
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `6.3s`
+  Interpretation: proved the same copied-link contract against the real workspace, take, and edit routes
 - Intent: probe the slice against the acceptance floor
   Command / artifact: `bash ./scripts/test-migration.sh`
-  Result: pending
-  Interpretation: will prove the new slice does not break the broader migration baseline, subject to the retained-legacy contradiction protocol if the workspace lane disagrees again
+  Result: green with mocked WTR (`105 passed`, `0 failed`, `wtr_mocked_seconds=79`), retained Playwright (`153 passed`, `2 skipped`, `playwright_seconds=422`), backend WTR (`84 passed`, `0 failed`, `wtr_backend_seconds=93`), and `migration_total_seconds=623`
+  Interpretation: proved the new slice does not break the broader migration baseline, and the previously contradictory retained `Workspace.feature` copied-link scenarios stayed green during the same run
 
 ### Planned Scope Inventory
+- `frontend/tests/wtr/support/clipboard-harness.ts`
 - `frontend/tests/wtr/mocked/workspace-copied-links.test.tsx`
 - `frontend/tests/wtr/backend/workspace-copied-links.backend.test.tsx`
 - `PLANS.md`
@@ -71,12 +72,69 @@ Depends on: `Workspace.RowNavigation`, `Question.Take.*`, `Question.Edit.GUI`, `
 ## Execution Notes
 - This milestone was instantiated immediately after `Workspace.RowNavigation` because it is the last remaining uncovered workspace-list behavior.
 - `infrastructure-seams` review identified clipboard as a seam candidate, but the initial plan is to try a narrow test-local simulator first because the current product contract is only `writeText(string)` plus route-following; introduce a production seam only if that proves brittle.
+- The narrow test-local clipboard harness was sufficient in both mocked and backend lanes, so the slice stayed within WTR support code and did not require a production-owned seam.
 
 ## Pulls Handled During This Milestone
 - None yet.
 
-## Current State
-- What is true right now: `Workspace.feature` still lacks dedicated WTR coverage for copying take/edit question URLs and following them.
-- What remains blocked / incomplete: the mocked and backend WTR tests still need to be written and executed, and the acceptance evidence has not yet been rerun with copied-link coverage in place.
-- Current evidence or hydration notes: delete constraints and row navigation are now closed, so clipboard behavior is the only remaining uncovered workspace-list seam.
-- Next action / cheapest proof: implement `tests/wtr/mocked/workspace-copied-links.test.tsx` and `tests/wtr/backend/workspace-copied-links.backend.test.tsx`, starting with a narrow clipboard simulator in test code and escalating to a production seam only if the direct simulation proves too brittle.
+## BRACE Report
+
+### Outcome
+- Added dedicated mocked and backend WTR coverage for copying take and edit question URLs from the workspace list and following those URLs into the expected routes.
+- Closed the final uncovered workspace-list authoring seam with strong targeted evidence and a green command-of-record run.
+
+### Coverage Achieved
+- The workspace route now has dedicated WTR proof that copying the take link produces the expected absolute URL and that following it reaches the standalone question page with the expected content.
+- The slice now proves that copying the edit link produces the expected absolute URL, surfaces the existing `link copied` alert, and reaches the edit route with the expected prepopulated form.
+- The milestone stayed bounded to copied-link behavior and kept clipboard simulation inside WTR-local support code instead of widening into a production seam.
+
+### Evidence Run
+- Intent: prove copied workspace links under deterministic mocked responses
+  Command / artifact: `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/workspace-copied-links.test.tsx"`
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `5.7s`
+  Interpretation: strong proof for copied-link behavior without backend variability
+- Intent: prove the same copied-link behavior against the real backend
+  Command / artifact: `pnpm --dir specs exec start-server-and-test "concurrently \"cd /workspaces/quizmaster/backend && ./gradlew bootRun\" \"cd /workspaces/quizmaster/frontend && pnpm dev\"" "8080|5173" "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_VITE_HOST=127.0.0.1 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/workspace-copied-links.backend.test.tsx\""`
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `6.3s`
+  Interpretation: strong proof for the same copied-link contract against the real workspace, take, and edit routes
+- Intent: probe the slice against the acceptance floor
+  Command / artifact: `bash ./scripts/test-migration.sh`
+  Result: green with mocked WTR (`105 passed`, `0 failed`, `wtr_mocked_seconds=79`), retained Playwright (`153 passed`, `2 skipped`, `playwright_seconds=422`), backend WTR (`84 passed`, `0 failed`, `wtr_backend_seconds=93`), and `migration_total_seconds=623`
+  Interpretation: strong proof that the repository baseline accepts the copied-link slice and that the previously contradictory retained `Workspace.feature` copied-link scenarios stayed green in the same run
+
+### Actual Scope Inventory
+- `frontend/tests/wtr/support/clipboard-harness.ts`
+- `frontend/tests/wtr/mocked/workspace-copied-links.test.tsx`
+- `frontend/tests/wtr/backend/workspace-copied-links.backend.test.tsx`
+- `PLANS.md`
+- `history/2026-03-31-workspace-copied-links.md`
+
+### Remaining Uncertainty
+- `Home.feature` still lacks explicit browser-level parity proof even though its current mocked WTR coverage is low-risk and stable.
+- The host-aware backend-WTR wrapper remains primarily proven in the local environment.
+- The retained legacy lane now has another green command-of-record run, but its earlier contradictory-red history still warrants caution if it disagrees again later.
+
+### Actual Trace
+| Behavior | Risk (Tier / Area) | Assurance | Actual Evidence | Residual risk | Cheapest proof |
+|---|---|---|---|---|---|
+| Copying a take-question URL yields a navigable take route with the expected content | Medium / Slice-level behavior integrity | Asserted both the copied URL payload and the visible question/answers after following it | Targeted mocked and backend copied-link runs green in Chromium and Firefox | Low | Re-run the copied-link files after future workspace-row changes |
+| Copying an edit-question URL yields a navigable edit route with the expected prepopulated content | Medium / Slice-level behavior integrity | Asserted both the copied URL payload and the visible edit-form content after following it | Targeted mocked and backend copied-link runs green in Chromium and Firefox | Low | Re-run the copied-link files after future workspace-row or edit-route changes |
+| Broader migration confidence remains current | Medium / Harness / gate reliability | Re-ran the command of record after targeted proof | `bash ./scripts/test-migration.sh` green across mocked WTR, retained Playwright, and backend WTR | Low-Medium | Re-run the command of record after the next parity slice and isolate the retained legacy lane first if it contradicts again |
+
+## Delta From Plan
+- New risks discovered:
+  - None.
+- Assurances changed:
+  - The test-local clipboard harness proved sufficient, so no production seam was needed for this slice.
+- Scope changes:
+  - Added a small WTR-local clipboard harness to capture `navigator.clipboard.writeText` calls and `window.alert` side effects deterministically.
+- Decision changes:
+  - `Workspace.feature` copied take/edit URL scenarios are now considered closed, and the workspace-list authoring frontier is closed in substance.
+
+## Reusable Learning / Handoff
+- Clipboard-heavy workspace behavior was still cheap to prove with a narrow WTR-local harness because the product contract was limited to `writeText` plus a route-following assertion.
+- Following the copied URLs inside the same test kept the slice honest without requiring any production refactor.
+
+## Milestone closeout choice
+
+- **Continue autonomously** - closed `Workspace.CopiedLinks`, opened an explicit packaging milestone for the bookkeeping boundary, and activated `Home.BrowserProof` as the next concrete proof target.

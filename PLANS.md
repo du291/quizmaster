@@ -3,7 +3,7 @@
 ## Version / status
 - BRACE version: `2.5`
 - Plan status: `active`
-- Last updated: `2026-03-31 13:49 CEST`
+- Last updated: `2026-03-31 14:07 CEST`
 
 ## Primary mission
 - Goal: Continue the Playwright-BDD to WTR migration until the retained Playwright feature inventory has full WTR parity, while preserving the legacy Playwright suite until parity is proven slice by slice.
@@ -16,8 +16,8 @@
 
 ## Current operating context
 - Current mode: `autonomous milestones`
-- Short state summary: `Workspace.RowNavigation` now has dedicated mocked/backend WTR coverage plus a green `bash ./scripts/test-migration.sh`, which closes the remaining non-clipboard workspace row-action seam. `Workspace.CopiedLinks` is the new active proof target for the last uncovered workspace-list behavior.
-- Current VCS / recoverability note: The closed `Workspace.RowNavigation` slice and the activation of `Workspace.CopiedLinks` are packaged together under the `2026-03-31-workspace-row-navigation-packaging` milestone, which establishes the clean bookkeeping boundary before the final workspace-list implementation step.
+- Short state summary: `Workspace.CopiedLinks` now has dedicated mocked/backend WTR coverage plus a green `bash ./scripts/test-migration.sh`, which closes the remaining workspace-list authoring seam. `Home.BrowserProof` is the new active proof target for the last explicit low-risk parity question.
+- Current VCS / recoverability note: The closed `Workspace.CopiedLinks` slice and the activation of `Home.BrowserProof` are packaged together under the `2026-03-31-workspace-copied-links-packaging` milestone, which establishes the clean bookkeeping boundary before the final home-route proof step.
 - Tool-facing plan note: keep one concrete next proof target live unless emitting a Pull or BRACE Final
 
 ## Current pinboard
@@ -38,7 +38,8 @@
 - `Workspace.feature` scenario `Show edited question in a workspace` is treated as substantively covered by the existing `Question.Edit.GUI` WTR slice because it already proves saving from the edit route returns to the workspace list with the updated question text and supports reopening from that list.
 - `Workspace.feature` scenarios `Delete question in a workspace` and `Do not show delete button for question used in a quiz` are now treated as covered by dedicated mocked/backend WTR tests plus a green `bash ./scripts/test-migration.sh` run.
 - `Workspace.feature` scenarios `Take question in a workspace` and `Edit question in a workspace` are now treated as covered by dedicated mocked/backend WTR tests plus a green `bash ./scripts/test-migration.sh` run.
-- The next repo-wide migration frontier remains workspace list authoring, with `Workspace.CopiedLinks` selected as the next bounded implementation slice because it closes the final remaining workspace-list behavior before low-risk frontend-only parity questions.
+- `Workspace.feature` scenarios `Copy a take question URL` and `Copy an edit question URL` are now treated as covered by dedicated mocked/backend WTR tests plus a green `bash ./scripts/test-migration.sh` run.
+- Workspace-list authoring is now closed in substance, and the next bounded parity slice is `Home.BrowserProof` to replace the remaining mocked-only `Home.feature` ambiguity with explicit routed browser evidence.
 
 ### Constraints
 - Keep CI and local developer flow usable during migration.
@@ -74,19 +75,18 @@
 | Environment / external blockers | Pull | External blockers should be escalated with a concrete action request. |
 
 ## Current milestone header
-- ID: `2026-03-31-workspace-copied-links`
+- ID: `2026-03-31-home-browser-proof`
 - Status: `in_progress`
-- One-line goal: Add mocked and backend WTR coverage for copied take/edit question URLs from the workspace list in `Workspace.feature`.
+- One-line goal: Add lightweight routed browser proof for `Home.feature` so the last explicit mocked-only parity question is closed with browser-level evidence.
 - Exit condition: Targeted mocked/backend greens plus a green `bash ./scripts/test-migration.sh` are recorded, and `PLANS.md` points to the correct next action at closeout.
-- Active artifact: `history/2026-03-31-workspace-copied-links.md`
+- Active artifact: `history/2026-03-31-home-browser-proof.md`
 
 ## Active residuals
 | Residual | Tier | Why it matters now | Cheapest next proof / action |
 |---|---|---|---|
-| `Workspace.feature` copied take/edit URLs are now the last uncovered workspace-list seam. | Medium | Repo-wide parity on workspace authoring is not credible until the copied-link behavior is proven directly from the workspace list. | Implement dedicated mocked/backend copied-link tests and rerun the acceptance evidence. |
-| `Home.feature` currently has mocked-only WTR proof. | Low | The feature is static and low-risk, but final parity accounting still needs an explicit closure rule for frontend-only surfaces. | Decide later whether mocked-only proof is sufficient or whether a lightweight browser-capability slice is still warranted. |
+| `Home.feature` still relies on component-level mocked WTR proof only. | Low | Repo-wide parity claims are almost complete, but the last explicit home-page behavior still lacks routed browser-level evidence. | Add a lightweight backend/browser WTR proof for the home route and rerun the acceptance evidence. |
 | The host-aware backend-WTR wrapper remains primarily proven in the local environment. | Medium | A fresh environment could still expose a host or proxy contradiction. | Reuse the command of record in CI or another fresh workspace and compare it to the local baseline. |
-| Legacy Playwright still carries recent contradictory-red history outside the touched WTR slice, even though the latest full gate is green. | Medium | The command of record is authoritative again today, but the retained lane has shown enough drift to justify caution if it contradicts a later slice. | If it recurs, isolate the legacy lane first and require a second run before interpreting the result as slice-level evidence. |
+| Legacy Playwright still carries earlier contradictory-red history even though the two latest full gates are green. | Medium | The command of record is authoritative again today, but the retained lane has shown enough drift to justify caution if it contradicts a later slice. | If it recurs, isolate the legacy lane first and require a second run before interpreting the result as slice-level evidence. |
 
 ## Pull log
 | Date | Pull type | Area tag(s) | Trigger | Decision / action requested | Resolution | Notes |
@@ -99,7 +99,9 @@
 ## Milestone index
 | Milestone | Status | Summary | Commit(s) | Artifact | Pull(s) |
 |---|---|---|---|---|---|
-| `2026-03-31-workspace-copied-links` | in_progress | Active slice: add mocked/backend WTR coverage for copying take and edit question URLs from the workspace list and following them. | none | `history/2026-03-31-workspace-copied-links.md` | none |
+| `2026-03-31-home-browser-proof` | in_progress | Active slice: add routed browser-level proof for `Home.feature` so the last mocked-only parity question is closed explicitly. | none | `history/2026-03-31-home-browser-proof.md` | none |
+| `2026-03-31-workspace-copied-links-packaging` | completed | Packaged the closed `Workspace.CopiedLinks` slice and activated `Home.BrowserProof` as the next live proof target. | packaging milestone | `history/2026-03-31-workspace-copied-links-packaging.md` | none |
+| `2026-03-31-workspace-copied-links` | completed | Added mocked/backend WTR coverage for copying take and edit question URLs from the workspace list and following those routes. | packaged by `2026-03-31-workspace-copied-links-packaging` | `history/2026-03-31-workspace-copied-links.md` | none |
 | `2026-03-31-workspace-row-navigation-packaging` | completed | Packaged the closed `Workspace.RowNavigation` slice and activated `Workspace.CopiedLinks` as the next live proof target. | packaging milestone | `history/2026-03-31-workspace-row-navigation-packaging.md` | none |
 | `2026-03-31-workspace-row-navigation` | completed | Added mocked/backend WTR coverage for taking and editing a question directly from the workspace list. | packaged by `2026-03-31-workspace-row-navigation-packaging` | `history/2026-03-31-workspace-row-navigation.md` | none |
 | `2026-03-31-workspace-delete-constraints-packaging` | completed | Packaged the closed `Workspace.DeleteConstraints` slice and activated `Workspace.RowNavigation` as the next live proof target. | packaging milestone | `history/2026-03-31-workspace-delete-constraints-packaging.md` | none |
@@ -127,7 +129,7 @@
 ## BRACE Final scaffold
 - Mission completion status: Open. Repo-wide WTR parity is not yet proven.
 - Explicit decisions made through pulls: Preserve the repo-local host-aware backend baseline, keep the legacy Playwright suite during migration, and reopen under a new BRACE 2.5 full-parity mission after archiving the prior final.
-- Autonomous milestone work completed: Prior-mission BRACE Final preservation, repo-wide mission selection, planning-bookkeeping packaging, `Quiz.Edit` closure, `Quiz.Validations` closure, `Quiz.FilterQuestions` closure, `Workspace.DeleteConstraints` closure, `Workspace.RowNavigation` closure, and `Workspace.CopiedLinks` activation.
-- Evidence summary: Repo inventory confirms `take/*`, `make/question/*`, `Workspace.Create`, the bounded quiz-create tranche (`Quiz.CreateNew`, `Quiz.Edit`, `Quiz.Validations`, `Quiz.FilterQuestions`), workspace delete constraints, and workspace take/edit row navigation are covered, while the remaining open work clusters around copied workspace links plus low-risk frontend-only parity questions.
-- Remaining unknowns / unproven areas: Workspace copied-link parity remains open, the retained legacy lane still has recent contradictory-red history even though the latest command of record is green, `Home.feature` closure criteria are still low-risk but explicit, and cross-environment proof of the host-aware wrapper remains outstanding.
-- Recommended next proof / next mission: Execute the `Workspace.CopiedLinks` milestone with targeted mocked/backend evidence and then rerun `bash ./scripts/test-migration.sh`.
+- Autonomous milestone work completed: Prior-mission BRACE Final preservation, repo-wide mission selection, planning-bookkeeping packaging, `Quiz.Edit` closure, `Quiz.Validations` closure, `Quiz.FilterQuestions` closure, `Workspace.DeleteConstraints` closure, `Workspace.RowNavigation` closure, `Workspace.CopiedLinks` closure, and `Home.BrowserProof` activation.
+- Evidence summary: Repo inventory confirms `take/*`, `make/question/*`, `Workspace.Create`, the bounded quiz-create tranche (`Quiz.CreateNew`, `Quiz.Edit`, `Quiz.Validations`, `Quiz.FilterQuestions`), and the full `Workspace.feature` authoring surface are covered, while the remaining open work is the explicit home-route parity proof plus cross-environment harness confidence.
+- Remaining unknowns / unproven areas: `Home.feature` still lacks routed browser-level WTR proof, the retained legacy lane still has historical contradictory-red residue even though the two latest command-of-record runs are green, and cross-environment proof of the host-aware wrapper remains outstanding.
+- Recommended next proof / next mission: Execute the `Home.BrowserProof` milestone with targeted mocked/backend evidence and then rerun `bash ./scripts/test-migration.sh`.
