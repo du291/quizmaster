@@ -2,10 +2,10 @@
 
 Milestone: `Workspace.RowNavigation`
 Date: 2026-03-31
-Status: in_progress
+Status: completed
 Primary mission: Continue the Playwright-BDD to WTR migration until the retained Playwright feature inventory has full WTR parity while preserving the legacy Playwright suite until parity is proven.
 PLANS ref: `PLANS.md`
-Commit(s): none
+Commit(s): `packaged by 2026-03-31-workspace-row-navigation-packaging`
 Related pull(s): none
 Depends on: `Workspace.Create`, `Question.Take.*`, `Question.Edit.GUI`, `2026-03-30-full-wtr-parity-mission-selection`
 
@@ -42,16 +42,16 @@ Depends on: `Workspace.Create`, `Question.Take.*`, `Question.Edit.GUI`, `2026-03
 ### Planned Evidence
 - Intent: prove workspace row navigation under deterministic mocked responses
   Command / artifact: `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/workspace-row-navigation.test.tsx"`
-  Result: pending
-  Interpretation: will prove workspace-row navigation without backend variability
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `4.3s`
+  Interpretation: proved workspace-row navigation without backend variability
 - Intent: prove the same row navigation against the real backend
   Command / artifact: `pnpm --dir specs exec start-server-and-test "concurrently \"cd /workspaces/quizmaster/backend && ./gradlew bootRun\" \"cd /workspaces/quizmaster/frontend && pnpm dev\"" "8080|5173" "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_VITE_HOST=127.0.0.1 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/workspace-row-navigation.backend.test.tsx\""`
-  Result: pending
-  Interpretation: will prove the same row-navigation contract against the real workspace, take, and edit routes
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `5.0s`
+  Interpretation: proved the same row-navigation contract against the real workspace, take, and edit routes
 - Intent: probe the slice against the acceptance floor
   Command / artifact: `bash ./scripts/test-migration.sh`
-  Result: pending
-  Interpretation: will prove the new slice does not break the broader migration baseline, subject to the retained-legacy contradiction protocol if the workspace lane disagrees again
+  Result: green with mocked WTR (`103 passed`, `0 failed`, `wtr_mocked_seconds=65`), retained Playwright (`153 passed`, `2 skipped`, `playwright_seconds=369`), backend WTR (`82 passed`, `0 failed`, `wtr_backend_seconds=83`), and `migration_total_seconds=537`
+  Interpretation: proved the new slice does not break the broader migration baseline, and the retained legacy workspace row-action scenarios stayed green throughout the run
 
 ### Planned Scope Inventory
 - `frontend/tests/wtr/support/workspace-page.ts`
@@ -73,12 +73,69 @@ Depends on: `Workspace.Create`, `Question.Take.*`, `Question.Edit.GUI`, `2026-03
 ## Execution Notes
 - This milestone was instantiated immediately after `Workspace.DeleteConstraints` because it closes the remaining non-clipboard workspace row actions before copied-link work.
 - The existing `Question.Edit.GUI` and question-take WTR slices already prove behavior inside the destination routes, so this milestone stays focused on reaching those routes correctly from the workspace list.
+- No production files changed; the slice stayed within WTR tests, a small question-take helper, and BRACE artifacts.
 
 ## Pulls Handled During This Milestone
 - None yet.
 
-## Current State
-- What is true right now: `Workspace.feature` still lacks dedicated WTR coverage for taking and editing a question directly from the workspace list.
-- What remains blocked / incomplete: the mocked and backend WTR tests still need to be written and executed, and the acceptance evidence has not yet been rerun with workspace row-navigation coverage in place.
-- Current evidence or hydration notes: the destructive delete seam is now closed, so the remaining workspace frontier is row navigation plus copied take/edit URLs.
-- Next action / cheapest proof: implement `tests/wtr/mocked/workspace-row-navigation.test.tsx` and `tests/wtr/backend/workspace-row-navigation.backend.test.tsx`, reusing the existing workspace helper and destination-page selectors where they already exist.
+## BRACE Report
+
+### Outcome
+- Added dedicated mocked and backend WTR coverage for taking and editing a question directly from the workspace list.
+- Closed the non-clipboard workspace row-action seam with strong targeted evidence and a green command-of-record run.
+
+### Coverage Achieved
+- The workspace route now has dedicated WTR proof that clicking the take button reaches the standalone question page with the expected question and answers visible.
+- The slice now proves that clicking the edit button reaches the question edit page with the expected prepopulated form content.
+- The milestone stayed bounded to row navigation and left copied-link behavior for a final follow-up slice.
+
+### Evidence Run
+- Intent: prove workspace row navigation under deterministic mocked responses
+  Command / artifact: `WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 pnpm --dir frontend exec web-test-runner --config web-test-runner.config.mjs --files "tests/wtr/mocked/workspace-row-navigation.test.tsx"`
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `4.3s`
+  Interpretation: strong proof for workspace-row navigation without backend variability
+- Intent: prove the same row navigation against the real backend
+  Command / artifact: `pnpm --dir specs exec start-server-and-test "concurrently \"cd /workspaces/quizmaster/backend && ./gradlew bootRun\" \"cd /workspaces/quizmaster/frontend && pnpm dev\"" "8080|5173" "WTR_API_PROXY_TARGET=http://localhost:8080 WTR_VITE_HOST=127.0.0.1 WTR_CONCURRENT_BROWSERS=1 WTR_CONCURRENCY=1 WTR_TEST_TIMEOUT=20000 pnpm --dir /workspaces/quizmaster/frontend exec web-test-runner --config /workspaces/quizmaster/frontend/web-test-runner.config.mjs --files \"tests/wtr/backend/workspace-row-navigation.backend.test.tsx\""`
+  Result: Chromium + Firefox green, `2 passed`, `0 failed`, `5.0s`
+  Interpretation: strong proof for the same row-navigation contract against the real workspace, take, and edit routes
+- Intent: probe the slice against the acceptance floor
+  Command / artifact: `bash ./scripts/test-migration.sh`
+  Result: green with mocked WTR (`103 passed`, `0 failed`, `wtr_mocked_seconds=65`), retained Playwright (`153 passed`, `2 skipped`, `playwright_seconds=369`), backend WTR (`82 passed`, `0 failed`, `wtr_backend_seconds=83`), and `migration_total_seconds=537`
+  Interpretation: strong proof that the repository baseline accepts the row-navigation slice and that the retained legacy workspace row-action scenarios did not contradict during this run
+
+### Actual Scope Inventory
+- `frontend/tests/wtr/support/question-take-page.ts`
+- `frontend/tests/wtr/mocked/workspace-row-navigation.test.tsx`
+- `frontend/tests/wtr/backend/workspace-row-navigation.backend.test.tsx`
+- `PLANS.md`
+- `history/2026-03-31-workspace-row-navigation.md`
+
+### Remaining Uncertainty
+- Workspace copied take/edit URLs still remain open.
+- The host-aware backend-WTR wrapper remains primarily proven in the local environment.
+- The retained legacy lane now has another green command-of-record run, but its recent contradictory-red history still warrants caution if it disagrees again later.
+
+### Actual Trace
+| Behavior | Risk (Tier / Area) | Assurance | Actual Evidence | Residual risk | Cheapest proof |
+|---|---|---|---|---|---|
+| Taking a question from the workspace list reaches the take page with the expected content | Medium / Slice-level behavior integrity | Asserted both the route change and the visible question/answers after clicking the workspace row action | Targeted mocked and backend row-navigation runs green in Chromium and Firefox | Low | Re-run the row-navigation files after future workspace-row changes |
+| Editing a question from the workspace list reaches the edit page with the expected prepopulated question | Medium / Slice-level behavior integrity | Asserted both the route change and the visible question-edit form content after clicking the workspace row action | Targeted mocked and backend row-navigation runs green in Chromium and Firefox | Low | Re-run the row-navigation files after future workspace-row or edit-route changes |
+| Broader migration confidence remains current | Medium / Harness / gate reliability | Re-ran the command of record after targeted proof | `bash ./scripts/test-migration.sh` green across mocked WTR, retained Playwright, and backend WTR | Low-Medium | Re-run the command of record after the copied-link slice and isolate the retained legacy lane first if it contradicts again |
+
+## Delta From Plan
+- New risks discovered:
+  - None beyond the already-known recent contradictory-red history in the retained legacy lane.
+- Assurances changed:
+  - The acceptance-floor evidence strengthened from a recent green baseline to another fresh green command-of-record run with the new workspace slice included.
+- Scope changes:
+  - Added a small WTR-local question-take helper rather than extending the previously added workspace helper.
+- Decision changes:
+  - `Workspace.feature` take/edit row-action scenarios are now considered closed, and `Workspace.CopiedLinks` is the next active workspace-list slice.
+
+## Reusable Learning / Handoff
+- Keeping the workspace row-action slice separate from copied-link behavior preserved a narrow scope and avoided introducing clipboard-specific seams prematurely.
+- A tiny WTR-local take-page helper was enough to prove destination content without widening production seams.
+
+## Milestone closeout choice
+
+- **Continue autonomously** - closed `Workspace.RowNavigation`, opened an explicit packaging milestone for the bookkeeping boundary, and activated `Workspace.CopiedLinks` as the next concrete proof target.
